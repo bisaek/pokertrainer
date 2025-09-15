@@ -23,13 +23,15 @@
 
   let selectedAction: Action = $state(Action.Fold);
 
-  addEventListener("keydown", (e) => {
+  function keyPressed(e: KeyboardEvent) {
     if (e.key === "1") selectedAction = Action.Raise;
     else if (e.key === "2") selectedAction = Action.Call;
     else if (e.key === "3") selectedAction = Action.Fold;
     else if (e.key === "4") selectedAction = Action.AllIn;
-  });
+  }
 </script>
+
+<svelte:window onkeypress={keyPressed} />
 
 <div class="flex flex-row justify-center gap-8 h-auto">
   <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto">
