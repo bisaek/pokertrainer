@@ -13,6 +13,10 @@ class PokerRange {
             name: this.name
         }
     }
+
+    static fromJSON(json: { range: Action[]; name: string }): PokerRange {
+        return new PokerRange(json.name, json.range);
+    }
 }
 
 enum Action {
