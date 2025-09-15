@@ -19,7 +19,7 @@
   } = $props();
 
   function toggleHand(event: MouseEvent, index: number) {
-    console.log(event);
+    // console.log(event);
     if (event.buttons !== 1) return; // Only proceed if left mouse button is pressed
     pokerRange.range[index] = selectedAction;
     //pokerRange = new PokerRange(pokerRange.name, [...pokerRange.range]); // Trigger reactivity
