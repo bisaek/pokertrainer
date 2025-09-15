@@ -13,15 +13,20 @@
 
   let {
     pokerRange = new PokerRange(),
+    compareTo = undefined,
     children,
-  }: { pokerRange: PokerRange; children: Snippet } = $props();
+  }: {
+    pokerRange: PokerRange;
+    compareTo?: PokerRange;
+    children: Snippet;
+  } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
 </script>
 
 <div class="flex flex-row justify-center gap-8 h-auto">
   <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto">
-    <Range {pokerRange} {selectedAction} />
+    <Range {pokerRange} {selectedAction} {compareTo} />
   </div>
   <div class="flex flex-col justify-between my-auto h-200">
     <div class="flex flex-col">
