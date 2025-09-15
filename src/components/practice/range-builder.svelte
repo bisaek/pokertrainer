@@ -7,7 +7,7 @@
     PokerRangeLength,
   } from "../../utils/range";
 
-  let { pokerRange = new PokerRange() } = $props<{ pokerRange?: PokerRange }>();
+  let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
 
@@ -32,6 +32,18 @@
         return "bg-gray-100 hover:bg-gray-200";
     }
   }
+
+  function downloadRange() {
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(pokerRange.toJSON()));
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "poker_range.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
 </script>
 
 <div class="flex flex-col items-center space-y-4">
@@ -41,6 +53,7 @@
       <button
         class={`p-2 rounded ${getButtonClass(pokerRange.range[index])}`}
         onmouseover={(e) => toggleHand(e, index)}
+        onmousedown={(e) => toggleHand(e, index)}
         title={HandStrings[index]}
       >
         {HandStrings[index]}
@@ -50,11 +63,16 @@
   <div class="">
     {#each Object.values(Action) as action}
       <button
-        class={`inline-block px-3 py-1 m-1 rounded ${getButtonClass(action)}`}
+        class={`inline-block px-3 py-1 m-1 rounded ${getButtonClass(action)} ${
+          selectedAction === action ? "ring-4 ring-offset-2 ring-blue-300" : ""
+        }`}
         onclick={() => (selectedAction = action)}
       >
         {action}
       </button>
     {/each}
+  </div>
+  <div>
+    <button onclick={() => downloadRange()}>download</button>
   </div>
 </div>

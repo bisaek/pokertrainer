@@ -4,6 +4,12 @@ class PokerRange {
     constructor(range: Action[] = Array(PokerRangeLength).fill(Action.Fold)) {
         this.range = range;
     }
+
+    toJSON() {
+        return {
+            range: this.range
+        }
+    }
 }
 
 enum Action {
