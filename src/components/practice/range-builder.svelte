@@ -7,30 +7,14 @@
     PokerRangeLength,
   } from "../../utils/range";
 
-  export let pokerRange: PokerRange = new PokerRange();
+  let { pokerRange = new PokerRange() } = $props<{ pokerRange?: PokerRange }>();
 
-  function toggleHand(index: number) {
-    const currentAction = pokerRange.range[index];
-    let newAction: Action;
+  let selectedAction: Action = $state(Action.Fold);
 
-    switch (currentAction) {
-      case Action.Fold:
-        newAction = Action.Call;
-        break;
-      case Action.Call:
-        newAction = Action.Raise;
-        break;
-      case Action.Raise:
-        newAction = Action.AllIn;
-        break;
-      case Action.AllIn:
-        newAction = Action.Fold;
-        break;
-      default:
-        newAction = Action.Fold;
-    }
-
-    pokerRange.range[index] = newAction;
+  function toggleHand(event: MouseEvent, index: number) {
+    console.log(event);
+    if (event.buttons !== 1) return; // Only proceed if left mouse button is pressed
+    pokerRange.range[index] = selectedAction;
     pokerRange = new PokerRange([...pokerRange.range]); // Trigger reactivity
   }
 
@@ -45,19 +29,32 @@
       case Action.AllIn:
         return "bg-red-500 hover:bg-red-600 text-white";
       default:
-        return "bg-gray-300 hover:bg-gray-400";
+        return "bg-gray-100 hover:bg-gray-200";
     }
   }
 </script>
 
-<div class="grid grid-cols-13 gap-1 w-vw-5 h-vw-5">
-  {#each Array(PokerRangeLength) as _, index}
-    <button
-      class={`p-2 rounded ${getButtonClass(pokerRange.range[index])}`}
-      on:click={() => toggleHand(index)}
-      title={HandStrings[index]}
-    >
-      {HandStrings[index]}
-    </button>
-  {/each}
+<div class="flex flex-col items-center space-y-4">
+  <div class="grid grid-cols-13 gap-1 w-vw-5 h-vw-5">
+    {#each Array(PokerRangeLength) as _, index}
+      <!-- svelte-ignore a11y_mouse_events_have_key_events -->
+      <button
+        class={`p-2 rounded ${getButtonClass(pokerRange.range[index])}`}
+        onmouseover={(e) => toggleHand(e, index)}
+        title={HandStrings[index]}
+      >
+        {HandStrings[index]}
+      </button>
+    {/each}
+  </div>
+  <div class="">
+    {#each Object.values(Action) as action}
+      <button
+        class={`inline-block px-3 py-1 m-1 rounded ${getButtonClass(action)}`}
+        onclick={() => (selectedAction = action)}
+      >
+        {action}
+      </button>
+    {/each}
+  </div>
 </div>

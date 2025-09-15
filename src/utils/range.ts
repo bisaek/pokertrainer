@@ -7,10 +7,10 @@ class PokerRange {
 }
 
 enum Action {
-    Raise,
-    Call,
-    Fold,
-    AllIn
+    Raise = "Raise",
+    Call = "Call",
+    Fold = "Fold",
+    AllIn = "All in"
 }
 
 enum Hand {
