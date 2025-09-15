@@ -22,6 +22,13 @@
   } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
+
+  addEventListener("keydown", (e) => {
+    if (e.key === "1") selectedAction = Action.Raise;
+    else if (e.key === "2") selectedAction = Action.Call;
+    else if (e.key === "3") selectedAction = Action.Fold;
+    else if (e.key === "4") selectedAction = Action.AllIn;
+  });
 </script>
 
 <div class="flex flex-row justify-center gap-8 h-auto">
