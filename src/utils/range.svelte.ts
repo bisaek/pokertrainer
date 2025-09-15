@@ -3,8 +3,8 @@ class PokerRange {
     name: string;
 
     constructor(name: string = "My Range", range: Action[] = Array(PokerRangeLength).fill(Action.Fold)) {
-        this.range = range;
-        this.name = name;
+        this.range = $state(range);
+        this.name = $state(name);
     }
 
     toJSON() {
@@ -56,4 +56,19 @@ const HandStrings: string[] = [
 
 const PokerRangeLength = 13 * 13;
 
-export { PokerRange, Action, Hand, HandStrings, PokerRangeLength };
+function getButtonClass(action: Action): string {
+    switch (action) {
+      case Action.Fold:
+        return "bg-gray-300 hover:bg-gray-400";
+      case Action.Call:
+        return "bg-blue-500 hover:bg-blue-600 text-white";
+      case Action.Raise:
+        return "bg-green-500 hover:bg-green-600 text-white";
+      case Action.AllIn:
+        return "bg-red-500 hover:bg-red-600 text-white";
+      default:
+        return "bg-gray-100 hover:bg-gray-200";
+    }
+  }
+
+export { PokerRange, Action, Hand, HandStrings, PokerRangeLength, getButtonClass };
