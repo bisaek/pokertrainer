@@ -1,13 +1,16 @@
 class PokerRange {
     range: Action[];
+    name: string;
 
-    constructor(range: Action[] = Array(PokerRangeLength).fill(Action.Fold)) {
+    constructor(name: string = "My Range", range: Action[] = Array(PokerRangeLength).fill(Action.Fold)) {
         this.range = range;
+        this.name = name;
     }
 
     toJSON() {
         return {
-            range: this.range
+            range: this.range,
+            name: this.name
         }
     }
 }
