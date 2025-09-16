@@ -15,19 +15,21 @@
   let pokerRangesHaveNotFinished: PokerRange[] = $state([]);
   let compareTo: PokerRange | undefined = $state(undefined);
   function importRange(e: Event) {
-    const file = (e?.target as HTMLInputElement)?.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const json = JSON.parse(event.target?.result as string);
-        pokerRangesToPractice.push(PokerRange.fromJSON(json));
-        start();
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-      }
-    };
-    reader.readAsText(file);
+    const files = (e?.target as HTMLInputElement)?.files;
+    if (!files) return;
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const json = JSON.parse(event.target?.result as string);
+          pokerRangesToPractice.push(PokerRange.fromJSON(json));
+          start();
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      };
+      reader.readAsText(file);
+    });
   }
 
   function start() {
@@ -76,6 +78,7 @@
       <input
         type="file"
         class="border border-gray-300 rounded px-2 py-1"
+        multiple
         onchange={importRange}
       />
     </div>
