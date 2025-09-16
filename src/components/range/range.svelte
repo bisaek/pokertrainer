@@ -27,9 +27,17 @@
 
   function getCompareClass(index: number): string {
     if (!compareTo) return "";
-    return pokerRange.range[index] === compareTo.range[index]
-      ? "border-4 border-green-600"
-      : "border-4 border-red-600";
+
+    switch (compareTo.range[index]) {
+      case Action.Raise:
+        return "border-4 border-red-500";
+      case Action.Call:
+        return "border-4 border-green-500";
+      case Action.Fold:
+        return "border-4 border-gray-300";
+      case Action.AllIn:
+        return "border-4 border-blue-500";
+    }
   }
 </script>
 

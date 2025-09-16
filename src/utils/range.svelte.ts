@@ -65,11 +65,11 @@ function getButtonClass(action: Action): string {
       case Action.Fold:
         return "bg-gray-300 hover:bg-gray-400";
       case Action.Call:
-        return "bg-blue-500 hover:bg-blue-600 text-white";
-      case Action.Raise:
         return "bg-green-500 hover:bg-green-600 text-white";
-      case Action.AllIn:
+      case Action.Raise:
         return "bg-red-500 hover:bg-red-600 text-white";
+      case Action.AllIn:
+        return "bg-blue-500 hover:bg-blue-600 text-white";
       default:
         return "bg-gray-100 hover:bg-gray-200";
     }
