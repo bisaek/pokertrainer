@@ -55,7 +55,7 @@
   }
 </script>
 
-<h1>{pokerRangesHaveNotFinished[0]?.name}</h1>
+<h1 class="text-4xl">{pokerRangesHaveNotFinished[0]?.name}</h1>
 <RangeLayout {pokerRange} {compareTo}>
   <div class="flex flex-col">
     {#if compareTo}
