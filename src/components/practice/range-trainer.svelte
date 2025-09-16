@@ -11,6 +11,8 @@
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
+  let isCorrect: boolean = $state(false);
+
   const pokerRangesToPractice: PokerRange[] = $state([]);
   let pokerRangesHaveNotFinished: PokerRange[] = $state([]);
   let compareTo: PokerRange | undefined = $state(undefined);
@@ -41,7 +43,7 @@
   }
 
   function next() {
-    if (pokerRange.range.toString() == compareTo?.range.toString()) {
+    if (isCorrect) {
       pokerRangesHaveNotFinished.shift();
     } else if (
       pokerRangesHaveNotFinished[pokerRangesHaveNotFinished.length - 1] !==
@@ -69,8 +71,11 @@
     {:else}
       <button
         class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-        onclick={() => (compareTo = pokerRangesHaveNotFinished[0])}
-        >Check</button
+        onclick={() => {
+          compareTo = pokerRangesHaveNotFinished[0];
+          isCorrect =
+            pokerRange.range.toString() == compareTo?.range.toString();
+        }}>Check</button
       >
     {/if}
 
