@@ -36,6 +36,7 @@
     pokerRangesHaveNotFinished = [];
     pokerRangesHaveNotFinished.push(...pokerRangesToPractice);
     pokerRangesHaveNotFinished.sort(() => Math.random() - 0.5);
+    pokerRangesHaveNotFinished = [...pokerRangesHaveNotFinished];
     console.log(pokerRangesHaveNotFinished);
   }
 
