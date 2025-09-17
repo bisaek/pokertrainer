@@ -74,15 +74,15 @@
           </button>
         {/each}
       </div>
-      {#if compareToWithMistakes}
-        <div class="grid grid-cols-13 gap-1 h-200 w-200">
+      <div class="grid grid-cols-13 gap-1 h-200 w-200">
+        {#if compareToWithMistakes}
           <Range
             selectedAction={Action.Fold}
             pokerRange={compareToWithMistakes}
             {compareTo}
           />
-        </div>
-      {/if}
+        {/if}
+      </div>
     {/if}
   </div>
 
