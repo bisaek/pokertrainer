@@ -8,10 +8,12 @@
     PokerRangeLength,
   } from "@utils/range.svelte";
   import Range from "@components/range/range.svelte";
+  import Card from "./card.svelte";
 
   let handsNotFinished: Hand[] = $state([]);
   let compareTo: PokerRange | undefined = $state();
   let compareToWithMistakes: PokerRange | undefined = $state();
+  let cardSuits: String[] = ["D", "D"];
   function importRange(e: Event) {
     const file = (e?.target as HTMLInputElement)?.files?.[0];
     if (!file) return;
@@ -31,12 +33,14 @@
   function start() {
     handsNotFinished = [...Array(PokerRangeLength).keys()];
     handsNotFinished.sort(() => Math.random() - 0.5);
+    randomCardSuits();
   }
 
   function check(action: Action) {
     if (compareTo?.range[handsNotFinished[0]] === action) {
       compareToWithMistakes = undefined;
       handsNotFinished.shift();
+      randomCardSuits();
     } else {
       if (
         handsNotFinished[handsNotFinished.length - 1] !== handsNotFinished[0]
@@ -54,13 +58,35 @@
     }
     console.log(handsNotFinished);
   }
+
+  function randomCardSuits() {
+    const suits = ["C", "D", "H", "S"];
+    cardSuits[0] = suits[Math.floor(Math.random() * suits.length)];
+
+    if (HandStrings[handsNotFinished[0]].slice(-1) === "s") {
+      cardSuits[1] = cardSuits[0];
+    } else {
+      do {
+        cardSuits[1] = suits[Math.floor(Math.random() * suits.length)];
+      } while (cardSuits[1] === cardSuits[0]);
+    }
+
+    console.log(cardSuits);
+  }
 </script>
 
 <div class="flex flex-row items-center justify-around">
   <div class="flex flex-col w-200">
     {#if compareTo}
       <div class="flex flex-row gap-8 justify-center">
-        <h2 class="text-4xl text-center">{HandStrings[handsNotFinished[0]]}</h2>
+        <Card
+          rank={HandStrings[handsNotFinished[0]].charAt(0)}
+          suit={cardSuits[0]}
+        />
+        <Card
+          rank={HandStrings[handsNotFinished[0]].charAt(1)}
+          suit={cardSuits[1]}
+        />
         <span>{handsNotFinished.length}</span>
       </div>
 
