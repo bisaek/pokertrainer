@@ -13,7 +13,7 @@
   let handsNotFinished: Hand[] = $state([]);
   let compareTo: PokerRange | undefined = $state();
   let compareToWithMistakes: PokerRange | undefined = $state();
-  let cardSuits: String[] = ["D", "D"];
+  let cardSuits: String[] = $state(["C", "D"]);
   function importRange(e: Event) {
     const file = (e?.target as HTMLInputElement)?.files?.[0];
     if (!file) return;
@@ -78,6 +78,8 @@
 <div class="flex flex-row items-center justify-around">
   <div class="flex flex-col w-200">
     {#if compareTo}
+      <p class="text-center">hands back: {handsNotFinished.length}</p>
+      <h2 class="text-4xl text-center">{HandStrings[handsNotFinished[0]]}</h2>
       <div class="flex flex-row gap-8 justify-center">
         <Card
           rank={HandStrings[handsNotFinished[0]].charAt(0)}
@@ -87,7 +89,6 @@
           rank={HandStrings[handsNotFinished[0]].charAt(1)}
           suit={cardSuits[1]}
         />
-        <span>{handsNotFinished.length}</span>
       </div>
 
       <div class="flex flex-row justify-center">
@@ -100,19 +101,19 @@
           </button>
         {/each}
       </div>
-      <div class="grid grid-cols-13 gap-1 h-200 w-200">
-        {#if compareToWithMistakes}
-          <Range
-            selectedAction={Action.Fold}
-            pokerRange={compareToWithMistakes}
-            {compareTo}
-          />
-        {/if}
-      </div>
     {/if}
   </div>
 
   <div class="m-1">
+    <div class="grid grid-cols-13 gap-1 h-200 w-200">
+      {#if compareToWithMistakes}
+        <Range
+          selectedAction={Action.Fold}
+          pokerRange={compareToWithMistakes}
+          {compareTo}
+        />
+      {/if}
+    </div>
     <label for="">Import range to practice: </label>
     <input
       type="file"
