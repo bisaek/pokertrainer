@@ -8,14 +8,17 @@
   } from "../../utils/range.svelte";
 
   import RangeLayout from "../range/range-layout.svelte";
+  import Drills from "./drills.svelte";
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
   let isCorrect: boolean = $state(false);
 
   const pokerRangesToPractice: PokerRange[] = $state([]);
+  let pokerRangesToPracticeFromDrills: PokerRange[] = $state([]);
   let pokerRangesHaveNotFinished: PokerRange[] = $state([]);
   let compareTo: PokerRange | undefined = $state(undefined);
+
   function importRange(e: Event) {
     const files = (e?.target as HTMLInputElement)?.files;
     if (!files) return;
@@ -35,8 +38,12 @@
   }
 
   function start() {
+    console.log(pokerRangesToPracticeFromDrills);
     pokerRangesHaveNotFinished = [];
-    pokerRangesHaveNotFinished.push(...pokerRangesToPractice);
+    pokerRangesHaveNotFinished.push(
+      ...pokerRangesToPractice,
+      ...pokerRangesToPracticeFromDrills
+    );
     pokerRangesHaveNotFinished.sort(() => Math.random() - 0.5);
     pokerRangesHaveNotFinished = [...pokerRangesHaveNotFinished];
     console.log(pokerRangesHaveNotFinished);
@@ -78,6 +85,12 @@
         }}>Check</button
       >
     {/if}
+
+    <Drills
+      changeRanges={(ranges: PokerRange[]) =>
+        (pokerRangesToPracticeFromDrills = ranges)}
+      {start}
+    />
 
     <div class="m-1">
       <label for="">Import: </label>
