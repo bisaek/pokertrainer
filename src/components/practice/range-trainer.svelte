@@ -8,7 +8,7 @@
   } from "../../utils/range.svelte";
 
   import RangeLayout from "../range/range-layout.svelte";
-  import Drills from "./drills.svelte";
+  import RangesSelecter from "../range/ranges-selecter.svelte";
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
@@ -98,7 +98,7 @@
       >
     {/if}
 
-    <Drills
+    <RangesSelecter
       changeRanges={(ranges: PokerRange[]) =>
         (pokerRangesToPracticeFromDrills = ranges)}
       {start}
