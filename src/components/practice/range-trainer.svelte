@@ -65,9 +65,25 @@
     }
     console.log(pokerRangesHaveNotFinished);
   }
+
+  function check() {
+    compareTo = pokerRangesHaveNotFinished[0];
+    isCorrect = pokerRange.range.toString() == compareTo?.range.toString();
+  }
+
+  function keyPressed(Event: KeyboardEvent) {
+    if (["Enter", " "].includes(Event.key)) {
+      if (compareTo) {
+        next();
+      } else {
+        check();
+      }
+    }
+  }
 </script>
 
-<h1 class="text-4xl text-center">{pokerRangesHaveNotFinished[0]?.name}</h1>
+<svelte:window onkeypress={keyPressed} />
+<h1 class="text-4xl text-center pb-4">{pokerRangesHaveNotFinished[0]?.name}</h1>
 <RangeLayout {pokerRange} {compareTo}>
   <div class="flex flex-col">
     {#if compareTo}
@@ -78,11 +94,7 @@
     {:else}
       <button
         class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-        onclick={() => {
-          compareTo = pokerRangesHaveNotFinished[0];
-          isCorrect =
-            pokerRange.range.toString() == compareTo?.range.toString();
-        }}>Check</button
+        onclick={check}>Check</button
       >
     {/if}
 
