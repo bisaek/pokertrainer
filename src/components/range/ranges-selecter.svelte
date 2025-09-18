@@ -61,7 +61,7 @@
       for (const position of selectedPositions) {
         for (const action of selectedActions) {
           const response = await fetch(
-            `/ranges/mtt/${stack}/${action}/${position}.json`
+            `/ranges/mtt/${encodeURIComponent(stack)}/${encodeURIComponent(action)}/${encodeURIComponent(position)}.json`
           );
 
           if (response.ok) {
