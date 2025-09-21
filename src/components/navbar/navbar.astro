@@ -1,8 +1,9 @@
 ---
 const menuItems = [
-  { name: 'Range builder', link: '/range-builder' },
-  { name: 'Ranger trainer', link: '/range-trainer' },
-  { name: 'Hand trainer', link: '/hand-trainer' },
+  { name: "Range builder", link: "/range-builder" },
+  { name: "Ranger trainer", link: "/range-trainer" },
+  { name: "Hand trainer", link: "/hand-trainer" },
+  { name: "Drills", link: "/drills" },
 ];
 ---
 
@@ -10,10 +11,15 @@ const menuItems = [
   <div class="flex p-4">
     <a href="/" class="absolute">Poker trainer</a>
     <ul class="flex gap-4 justify-around mx-auto">
-      {menuItems.map(item => (
-        <li class="navbar-item">
-          <a href={item.link} class="navbar-link">{item.name}</a>
-        </li>
-      ))}
+      {
+        menuItems.map((item) => (
+          <li class="navbar-item">
+            <a href={item.link} class="navbar-link">
+              {item.name}
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </div>
+</nav>
