@@ -12,7 +12,7 @@
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
-  let isCorrect: boolean = $state(false);
+  let isCorrect: boolean | undefined = $state(undefined);
 
   const pokerRangesToPractice: PokerRange[] = $state([]);
   let pokerRangesToPracticeFromDrills: PokerRange[] = $state([]);
@@ -59,6 +59,7 @@
       pokerRangesHaveNotFinished.push(pokerRangesHaveNotFinished[0]);
     }
     compareTo = undefined;
+    isCorrect = undefined;
     pokerRange = new PokerRange();
     if (pokerRangesHaveNotFinished.length === 0) {
       start();
@@ -69,6 +70,7 @@
   function check() {
     compareTo = pokerRangesHaveNotFinished[0];
     isCorrect = pokerRange.range.toString() == compareTo?.range.toString();
+    console.log(isCorrect);
   }
 
   function keyPressed(Event: KeyboardEvent) {
@@ -84,7 +86,7 @@
 
 <svelte:window onkeypress={keyPressed} />
 <h1 class="text-4xl text-center pb-4">{pokerRangesHaveNotFinished[0]?.name}</h1>
-<RangeLayout {pokerRange} {compareTo}>
+<RangeLayout {pokerRange} {compareTo} {isCorrect}>
   <div class="flex flex-col">
     {#if compareTo}
       <button

@@ -14,10 +14,12 @@
   let {
     pokerRange = new PokerRange(),
     compareTo = undefined,
+    isCorrect = undefined,
     children,
   }: {
     pokerRange: PokerRange;
     compareTo?: PokerRange;
+    isCorrect?: boolean;
     children: Snippet;
   } = $props();
 
@@ -29,12 +31,18 @@
     else if (e.key === "3") selectedAction = Action.Fold;
     else if (e.key === "4") selectedAction = Action.AllIn;
   }
+
+  function isCorrectClass() {
+    if (isCorrect === undefined) return "";
+    else if (isCorrect) return "ring-4 ring-offset-2 ring-green-300";
+    else return "ring-4 ring-offset-2 ring-red-300";
+  }
 </script>
 
 <svelte:window onkeypress={keyPressed} />
 
 <div class="flex flex-row justify-center gap-8 h-auto">
-  <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto">
+  <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto {isCorrectClass()}">
     <Range {pokerRange} {selectedAction} {compareTo} />
   </div>
   <div class="flex flex-col justify-between my-auto h-200">
