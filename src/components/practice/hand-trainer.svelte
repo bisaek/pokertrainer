@@ -75,12 +75,14 @@
   }
 </script>
 
-<div class="flex flex-row items-center justify-around">
-  <div class="flex flex-col w-200">
+<div
+  class="flex flex-col md:flex-row flex-wrap items-center justify-around gap-4 p-2"
+>
+  <div class="flex flex-col w-full max-w-xs">
     {#if compareTo}
       <p class="text-center">hands back: {handsNotFinished.length}</p>
       <h2 class="text-4xl text-center">{HandStrings[handsNotFinished[0]]}</h2>
-      <div class="flex flex-row gap-8 justify-center">
+      <div class="flex flex-row gap-4 justify-center">
         <Card
           rank={HandStrings[handsNotFinished[0]].charAt(0)}
           suit={cardSuits[0]}
@@ -91,10 +93,10 @@
         />
       </div>
 
-      <div class="flex flex-row justify-center">
+      <div class="flex flex-row flex-wrap justify-center gap-2 mt-2">
         {#each Object.values(Action) as action}
           <button
-            class={`inline-block px-3 py-1 m-1 rounded ${getButtonClass(action)}`}
+            class={`inline-block px-4 py-2 m-1 rounded text-base ${getButtonClass(action)}`}
             onclick={() => check(action)}
           >
             {action}
@@ -105,7 +107,7 @@
   </div>
 
   <div class="m-1">
-    <div class="grid grid-cols-13 gap-1 h-200 w-200">
+    <div class="grid grid-cols-13 gap-1 aspect-square w-full">
       {#if compareToWithMistakes}
         <Range
           selectedAction={Action.Fold}
