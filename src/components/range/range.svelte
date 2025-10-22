@@ -8,6 +8,7 @@
     getButtonClass,
     lineFromTwoHands,
     handToVector,
+    boxFromTwoHands,
   } from "../../utils/range.svelte";
 
   let {
@@ -22,11 +23,13 @@
 
   let startHand: Hand | undefined = $state(undefined);
   let shiftDown: boolean = $state(false);
+  let ctrlDown: boolean = $state(false);
   let line: number[][] = $state([]);
+  let box: number[][] = $state([]);
 
   function toggleHand(event: MouseEvent, index: number) {
     // console.log(event);
-    if (shiftDown) {
+    if (shiftDown || ctrlDown) {
       if (event.buttons !== 1) {
         return;
       }
@@ -39,6 +42,7 @@
         Math.min(startHand, index),
         Math.max(startHand, index)
       );
+      box = boxFromTwoHands(startHand, index);
     } else {
       if (event.buttons !== 1) return; // Only proceed if left mouse button is pressed
       pokerRange.range[index] = selectedAction;
@@ -46,9 +50,16 @@
     }
   }
 
-  function createLine(event: MouseEvent) {
+  function createLine() {
     if (startHand !== undefined) {
       pokerRange.changeActionAtVectors(line, selectedAction);
+      startHand = undefined;
+    }
+  }
+
+  function createBox() {
+    if (startHand !== undefined) {
+      pokerRange.changeActionAtVectors(box, selectedAction);
       startHand = undefined;
     }
   }
@@ -74,13 +85,19 @@
     console.log(line);
     if (startHand === undefined) return "";
 
-    if (
+    let lineHand =
       line.some(
         (vec) =>
           vec[0] === handToVector(index)[0] && vec[1] === handToVector(index)[1]
-      )
-    ) {
-      switch (pokerRange.range[index]) {
+      ) && shiftDown;
+
+    let boxHand =
+      box.some(
+        (vec) =>
+          vec[0] === handToVector(index)[0] && vec[1] === handToVector(index)[1]
+      ) && ctrlDown;
+    if (lineHand || boxHand) {
+      switch (selectedAction) {
         case Action.Fold:
           return "bg-gray-400";
         case Action.Call:
@@ -101,12 +118,26 @@
     if (Event.key === "Shift") {
       shiftDown = true;
     }
+    if (Event.key === "Control") {
+      ctrlDown = true;
+    }
   }
 
   function keyUp(Event: KeyboardEvent) {
     if (Event.key === "Shift") {
       shiftDown = false;
       startHand = undefined;
+    }
+    if (Event.key === "Control") {
+      ctrlDown = false;
+    }
+  }
+
+  function mouseUp(Event: MouseEvent) {
+    if (shiftDown) {
+      createLine();
+    } else if (ctrlDown) {
+      createBox();
     }
   }
 </script>
@@ -118,7 +149,7 @@
     class={`rounded ${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)} ${getHoverClass(index)}`}
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
-    onmouseup={createLine}
+    onmouseup={mouseUp}
     title={HandStrings[index]}
   >
     {HandStrings[index]}

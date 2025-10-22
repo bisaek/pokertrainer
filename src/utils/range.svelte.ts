@@ -48,6 +48,29 @@ function lineFromTwoHands(hand1: Hand, hand2: Hand): number[][] {
   }
   return range;
 }
+
+function boxFromTwoHands(hand1: Hand, hand2: Hand): number[][] {
+  const vec1 = handToVector(hand1);
+  const vec2 = handToVector(hand2);
+
+  const range: number[][] = [];
+
+  for (
+    let x = Math.min(vec1[0], vec2[0]);
+    x <= Math.max(vec1[0], vec2[0]);
+    x++
+  ) {
+    for (
+      let y = Math.min(vec1[1], vec2[1]);
+      y <= Math.max(vec1[1], vec2[1]);
+      y++
+    ) {
+      range.push([x, y]);
+    }
+  }
+  return range;
+}
+
 enum Action {
   Raise = "Raise",
   Call = "Call",
@@ -429,4 +452,5 @@ export {
   getButtonClass,
   lineFromTwoHands,
   handToVector,
+  boxFromTwoHands,
 };
