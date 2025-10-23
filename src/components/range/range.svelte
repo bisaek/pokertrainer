@@ -130,6 +130,7 @@
     }
     if (Event.key === "Control") {
       ctrlDown = false;
+      startHand = undefined;
     }
   }
 
