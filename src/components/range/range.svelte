@@ -147,7 +147,10 @@
 {#each Array(PokerRangeLength) as _, index}
   <!-- svelte-ignore a11y_mouse_events_have_key_events -->
   <button
-    class={`rounded ${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)} ${getHoverClass(index)}`}
+    class={"rounded " +
+      (getHoverClass(index) == ""
+        ? getButtonClass(pokerRange.range[index]) + " " + getCompareClass(index)
+        : getHoverClass(index))}
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
     title={HandStrings[index]}
