@@ -142,14 +142,13 @@
   }
 </script>
 
-<svelte:window onkeydown={keyDown} onkeyup={keyUp} />
+<svelte:window onkeydown={keyDown} onkeyup={keyUp} onmouseup={mouseUp} />
 {#each Array(PokerRangeLength) as _, index}
   <!-- svelte-ignore a11y_mouse_events_have_key_events -->
   <button
     class={`rounded ${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)} ${getHoverClass(index)}`}
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
-    onmouseup={mouseUp}
     title={HandStrings[index]}
   >
     {HandStrings[index]}
