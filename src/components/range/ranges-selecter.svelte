@@ -23,7 +23,7 @@
   ];
   let selectedPositions: String[] = $state([]);
 
-  const actions = ["RFI", "vs UTG", "vs MP", "vs LP", "vs Blinds"];
+  const actions = ["RFI", "vs UTG", "vs MP", "vs CO", "vs BTN", "vs Blinds"];
   let selectedActions: String[] = $state([]);
 
   function selectStack(option: Number) {
@@ -61,7 +61,7 @@
       for (const position of selectedPositions) {
         for (const action of selectedActions) {
           const response = await fetch(
-            `/ranges/mtt/${encodeURIComponent(stack)}/${encodeURIComponent(action)}/${encodeURIComponent(position)}.json`
+            `/ranges/mtt/${encodeURIComponent(stack as number)}/${encodeURIComponent(action as string)}/${encodeURIComponent(position as string)}.json`
           );
 
           if (response.ok) {
