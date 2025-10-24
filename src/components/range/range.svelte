@@ -153,6 +153,7 @@
         : getHoverClass(index))}
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
+    onmouseleave={(e) => toggleHand(e, index)}
     title={HandStrings[index]}
   >
     {HandStrings[index]}
