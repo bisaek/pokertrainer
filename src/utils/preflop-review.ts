@@ -23,6 +23,10 @@ export type ReviewedDecision = {
   handIndex: number;
   position: string;
   situation: string;
+  // Situation type ("vs RFI", "vs 3-bet", ...) and opponent position, also kept for
+  // decisions without a chart so they can be filtered.
+  spotType?: string | null;
+  opponent?: string | null;
   effectiveBB: number;
   heroAction: Action;
   verdict: Verdict;
@@ -304,7 +308,15 @@ export async function reviewHands(
       };
 
       if (!found.spot) {
-        reviewed.push({ ...base, position: heroName, situation: `${heroName}, ${found.reason!.toLowerCase()}`, verdict: "uncovered", reason: found.reason });
+        reviewed.push({
+          ...base,
+          position: heroName,
+          situation: `${heroName}, ${found.reason!.toLowerCase()}`,
+          spotType: null,
+          opponent: null,
+          verdict: "uncovered",
+          reason: found.reason,
+        });
         continue;
       }
 
@@ -316,6 +328,8 @@ export async function reviewHands(
           ...base,
           position: heroName,
           situation: situationLabel(found.spot.type, heroName, opponentName),
+          spotType: found.spot.type,
+          opponent: opponentName,
           verdict: "uncovered",
           reason: `No ${game === "mtt" ? "tournament" : "cash"} chart for this spot near ${Math.round(found.effectiveBB)}bb.`,
         });
@@ -328,6 +342,8 @@ export async function reviewHands(
         ...base,
         position: choice.heroName,
         situation: situationLabel(found.spot.type, choice.heroName, choice.opponentName),
+        spotType: choice.info.type,
+        opponent: choice.info.opponent,
         chart: { url, name: chart.name, stack: choice.info.stack, notes: choice.notes },
         ...grade(chart, index, found.heroAction),
       });
