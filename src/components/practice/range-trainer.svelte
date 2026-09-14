@@ -37,6 +37,16 @@
     });
   }
 
+  // An empty grid to fill in. Hands outside the answer's range (null) stay
+  // empty, since there is no action to learn for them.
+  function blankRangeFor(answer?: PokerRange) {
+    if (!answer) return new PokerRange();
+    return new PokerRange(
+      undefined,
+      answer.range.map((action) => (action === null ? null : Action.Fold))
+    );
+  }
+
   function start() {
     console.log(pokerRangesToPracticeFromDrills);
     pokerRangesHaveNotFinished = [];
@@ -46,6 +56,7 @@
     );
     pokerRangesHaveNotFinished.sort(() => Math.random() - 0.5);
     pokerRangesHaveNotFinished = [...pokerRangesHaveNotFinished];
+    pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
     console.log(pokerRangesHaveNotFinished);
   }
 
@@ -60,16 +71,19 @@
     }
     compareTo = undefined;
     isCorrect = undefined;
-    pokerRange = new PokerRange();
     if (pokerRangesHaveNotFinished.length === 0) {
       start();
     }
+    pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
     console.log(pokerRangesHaveNotFinished);
   }
 
   function check() {
     compareTo = pokerRangesHaveNotFinished[0];
-    isCorrect = pokerRange.range.toString() == compareTo?.range.toString();
+    // Hands outside the range (null) have no answer, so they don't count.
+    isCorrect = compareTo?.range.every(
+      (action, index) => action === null || pokerRange.range[index] === action
+    );
     console.log(isCorrect);
   }
 

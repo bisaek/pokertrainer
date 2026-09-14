@@ -31,7 +31,10 @@
   }
 
   function start() {
-    handsNotFinished = [...Array(PokerRangeLength).keys()];
+    // Skip hands outside the range (null), which have no answer.
+    handsNotFinished = [...Array(PokerRangeLength).keys()].filter(
+      (hand) => compareTo?.range[hand] !== null
+    );
     handsNotFinished.sort(() => Math.random() - 0.5);
     randomCardSuits();
   }

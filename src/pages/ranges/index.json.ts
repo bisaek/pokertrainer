@@ -2,6 +2,15 @@ import type { APIRoute } from "astro";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
+// Splits a situation folder name into what the hero faces and from whom:
+// "RFI" -> RFI, "vs UTG" -> vs RFI from UTG, "vs LJ 3-bet" -> vs 3-bet from LJ.
+function parseSituation(situation: string) {
+  if (situation === "RFI") return { type: "RFI", opponent: null };
+  const match = situation.match(/^vs (\S+?)(?: (limp|3-bet|4-bet|5-bet|6-bet))?$/);
+  if (!match) return { type: situation, opponent: null };
+  return { type: match[2] ? `vs ${match[2]}` : "vs RFI", opponent: match[1] };
+}
+
 // Lists every range in public/ranges/<game>/<stack>/<situation>/<position>.json
 // so the range selecter only offers options that have data.
 export const GET: APIRoute = async () => {
@@ -17,6 +26,7 @@ export const GET: APIRoute = async () => {
             game,
             stack: Number(stack),
             situation,
+            ...parseSituation(situation),
             position: file.slice(0, -".json".length),
           });
         }

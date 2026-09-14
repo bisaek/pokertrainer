@@ -11,6 +11,8 @@
     game: string;
     stack: number;
     situation: string;
+    type: string;
+    opponent: string | null;
     position: string;
   };
 
@@ -20,27 +22,29 @@
     "UTG+1",
     "UTG+2",
     "LJ",
+    "MP",
     "HJ",
     "CO",
     "BTN",
     "SB",
     "BB",
   ];
-  const situationOrder = [
+  const typeOrder = [
     "RFI",
-    "vs UTG",
-    "vs MP",
-    "vs HJ",
-    "vs CO",
-    "vs BTN",
-    "vs SB",
+    "vs RFI",
+    "vs limp",
+    "vs 3-bet",
+    "vs 4-bet",
+    "vs 5-bet",
+    "vs 6-bet",
   ];
 
   let availableRanges: RangeInfo[] = $state([]);
   let selectedGame: string = $state("mtt");
   let selectedEffectiveStacks: number[] = $state([]);
   let selectedPositions: string[] = $state([]);
-  let selectedActions: string[] = $state([]);
+  let selectedTypes: string[] = $state([]);
+  let selectedOpponents: string[] = $state([]);
   let latestRequest = 0;
 
   // Only show game types that have ranges.
@@ -63,16 +67,29 @@
       rangesForGame.some((range) => range.position === position)
     )
   );
-  const actions = $derived(
-    situationOrder.filter((situation) =>
-      rangesForGame.some((range) => range.situation === situation)
+  const types = $derived(
+    typeOrder.filter((type) =>
+      rangesForGame.some((range) => range.type === type)
+    )
+  );
+  const opponents = $derived(
+    positionOrder.filter((position) =>
+      rangesForGame.some(
+        (range) =>
+          range.opponent === position && selectedTypes.includes(range.type)
+      )
     )
   );
 
   $effect(() => {
     fetch("/ranges/index.json")
       .then((response) => response.json())
-      .then((json: RangeInfo[]) => (availableRanges = json));
+      .then((json: RangeInfo[]) => {
+        availableRanges = json;
+        if (!json.some((range) => range.game === selectedGame) && json[0]) {
+          selectedGame = json[0].game;
+        }
+      });
   });
 
   function toggle<T>(list: T[], option: T): T[] {
@@ -86,7 +103,8 @@
     selectedGame = game;
     selectedEffectiveStacks = [];
     selectedPositions = [];
-    selectedActions = [];
+    selectedTypes = [];
+    selectedOpponents = [];
     addSelectedRangesToRanges();
   }
 
@@ -100,8 +118,13 @@
     addSelectedRangesToRanges();
   }
 
-  function selectAction(option: string) {
-    selectedActions = toggle(selectedActions, option);
+  function selectType(option: string) {
+    selectedTypes = toggle(selectedTypes, option);
+    addSelectedRangesToRanges();
+  }
+
+  function selectOpponent(option: string) {
+    selectedOpponents = toggle(selectedOpponents, option);
     addSelectedRangesToRanges();
   }
 
@@ -111,7 +134,8 @@
       (range) =>
         selectedEffectiveStacks.includes(range.stack) &&
         selectedPositions.includes(range.position) &&
-        selectedActions.includes(range.situation)
+        selectedTypes.includes(range.type) &&
+        (range.opponent === null || selectedOpponents.includes(range.opponent))
     );
 
     const ranges = await Promise.all(
@@ -165,7 +189,7 @@
     </div>
   </div>
   <div>
-    <h2>Positions</h2>
+    <h2>Your position</h2>
     <div class="flex flex-wrap">
       {#each positions as position}
         {@render optionButton(
@@ -177,13 +201,27 @@
     </div>
   </div>
   <div>
-    <h2>Actions</h2>
+    <h2>Situation</h2>
     <div class="flex flex-wrap">
-      {#each actions as action}
-        {@render optionButton(action, selectedActions.includes(action), () =>
-          selectAction(action)
+      {#each types as type}
+        {@render optionButton(type, selectedTypes.includes(type), () =>
+          selectType(type)
         )}
       {/each}
     </div>
   </div>
+  {#if opponents.length > 0}
+    <div>
+      <h2>Opponent</h2>
+      <div class="flex flex-wrap">
+        {#each opponents as opponent}
+          {@render optionButton(
+            opponent,
+            selectedOpponents.includes(opponent),
+            () => selectOpponent(opponent)
+          )}
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
