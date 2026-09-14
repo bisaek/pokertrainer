@@ -7,10 +7,18 @@
   }: { changeRanges: (ranges: PokerRange[]) => void; start: () => void } =
     $props();
 
-  const effectiveStacks = [15, 25, 40, 75, 100];
-  let selectedEffectiveStacks: Number[] = $state([]);
+  type RangeInfo = {
+    game: string;
+    stack: number;
+    situation: string;
+    position: string;
+  };
 
-  const positions = [
+  const games = [
+    { id: "mtt", label: "MTT" },
+    { id: "cash", label: "Cash" },
+  ];
+  const positionOrder = [
     "UTG",
     "UTG+1",
     "UTG+2",
@@ -21,96 +29,146 @@
     "SB",
     "BB",
   ];
-  let selectedPositions: String[] = $state([]);
+  const situationOrder = [
+    "RFI",
+    "vs UTG",
+    "vs MP",
+    "vs HJ",
+    "vs CO",
+    "vs BTN",
+    "vs SB",
+  ];
 
-  const actions = ["RFI", "vs UTG", "vs MP", "vs CO", "vs BTN", "vs Blinds"];
-  let selectedActions: String[] = $state([]);
+  let availableRanges: RangeInfo[] = $state([]);
+  let selectedGame: string = $state("mtt");
+  let selectedEffectiveStacks: number[] = $state([]);
+  let selectedPositions: string[] = $state([]);
+  let selectedActions: string[] = $state([]);
+  let latestRequest = 0;
 
-  function selectStack(option: Number) {
-    if (selectedEffectiveStacks.includes(option)) {
-      selectedEffectiveStacks = selectedEffectiveStacks.filter(
-        (item) => item !== option
-      );
-    } else {
-      selectedEffectiveStacks.push(option);
-    }
+  const rangesForGame = $derived(
+    availableRanges.filter((range) => range.game === selectedGame)
+  );
+  const effectiveStacks = $derived(
+    [...new Set(rangesForGame.map((range) => range.stack))].sort(
+      (a, b) => a - b
+    )
+  );
+  const positions = $derived(
+    positionOrder.filter((position) =>
+      rangesForGame.some((range) => range.position === position)
+    )
+  );
+  const actions = $derived(
+    situationOrder.filter((situation) =>
+      rangesForGame.some((range) => range.situation === situation)
+    )
+  );
+
+  $effect(() => {
+    fetch("/ranges/index.json")
+      .then((response) => response.json())
+      .then((json: RangeInfo[]) => (availableRanges = json));
+  });
+
+  function toggle<T>(list: T[], option: T): T[] {
+    return list.includes(option)
+      ? list.filter((item) => item !== option)
+      : [...list, option];
+  }
+
+  function selectGame(game: string) {
+    if (game === selectedGame) return;
+    selectedGame = game;
+    selectedEffectiveStacks = [];
+    selectedPositions = [];
+    selectedActions = [];
     addSelectedRangesToRanges();
   }
 
-  function selectPosition(option: String) {
-    if (selectedPositions.includes(option)) {
-      selectedPositions = selectedPositions.filter((item) => item !== option);
-    } else {
-      selectedPositions.push(option);
-    }
+  function selectStack(option: number) {
+    selectedEffectiveStacks = toggle(selectedEffectiveStacks, option);
     addSelectedRangesToRanges();
   }
 
-  function selectAction(option: String) {
-    if (selectedActions.includes(option)) {
-      selectedActions = selectedActions.filter((item) => item !== option);
-    } else {
-      selectedActions.push(option);
-    }
+  function selectPosition(option: string) {
+    selectedPositions = toggle(selectedPositions, option);
+    addSelectedRangesToRanges();
+  }
+
+  function selectAction(option: string) {
+    selectedActions = toggle(selectedActions, option);
     addSelectedRangesToRanges();
   }
 
   async function addSelectedRangesToRanges() {
-    let ranges = [];
-    for (const stack of selectedEffectiveStacks) {
-      for (const position of selectedPositions) {
-        for (const action of selectedActions) {
-          const response = await fetch(
-            `/ranges/mtt/${encodeURIComponent(stack as number)}/${encodeURIComponent(action as string)}/${encodeURIComponent(position as string)}.json`
-          );
+    const request = ++latestRequest;
+    const matching = rangesForGame.filter(
+      (range) =>
+        selectedEffectiveStacks.includes(range.stack) &&
+        selectedPositions.includes(range.position) &&
+        selectedActions.includes(range.situation)
+    );
 
-          if (response.ok) {
-            const json = await response.json();
-            console.log(json);
-            ranges.push(PokerRange.fromJSON(json));
-          }
-        }
-      }
-    }
+    const ranges = await Promise.all(
+      matching.map(async (range) => {
+        const response = await fetch(
+          `/ranges/${encodeURIComponent(range.game)}/${range.stack}/${encodeURIComponent(range.situation)}/${encodeURIComponent(range.position)}.json`
+        );
+        return PokerRange.fromJSON(await response.json());
+      })
+    );
 
-    console.log(ranges);
+    // Ignore results from an older click that finished after a newer one.
+    if (request !== latestRequest) return;
     changeRanges(ranges);
     start();
   }
 </script>
 
+{#snippet optionButton(label: string, selected: boolean, onclick: () => void)}
+  <button
+    class="p-2 border m-1 rounded text-center cursor-pointer {selected
+      ? 'bg-blue-200 hover:bg-blue-300'
+      : 'hover:bg-gray-200'}"
+    {onclick}
+  >
+    {label}
+  </button>
+{/snippet}
+
 <div class="flex flex-col">
+  <div>
+    <h2>Game</h2>
+    <div class="flex flex-wrap">
+      {#each games as game}
+        {@render optionButton(game.label, selectedGame === game.id, () =>
+          selectGame(game.id)
+        )}
+      {/each}
+    </div>
+  </div>
   <div>
     <h2>Effective stack</h2>
     <div class="flex flex-wrap">
       {#each effectiveStacks as effectiveStack}
-        <button
-          class="p-2 border m-1 rounded text-center cursor-pointer {selectedEffectiveStacks.includes(
-            effectiveStack
-          )
-            ? 'bg-blue-200 hover:bg-blue-300'
-            : 'hover:bg-gray-200'}"
-          onclick={() => selectStack(effectiveStack)}
-        >
-          {effectiveStack}bb
-        </button>
+        {@render optionButton(
+          `${effectiveStack}bb`,
+          selectedEffectiveStacks.includes(effectiveStack),
+          () => selectStack(effectiveStack)
+        )}
       {/each}
     </div>
   </div>
-  <div class="">
+  <div>
     <h2>Positions</h2>
     <div class="flex flex-wrap">
       {#each positions as position}
-        <button
-          class="p-2 border m-1 rounded text-center cursor-pointer hover:bg-gray-200 {selectedPositions.includes(
-            position
-          )
-            ? 'bg-blue-200 hover:bg-blue-300'
-            : 'hover:bg-gray-200'}"
-          onclick={() => selectPosition(position)}
-        >
-          {position}
-        </button>
+        {@render optionButton(
+          position,
+          selectedPositions.includes(position),
+          () => selectPosition(position)
+        )}
       {/each}
     </div>
   </div>
@@ -118,16 +176,9 @@
     <h2>Actions</h2>
     <div class="flex flex-wrap">
       {#each actions as action}
-        <button
-          class="p-2 border m-1 rounded text-center cursor-pointer hover:bg-gray-200 {selectedActions.includes(
-            action
-          )
-            ? 'bg-blue-200 hover:bg-blue-300'
-            : 'hover:bg-gray-200'}"
-          onclick={() => selectAction(action)}
-        >
-          {action}
-        </button>
+        {@render optionButton(action, selectedActions.includes(action), () =>
+          selectAction(action)
+        )}
       {/each}
     </div>
   </div>
