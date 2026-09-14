@@ -14,10 +14,7 @@
     position: string;
   };
 
-  const games = [
-    { id: "mtt", label: "MTT" },
-    { id: "cash", label: "Cash" },
-  ];
+  const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
   const positionOrder = [
     "UTG",
     "UTG+1",
@@ -46,6 +43,13 @@
   let selectedActions: string[] = $state([]);
   let latestRequest = 0;
 
+  // Only show game types that have ranges.
+  const games = $derived(
+    [...new Set(availableRanges.map((range) => range.game))].map((id) => ({
+      id,
+      label: gameLabels[id] ?? id,
+    }))
+  );
   const rangesForGame = $derived(
     availableRanges.filter((range) => range.game === selectedGame)
   );
