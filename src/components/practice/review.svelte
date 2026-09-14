@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import HandQuiz from "./hand-quiz.svelte";
   import Range from "@components/range/range.svelte";
   import RangeFilter from "@components/range/range-filter.svelte";
@@ -112,7 +113,9 @@
     return { answer, attempt: new PokerRange(answer.name, cells) };
   });
 
-  $effect(() => {
+  // Load once. As an $effect this re-ran forever: it writes decisions and
+  // rangeFilter, and showGameWithDecisions reads them.
+  onMount(() => {
     try {
       decisions = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
     } catch {
