@@ -147,7 +147,7 @@
 {#each Array(PokerRangeLength) as _, index}
   <!-- svelte-ignore a11y_mouse_events_have_key_events -->
   <button
-    class={"rounded " +
+    class={"rounded select-none " +
       (getHoverClass(index) == ""
         ? getButtonClass(pokerRange.range[index]) + " " + getCompareClass(index)
         : getHoverClass(index))}

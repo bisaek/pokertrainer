@@ -87,7 +87,7 @@
 </script>
 
 <svelte:window onkeypress={keyPressed} />
-<h1 class="text-4xl text-center pb-4">{pokerRangesHaveNotFinished[0]?.name}</h1>
+<h1 class="text-4xl text-center pb-4 select-none">{pokerRangesHaveNotFinished[0]?.name}</h1>
 <RangeLayout {pokerRange} {compareTo} {isCorrect}>
   <div class="flex flex-col">
     {#if compareTo}

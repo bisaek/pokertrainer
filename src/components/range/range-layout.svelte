@@ -41,7 +41,8 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="flex flex-row justify-center gap-8 h-auto">
+<!-- select-none: dragging to paint cells shouldn't highlight text. -->
+<div class="flex flex-row justify-center gap-8 h-auto select-none">
   <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto {isCorrectClass()}">
     <Range {pokerRange} {selectedAction} {compareTo} />
   </div>
