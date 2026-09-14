@@ -3,10 +3,13 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 // Splits a situation folder name into what the hero faces and from whom:
-// "RFI" -> RFI, "vs UTG" -> vs RFI from UTG, "vs LJ 3-bet" -> vs 3-bet from LJ.
+// "RFI" -> RFI, "vs UTG" -> vs RFI from UTG, "vs LJ 3-bet" -> vs 3-bet from LJ,
+// "vs BTN all-in" -> vs all-in (open shove) from BTN.
 function parseSituation(situation: string) {
   if (situation === "RFI") return { type: "RFI", opponent: null };
-  const match = situation.match(/^vs (\S+?)(?: (limp|3-bet|4-bet|5-bet|6-bet))?$/);
+  const match = situation.match(
+    /^vs (\S+)(?: (limp|all-in|[3-6]-bet(?: all-in)?))?$/
+  );
   if (!match) return { type: situation, opponent: null };
   return { type: match[2] ? `vs ${match[2]}` : "vs RFI", opponent: match[1] };
 }

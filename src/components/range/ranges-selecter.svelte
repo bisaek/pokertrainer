@@ -32,11 +32,16 @@
   const typeOrder = [
     "RFI",
     "vs RFI",
+    "vs all-in",
     "vs limp",
     "vs 3-bet",
+    "vs 3-bet all-in",
     "vs 4-bet",
+    "vs 4-bet all-in",
     "vs 5-bet",
+    "vs 5-bet all-in",
     "vs 6-bet",
+    "vs 6-bet all-in",
   ];
 
   let availableRanges: RangeInfo[] = $state([]);
@@ -140,8 +145,11 @@
 
     const ranges = await Promise.all(
       matching.map(async (range) => {
+        // encodeURI keeps "+" (as in UTG+1) literal; "%2B" isn't served.
         const response = await fetch(
-          `/ranges/${encodeURIComponent(range.game)}/${range.stack}/${encodeURIComponent(range.situation)}/${encodeURIComponent(range.position)}.json`
+          encodeURI(
+            `/ranges/${range.game}/${range.stack}/${range.situation}/${range.position}.json`
+          )
         );
         return PokerRange.fromJSON(await response.json());
       })
