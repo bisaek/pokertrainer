@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# chart extraction (scripts/extract-pokercoaching-charts.py)
+.venv/
+cmp-*.png
