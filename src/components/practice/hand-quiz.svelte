@@ -6,19 +6,22 @@
     HandStrings,
     PokerRange,
   } from "@utils/range.svelte";
-  import { pickQuestions, type Question } from "@utils/practice";
+  import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
   import Card from "./card.svelte";
 
   let {
     ranges,
     count = undefined,
+    fixedQuestions = undefined,
     onfinish = undefined,
     children,
   }: {
     ranges: PokerRange[];
     // How many hands to ask; all in-range hands when omitted.
     count?: number;
+    // Ask exactly these hands, in random order, instead of picking from ranges.
+    fixedQuestions?: Question[];
     // Called when every hand is answered; without it the quiz starts over.
     onfinish?: () => void;
     children?: Snippet;
@@ -34,11 +37,16 @@
   $effect(() => {
     const quizRanges = ranges;
     const quizCount = count;
-    untrack(() => restart(quizRanges, quizCount));
+    const quizQuestions = fixedQuestions;
+    untrack(() => restart(quizRanges, quizCount, quizQuestions));
   });
 
-  function restart(quizRanges: PokerRange[], quizCount?: number) {
-    questions = pickQuestions(quizRanges, quizCount);
+  function restart(
+    quizRanges: PokerRange[],
+    quizCount?: number,
+    fixed = fixedQuestions
+  ) {
+    questions = fixed ? shuffle([...fixed]) : pickQuestions(quizRanges, quizCount);
     compareToWithMistakes = undefined;
     randomCardSuits();
   }

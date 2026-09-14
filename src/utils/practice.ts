@@ -45,7 +45,7 @@ function weight(range: PokerRange, hand: number, common: Action | null) {
   return action === common ? 1 : 2;
 }
 
-function shuffle<T>(items: T[]): T[] {
+export function shuffle<T>(items: T[]): T[] {
   for (let i = items.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [items[i], items[j]] = [items[j], items[i]];
