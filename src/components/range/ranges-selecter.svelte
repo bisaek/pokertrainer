@@ -1,5 +1,12 @@
 <script lang="ts">
   import { PokerRange } from "@utils/range.svelte";
+  import {
+    fetchManifest,
+    positionOrder,
+    rangeUrl,
+    typeOrder,
+    type RangeInfo,
+  } from "@utils/manifest";
 
   let {
     changeRanges,
@@ -7,42 +14,7 @@
   }: { changeRanges: (ranges: PokerRange[]) => void; start: () => void } =
     $props();
 
-  type RangeInfo = {
-    game: string;
-    stack: number;
-    situation: string;
-    type: string;
-    opponent: string | null;
-    position: string;
-  };
-
   const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
-  const positionOrder = [
-    "UTG",
-    "UTG+1",
-    "UTG+2",
-    "LJ",
-    "MP",
-    "HJ",
-    "CO",
-    "BTN",
-    "SB",
-    "BB",
-  ];
-  const typeOrder = [
-    "RFI",
-    "vs RFI",
-    "vs all-in",
-    "vs limp",
-    "vs 3-bet",
-    "vs 3-bet all-in",
-    "vs 4-bet",
-    "vs 4-bet all-in",
-    "vs 5-bet",
-    "vs 5-bet all-in",
-    "vs 6-bet",
-    "vs 6-bet all-in",
-  ];
 
   let availableRanges: RangeInfo[] = $state([]);
   let selectedGame: string = $state("mtt");
@@ -87,14 +59,12 @@
   );
 
   $effect(() => {
-    fetch("/ranges/index.json")
-      .then((response) => response.json())
-      .then((json: RangeInfo[]) => {
-        availableRanges = json;
-        if (!json.some((range) => range.game === selectedGame) && json[0]) {
-          selectedGame = json[0].game;
-        }
-      });
+    fetchManifest().then((json) => {
+      availableRanges = json;
+      if (!json.some((range) => range.game === selectedGame) && json[0]) {
+        selectedGame = json[0].game;
+      }
+    });
   });
 
   function toggle<T>(list: T[], option: T): T[] {
@@ -145,12 +115,7 @@
 
     const ranges = await Promise.all(
       matching.map(async (range) => {
-        // encodeURI keeps "+" (as in UTG+1) literal; "%2B" isn't served.
-        const response = await fetch(
-          encodeURI(
-            `/ranges/${range.game}/${range.stack}/${range.situation}/${range.position}.json`
-          )
-        );
+        const response = await fetch(rangeUrl(range));
         return PokerRange.fromJSON(await response.json());
       })
     );

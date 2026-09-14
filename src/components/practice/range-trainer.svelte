@@ -6,6 +6,7 @@
     HandStrings,
     PokerRangeLength,
   } from "../../utils/range.svelte";
+  import { blankRangeFor, isRangeCorrect } from "../../utils/practice";
 
   import RangeLayout from "../range/range-layout.svelte";
   import RangesSelecter from "../range/ranges-selecter.svelte";
@@ -35,16 +36,6 @@
       };
       reader.readAsText(file);
     });
-  }
-
-  // An empty grid to fill in. Hands outside the answer's range (null) stay
-  // empty, since there is no action to learn for them.
-  function blankRangeFor(answer?: PokerRange) {
-    if (!answer) return new PokerRange();
-    return new PokerRange(
-      undefined,
-      answer.range.map((action) => (action === null ? null : Action.Fold))
-    );
   }
 
   function start() {
@@ -80,10 +71,7 @@
 
   function check() {
     compareTo = pokerRangesHaveNotFinished[0];
-    // Hands outside the range (null) have no answer, so they don't count.
-    isCorrect = compareTo?.range.every(
-      (action, index) => action === null || pokerRange.range[index] === action
-    );
+    isCorrect = compareTo ? isRangeCorrect(pokerRange, compareTo) : undefined;
     console.log(isCorrect);
   }
 
