@@ -16,6 +16,7 @@
   import type { Question } from "@utils/practice";
   import {
     reviewHands,
+    verdictFor,
     type ChartFile,
     type ReviewedDecision,
     type Verdict,
@@ -29,17 +30,12 @@
   > = {
     mistake: {
       label: "Mistake",
-      help: "The chart rarely or never takes this action with this hand.",
+      help: "Not the action the trainer's chart has for this hand.",
       badge: "bg-red-500 text-white",
-    },
-    mixed: {
-      label: "Mixed",
-      help: "Not the chart's main action, but one it takes some of the time.",
-      badge: "bg-yellow-300",
     },
     good: {
       label: "Good",
-      help: "The chart's main action, or one it takes at least half the time.",
+      help: "The action the trainer's chart has for this hand.",
       badge: "bg-green-500 text-white",
     },
     outside: {
@@ -56,7 +52,6 @@
   const verdictFilters: (Verdict | "all")[] = [
     "all",
     "mistake",
-    "mixed",
     "good",
     "outside",
     "uncovered",
@@ -87,7 +82,6 @@
     const result: Record<Verdict | "all", number> = {
       all: inFilter.length,
       mistake: 0,
-      mixed: 0,
       good: 0,
       outside: 0,
       uncovered: 0,
@@ -117,12 +111,26 @@
   // rangeFilter, and showGameWithDecisions reads them.
   onMount(() => {
     try {
-      decisions = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+      const saved: ReviewedDecision[] = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) ?? "[]"
+      );
+      decisions = saved.map(regrade);
+      save();
     } catch {
       decisions = [];
     }
     showGameWithDecisions();
   });
+
+  // Decisions saved before grading matched the trainers can say "mixed"; grade them again.
+  function regrade(decision: ReviewedDecision): ReviewedDecision {
+    if (!decision.chart) return decision;
+    const verdict = verdictFor(
+      decision.gradedAction ?? decision.heroAction,
+      decision.chartAction ?? null
+    );
+    return verdict === decision.verdict ? decision : { ...decision, verdict };
+  }
 
   function filterItem(decision: ReviewedDecision): FilterItem {
     const info = decision.chart ? rangeInfoFromUrl(decision.chart.url) : null;
@@ -390,8 +398,7 @@
                   <td class="p-2 whitespace-nowrap">{decision.effectiveBB}bb</td>
                   <td class="p-2">{decision.heroAction}</td>
                   <td class="p-2">
-                    {formatFrequencies(decision.frequencies) ||
-                      (decision.chartAction ?? "")}
+                    {decision.chartAction ?? ""}
                   </td>
                   <td class="p-2">
                     <span
@@ -425,6 +432,13 @@
                             <p class="text-gray-600">
                               {verdictInfo[decision.verdict].help}
                             </p>
+                            {#if decision.frequencies}
+                              <p class="text-gray-600">
+                                Measured frequencies: {formatFrequencies(
+                                  decision.frequencies
+                                )}
+                              </p>
+                            {/if}
                             {#each decision.chart.notes as note}
                               <p class="text-gray-600">{note}</p>
                             {/each}

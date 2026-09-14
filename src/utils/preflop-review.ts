@@ -2,7 +2,7 @@ import { Action } from "./range.svelte";
 import type { ParsedHand, PreflopAction } from "./hand-history-888";
 import { rangeUrl, type RangeInfo } from "./manifest";
 
-export type Verdict = "good" | "mixed" | "mistake" | "outside" | "uncovered";
+export type Verdict = "good" | "mistake" | "outside" | "uncovered";
 
 // A chart file from public/ranges: the most frequent action and the measured frequencies per hand.
 export type ChartFile = {
@@ -38,8 +38,6 @@ export type ReviewedDecision = {
   frequencies?: Record<string, number> | null;
 };
 
-// An action the chart takes at least this often is a less common choice, not a mistake.
-const MIXED_THRESHOLD = 0.15;
 // Charts for stacks farther than this factor from the effective stack aren't used.
 const MAX_STACK_RATIO = 2.5;
 
@@ -262,6 +260,13 @@ function situationLabel(type: string, hero: string, opponent: string | null) {
   return `${hero} vs ${opponent} ${level}${shove ? " shove" : ""}`;
 }
 
+// Graded like the trainers: the chart has one action per hand (its most frequent one),
+// and anything else is a mistake.
+export function verdictFor(gradedAction: Action, chartAction: Action | null): Verdict {
+  if (chartAction === null) return "outside";
+  return gradedAction === chartAction ? "good" : "mistake";
+}
+
 export function grade(chart: ChartFile, handIndex: number, heroAction: Action) {
   const chartAction = chart.range[handIndex];
   if (chartAction === null) {
@@ -270,14 +275,7 @@ export function grade(chart: ChartFile, handIndex: number, heroAction: Action) {
   const frequencies = chart.frequencies?.[handIndex] ?? { [chartAction]: 1 };
   let gradedAction = heroAction;
   if (gradedAction === Action.AllIn && !(Action.AllIn in frequencies)) gradedAction = Action.Raise;
-  const frequency = frequencies[gradedAction] ?? 0;
-  const verdict: Verdict =
-    gradedAction === chartAction || frequency >= 0.5
-      ? "good"
-      : frequency >= MIXED_THRESHOLD
-        ? "mixed"
-        : "mistake";
-  return { verdict, chartAction, frequencies, gradedAction };
+  return { verdict: verdictFor(gradedAction, chartAction), chartAction, frequencies, gradedAction };
 }
 
 // Reviews every preflop decision of the hero (the player dealt cards) in the given hands.
