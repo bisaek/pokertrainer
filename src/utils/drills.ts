@@ -1,17 +1,17 @@
 import { positionOrder, rangeUrl, typeOrder, type RangeInfo } from "./manifest";
 
 // Which ranges an exercise uses. Omitted positions or opponents mean all of them.
-type RangeFilter = {
+export type RangeFilter = {
   types: string[];
   positions?: string[];
   opponents?: string[];
 };
 
-type ExerciseTemplate =
+export type ExerciseTemplate =
   | { kind: "range"; filter: RangeFilter; timesInARow: number }
   | { kind: "hands"; filter: RangeFilter; count: number };
 
-type DrillTemplate = {
+export type DrillTemplate = {
   name: string;
   description: string;
   exercises: ExerciseTemplate[];
@@ -36,14 +36,14 @@ const OPENERS = ["UTG", "UTG+1", "UTG+2", "LJ", "HJ", "CO", "BTN", "SB"];
 const RESPONDERS = ["UTG+1", "UTG+2", "LJ", "HJ", "CO", "BTN", "SB", "BB"];
 
 // Rebuild each chart until it's right `times` in a row, then answer hands from them.
-function learn(filter: RangeFilter, times: number, hands: number): ExerciseTemplate[] {
+export function learn(filter: RangeFilter, times: number, hands: number): ExerciseTemplate[] {
   return [
     { kind: "range", filter, timesInARow: times },
     { kind: "hands", filter, count: hands },
   ];
 }
 
-function quiz(filter: RangeFilter, hands: number): ExerciseTemplate[] {
+export function quiz(filter: RangeFilter, hands: number): ExerciseTemplate[] {
   return [{ kind: "hands", filter, count: hands }];
 }
 
@@ -249,6 +249,19 @@ function compareRanges(a: RangeInfo, b: RangeInfo) {
   );
 }
 
+// URLs of the charts matching a filter for a game and stack, in table order.
+export function resolveUrls(
+  filter: RangeFilter,
+  manifest: RangeInfo[],
+  game: string,
+  stack: number
+): string[] {
+  return manifest
+    .filter((range) => range.game === game && range.stack === stack && matches(range, filter))
+    .sort(compareRanges)
+    .map(rangeUrl);
+}
+
 // Turns a drill template into the ranges that exist for a game and stack.
 // Exercises without ranges are dropped, and the drill is null when nothing is left.
 export function resolveDrill(
@@ -259,10 +272,7 @@ export function resolveDrill(
 ): Drill | null {
   const exercises: DrillExercise[] = [];
   for (const exercise of drill.exercises) {
-    const urls = manifest
-      .filter((range) => range.game === game && range.stack === stack && matches(range, exercise.filter))
-      .sort(compareRanges)
-      .map(rangeUrl);
+    const urls = resolveUrls(exercise.filter, manifest, game, stack);
     if (urls.length === 0) continue;
     exercises.push(
       exercise.kind === "range"
