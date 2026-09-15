@@ -78,6 +78,17 @@
     }
   }
 
+  // Keys 1-4 answer with the action buttons, in order.
+  function keyDown(event: KeyboardEvent) {
+    if (!questions[0] || event.repeat) return;
+    const target = event.target as HTMLElement | null;
+    if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+    const action = Object.values(Action)[Number(event.key) - 1];
+    if (!action) return;
+    event.preventDefault();
+    check(action);
+  }
+
   function randomCardSuits() {
     if (!questions[0]) return;
     const suits = ["C", "D", "H", "S"];
@@ -93,42 +104,65 @@
   }
 </script>
 
-<div
-  class="flex flex-col md:flex-row flex-wrap items-center justify-around gap-4 p-2"
->
-  <div class="flex flex-col w-full max-w-xs">
+<svelte:window onkeydown={keyDown} />
+
+<div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+  <section class="card flex flex-col items-center gap-5 text-center lg:sticky lg:top-20">
     {#if current}
-      <p class="text-center">hands back: {questions.length}</p>
-      <p class="text-center font-semibold">{current.range.name}</p>
-      <h2 class="text-4xl text-center">{HandStrings[current.hand]}</h2>
-      <div class="flex flex-row gap-4 justify-center">
+      <div class="flex w-full items-center justify-between text-sm">
+        <span class="muted">Hands left</span>
+        <span class="font-semibold tabular-nums">{questions.length}</span>
+      </div>
+      <p class="chip chip-active cursor-default" data-quiz-range>
+        {current.range.name}
+      </p>
+      <h2 class="text-5xl font-bold tracking-tight" data-quiz-hand>
+        {HandStrings[current.hand]}
+      </h2>
+      <div class="flex justify-center gap-3">
         <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
         <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
       </div>
 
-      <div class="flex flex-row flex-wrap justify-center gap-2 mt-2">
-        {#each Object.values(Action) as action}
+      <div class="grid w-full grid-cols-2 gap-2">
+        {#each Object.values(Action) as action, index}
           <button
-            class={`inline-block px-4 py-2 m-1 rounded text-base ${getButtonClass(action)}`}
+            class="btn btn-lg justify-between font-semibold hover:brightness-110 {getButtonClass(
+              action
+            )}"
             onclick={() => check(action)}
           >
             {action}
+            <span class="kbd" aria-hidden="true">{index + 1}</span>
           </button>
         {/each}
       </div>
-    {/if}
-  </div>
-
-  <div class="m-1">
-    <div class="grid grid-cols-13 gap-1 aspect-square w-full">
-      {#if compareToWithMistakes && current}
-        <Range
-          selectedAction={Action.Fold}
-          pokerRange={compareToWithMistakes}
-          compareTo={current.range}
-        />
+      {#if compareToWithMistakes}
+        <p class="text-sm text-red-300">
+          Not quite. Try again: the chart shows where you went wrong.
+        </p>
       {/if}
-    </div>
+    {:else}
+      <p class="py-10 muted">Pick one or more charts to start.</p>
+    {/if}
+  </section>
+
+  <div class="flex flex-col gap-6">
+    {#if compareToWithMistakes && current}
+      <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">
+        <div class="range-grid">
+          <Range
+            selectedAction={Action.Fold}
+            pokerRange={compareToWithMistakes}
+            compareTo={current.range}
+          />
+        </div>
+        <figcaption class="text-center text-xs muted">
+          The hand you missed is filled with your answer and outlined with the
+          chart's.
+        </figcaption>
+      </figure>
+    {/if}
     {@render children?.()}
   </div>
 </div>

@@ -122,78 +122,100 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="p-4 flex flex-col gap-2">
-  <div class="flex items-center gap-4">
-    <button
-      class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-      onclick={onback}>{backLabel}</button
-    >
-    <h1 class="text-3xl">{drill.name}</h1>
-  </div>
+<div class="page">
+  <header class="flex flex-col gap-3">
+    <div>
+      <button class="btn btn-ghost -ml-3" onclick={onback}>
+        <span aria-hidden="true">←</span>
+        {backLabel}
+      </button>
+    </div>
+    <h1 class="page-title">{drill.name}</h1>
+    {#if !finished}
+      <div class="flex flex-col gap-2">
+        <p class="text-sm muted">
+          Exercise {exerciseIndex + 1} of {drill.exercises.length}{exercise
+            ? `: ${describeExercise(exercise)}`
+            : ""}
+        </p>
+        <div class="flex gap-1.5" aria-hidden="true">
+          {#each drill.exercises as _, index}
+            <div
+              class="h-1.5 flex-1 rounded-full {index < exerciseIndex
+                ? 'bg-accent-500'
+                : index === exerciseIndex
+                  ? 'bg-accent-500/50'
+                  : 'bg-ink-800'}"
+            ></div>
+          {/each}
+        </div>
+      </div>
+    {/if}
+  </header>
 
   {#if finished}
-    <p class="text-2xl text-center py-8">{completeText}</p>
-    <div class="flex justify-center gap-2">
-      {#each doneActions as action}
-        <button
-          class="{action.primary
-            ? 'bg-green-500 hover:bg-green-600 text-white'
-            : 'bg-gray-300 hover:bg-gray-400'} px-3 py-1 rounded"
-          onclick={action.onclick}>{action.label}</button
+    <section class="card flex flex-col items-center gap-5 py-12 text-center">
+      <div
+        class="grid h-14 w-14 place-items-center rounded-full bg-accent-500/15 text-3xl text-accent-300"
+        aria-hidden="true"
+      >
+        ✓
+      </div>
+      <p class="text-2xl font-semibold">{completeText}</p>
+      <div class="flex flex-wrap justify-center gap-2">
+        {#each doneActions as action}
+          <button
+            class="btn {action.primary ? 'btn-primary' : 'btn-secondary'}"
+            onclick={action.onclick}>{action.label}</button
+          >
+        {/each}
+        <button class="btn btn-secondary" onclick={() => restart()}
+          >{againLabel}</button
         >
-      {/each}
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        onclick={() => restart()}>{againLabel}</button
-      >
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        onclick={onback}>{backLabel}</button
-      >
-    </div>
+        <button class="btn btn-ghost" onclick={onback}>{backLabel}</button>
+      </div>
+    </section>
   {:else if loading || !exercise}
-    <p class="text-center py-8">Loading…</p>
+    <p class="py-12 text-center muted">Loading…</p>
+  {:else if exercise.kind === "range"}
+    <RangeLayout {pokerRange} {compareTo} {isCorrect}>
+      <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
+        {#if queue[0]}
+          <div class="flex flex-col gap-1">
+            <span class="label">Rebuild this chart</span>
+            <h2 class="text-lg leading-snug font-semibold" data-chart-name>
+              {queue[0].range.name}
+            </h2>
+            <p class="text-sm muted">
+              {queue.length}
+              {queue.length === 1 ? "chart" : "charts"} left
+              {#if exercise.timesInARow > 1}
+                · correct in a row: {queue[0].streak}/{exercise.timesInARow}
+              {/if}
+            </p>
+          </div>
+        {/if}
+        {#if compareTo}
+          <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
+            {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
+          </p>
+          <button class="btn btn-primary w-full" onclick={next}>
+            Next <span class="kbd" aria-hidden="true">Enter</span>
+          </button>
+        {:else}
+          <button class="btn btn-primary w-full" onclick={check}>
+            Check <span class="kbd" aria-hidden="true">Enter</span>
+          </button>
+        {/if}
+      </div>
+    </RangeLayout>
   {:else}
-    <p class="text-gray-600">
-      Exercise {exerciseIndex + 1} of {drill.exercises.length}: {describeExercise(
-        exercise
-      )}
-    </p>
-
-    {#if exercise.kind === "range"}
-      {#if queue[0]}
-        <h2 class="text-2xl text-center">{queue[0].range.name}</h2>
-        <p class="text-center text-sm text-gray-600">
-          {queue.length}
-          {queue.length === 1 ? "chart" : "charts"} left
-          {#if exercise.timesInARow > 1}
-            · correct in a row: {queue[0].streak}/{exercise.timesInARow}
-          {/if}
-        </p>
-      {/if}
-      <RangeLayout {pokerRange} {compareTo} {isCorrect}>
-        <div>
-          {#if compareTo}
-            <button
-              class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-              onclick={next}>Next</button
-            >
-          {:else}
-            <button
-              class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-              onclick={check}>Check</button
-            >
-          {/if}
-        </div>
-      </RangeLayout>
-    {:else}
-      {#key exerciseIndex}
-        <HandQuiz
-          ranges={exerciseRanges}
-          count={exercise.count}
-          onfinish={finishExercise}
-        />
-      {/key}
-    {/if}
+    {#key exerciseIndex}
+      <HandQuiz
+        ranges={exerciseRanges}
+        count={exercise.count}
+        onfinish={finishExercise}
+      />
+    {/key}
   {/if}
 </div>

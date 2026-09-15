@@ -1,22 +1,20 @@
 ---
 import HandTrainerComponent from "../components/practice/hand-trainer.svelte";
 import Layout from "../layouts/Layout.astro";
+
+const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+const suits = ["H", "D", "C", "S"];
 ---
 
-<head>
-  {
-    ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"].map(
-      (rank) =>
-        ["H", "D", "C", "S"].map((suit) => (
-          <link
-            rel="preload"
-            as="image"
-            href={`/poker-cards/${rank}${suit}.svg`}
-          />
+<Layout title="Hand trainer">
+  <Fragment slot="head">
+    {
+      ranks.flatMap((rank) =>
+        suits.map((suit) => (
+          <link rel="preload" as="image" href={`/poker-cards/${rank}${suit}.svg`} />
         ))
-    )
-  }
-</head>
-<Layout>
+      )
+    }
+  </Fragment>
   <HandTrainerComponent client:load />
 </Layout>

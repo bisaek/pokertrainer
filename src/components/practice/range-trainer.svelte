@@ -1,11 +1,5 @@
 <script lang="ts">
-  import {
-    PokerRange,
-    Action,
-    Hand,
-    HandStrings,
-    PokerRangeLength,
-  } from "../../utils/range.svelte";
+  import { PokerRange } from "../../utils/range.svelte";
   import { blankRangeFor, isRangeCorrect } from "../../utils/practice";
 
   import RangeLayout from "../range/range-layout.svelte";
@@ -39,7 +33,6 @@
   }
 
   function start() {
-    console.log(pokerRangesToPracticeFromDrills);
     pokerRangesHaveNotFinished = [];
     pokerRangesHaveNotFinished.push(
       ...pokerRangesToPractice,
@@ -48,7 +41,6 @@
     pokerRangesHaveNotFinished.sort(() => Math.random() - 0.5);
     pokerRangesHaveNotFinished = [...pokerRangesHaveNotFinished];
     pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
-    console.log(pokerRangesHaveNotFinished);
   }
 
   function next() {
@@ -66,13 +58,11 @@
       start();
     }
     pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
-    console.log(pokerRangesHaveNotFinished);
   }
 
   function check() {
     compareTo = pokerRangesHaveNotFinished[0];
     isCorrect = compareTo ? isRangeCorrect(pokerRange, compareTo) : undefined;
-    console.log(isCorrect);
   }
 
   function keyPressed(Event: KeyboardEvent) {
@@ -87,49 +77,65 @@
 </script>
 
 <svelte:window onkeypress={keyPressed} />
-<h1 class="text-4xl text-center pb-4 select-none">{pokerRangesHaveNotFinished[0]?.name}</h1>
-<RangeLayout {pokerRange} {compareTo} {isCorrect}>
-  <div class="flex flex-col">
-    {#if compareTo}
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-        onclick={next}>Next</button
-      >
-    {:else}
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-        onclick={check}>Check</button
-      >
-    {/if}
 
-    <RangesSelecter
-      changeRanges={(ranges: PokerRange[]) =>
-        (pokerRangesToPracticeFromDrills = ranges)}
-      {start}
-    />
+<div class="page">
+  <header class="flex flex-col gap-2 select-none">
+    <span class="eyebrow">Range trainer</span>
+    <h1 class="page-title" data-chart-name>
+      {pokerRangesHaveNotFinished[0]?.name ?? "Pick a chart to practice"}
+    </h1>
+    <p class="page-lead">
+      Paint the chart from memory, then press Check to compare it with the
+      answer.
+    </p>
+  </header>
 
-    <div class="m-1">
-      <label for="">Import: </label>
-      <input
-        type="file"
-        class="border border-gray-300 rounded px-2 py-1"
-        multiple
-        onchange={importRange}
+  <RangeLayout {pokerRange} {compareTo} {isCorrect}>
+    <div class="flex flex-col gap-3">
+      {#if compareTo}
+        <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
+          {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
+        </p>
+        <button class="btn btn-primary w-full" onclick={next}>
+          Next <span class="kbd" aria-hidden="true">Enter</span>
+        </button>
+      {:else}
+        <button class="btn btn-primary w-full" onclick={check}>
+          Check <span class="kbd" aria-hidden="true">Enter</span>
+        </button>
+      {/if}
+    </div>
+
+    <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
+      <h2 class="section-title">Charts</h2>
+      <RangesSelecter
+        changeRanges={(ranges: PokerRange[]) =>
+          (pokerRangesToPracticeFromDrills = ranges)}
+        {start}
       />
     </div>
-    <ul>
-      {#each pokerRangesToPractice as range, index}
-        <li>
-          <button
-            onclick={() => {
-              pokerRange = range;
-            }}
-            class="cursor-pointer hover:underline"
-          >
-            {range.name}
-          </button>
-        </li>
-      {/each}
-    </ul>
-  </div>
-</RangeLayout>
+
+    <div class="flex flex-col gap-2 border-t border-ink-700 pt-4">
+      <label class="flex flex-col gap-2">
+        <span class="label">Import range files</span>
+        <input type="file" class="file-input" multiple onchange={importRange} />
+      </label>
+      {#if pokerRangesToPractice.length > 0}
+        <ul class="flex flex-col gap-1 text-sm">
+          {#each pokerRangesToPractice as range}
+            <li>
+              <button
+                onclick={() => {
+                  pokerRange = range;
+                }}
+                class="link"
+              >
+                {range.name}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+  </RangeLayout>
+</div>

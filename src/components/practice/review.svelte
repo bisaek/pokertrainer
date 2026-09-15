@@ -31,22 +31,22 @@
     mistake: {
       label: "Mistake",
       help: "Not the action the trainer's chart has for this hand.",
-      badge: "bg-red-500 text-white",
+      badge: "badge-mistake",
     },
     good: {
       label: "Good",
       help: "The action the trainer's chart has for this hand.",
-      badge: "bg-green-500 text-white",
+      badge: "badge-good",
     },
     outside: {
       label: "Earlier mistake",
       help: "The chart never has this hand in this spot, so an earlier decision was off.",
-      badge: "bg-gray-400 text-white",
+      badge: "badge-outside",
     },
     uncovered: {
       label: "No chart",
       help: "No chart covers this spot.",
-      badge: "bg-gray-200",
+      badge: "badge-none",
     },
   };
   const verdictFilters: (Verdict | "all")[] = [
@@ -262,16 +262,19 @@
 </script>
 
 {#if training}
-  <div class="p-4 flex flex-col gap-2">
-    <div class="flex items-center gap-4">
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        onclick={() => (training = null)}>Back to review</button
-      >
-      <h1 class="text-3xl">
+  <div class="page">
+    <header class="flex flex-col gap-3">
+      <div>
+        <button class="btn btn-ghost -ml-3" onclick={() => (training = null)}>
+          <span aria-hidden="true">←</span>
+          Back to review
+        </button>
+      </div>
+      <span class="eyebrow">Review</span>
+      <h1 class="page-title">
         {training.kind === "hands" ? "Your mistakes" : "Charts you missed"}
       </h1>
-    </div>
+    </header>
     {#if training.kind === "hands"}
       <HandQuiz
         ranges={[]}
@@ -287,17 +290,18 @@
     {/if}
   </div>
 {:else}
-  <div class="p-4 flex flex-col gap-4">
-    <div>
-      <h1 class="text-3xl">Preflop review</h1>
-      <p class="text-gray-600">
+  <div class="page">
+    <header class="flex flex-col gap-2">
+      <span class="eyebrow">Tools</span>
+      <h1 class="page-title">Preflop review</h1>
+      <p class="page-lead">
         Import 888poker hand histories to check every preflop decision against
         the charts. Reviewed decisions are saved in this browser.
       </p>
-    </div>
+    </header>
 
-    <div class="flex flex-wrap items-center gap-2">
-      <label class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded cursor-pointer">
+    <div class="flex flex-wrap items-center gap-3">
+      <label class="btn btn-primary">
         {importing ? "Importing…" : "Import hand histories"}
         <input
           type="file"
@@ -308,152 +312,155 @@
           onchange={importFiles}
         />
       </label>
+      {#if importMessage}
+        <p class="text-sm text-ink-300">{importMessage}</p>
+      {/if}
       <button
-        class="ml-auto bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded disabled:opacity-50"
+        class="btn btn-ghost ml-auto"
         disabled={decisions.length === 0}
         onclick={clearReview}>Clear saved review</button
       >
     </div>
-    {#if importMessage}
-      <p class="text-sm">{importMessage}</p>
-    {/if}
 
     {#if decisions.length === 0}
-      <p class="text-gray-600">
-        No reviewed hands yet. Import the .txt hand history files the 888poker
-        client saves.
-      </p>
+      <div class="card flex flex-col items-center gap-2 border-dashed py-14 text-center">
+        <p class="text-lg font-semibold">No reviewed hands yet</p>
+        <p class="max-w-md muted">
+          Import the .txt hand history files the 888poker client saves. Every
+          preflop decision you made is graded against the charts.
+        </p>
+      </div>
     {:else}
-      <div class="border rounded p-3 flex flex-col gap-1">
-        <div class="flex items-center gap-4">
-          <h2 class="text-xl">Filter</h2>
-          <p class="text-sm text-gray-600">
-            Narrows the table and what you train.
-          </p>
+      <section class="card flex flex-col gap-4" data-filter>
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <h2 class="section-title">Filter</h2>
+          <p class="text-sm muted">Narrows the table and what you train.</p>
           <button
-            class="ml-auto text-sm underline cursor-pointer"
+            class="btn btn-ghost ml-auto text-sm"
             onclick={() => (rangeFilter = emptyFilter(rangeFilter.game))}
             >Show all</button
           >
         </div>
         <RangeFilter {items} bind:value={rangeFilter} emptyMeansAll />
-      </div>
+      </section>
 
       <div class="flex flex-wrap items-center gap-2">
         {#each verdictFilters as option}
           <button
-            class="p-2 border rounded cursor-pointer {verdictFilter === option
-              ? 'bg-blue-200 hover:bg-blue-300'
-              : 'hover:bg-gray-200'}"
+            class="chip {verdictFilter === option ? 'chip-active' : ''}"
             onclick={() => (verdictFilter = option)}
           >
             {option === "all" ? "All" : verdictInfo[option].label} ({counts[option]})
           </button>
         {/each}
-        <button
-          class="ml-auto bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded disabled:opacity-50"
-          disabled={mistakes.length === 0}
-          onclick={trainMistakes}>Train mistakes ({mistakes.length})</button
-        >
-        <button
-          class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded disabled:opacity-50"
-          disabled={mistakes.length === 0}
-          onclick={practiceMissedCharts}>Practice the charts you missed</button
-        >
+        <div class="ml-auto flex flex-wrap gap-2">
+          <button
+            class="btn btn-primary"
+            disabled={mistakes.length === 0}
+            onclick={trainMistakes}>Train mistakes ({mistakes.length})</button
+          >
+          <button
+            class="btn btn-secondary"
+            disabled={mistakes.length === 0}
+            onclick={practiceMissedCharts}>Practice the charts you missed</button
+          >
+        </div>
       </div>
 
       {#if visible.length === 0}
-        <p class="text-gray-600">No decisions match the filter.</p>
+        <p class="muted">No decisions match the filter.</p>
       {:else}
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="text-left border-b">
-              <tr>
-                <th class="p-2">Date</th>
-                <th class="p-2">Game</th>
-                <th class="p-2">Hand</th>
-                <th class="p-2">Spot</th>
-                <th class="p-2">Stack</th>
-                <th class="p-2">You</th>
-                <th class="p-2">Chart</th>
-                <th class="p-2">Verdict</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each visible as decision (decision.key)}
-                <tr
-                  class="border-b cursor-pointer hover:bg-gray-100 {decision.key ===
-                  selectedKey
-                    ? 'bg-blue-50'
-                    : ''}"
-                  onclick={() => select(decision)}
-                >
-                  <td class="p-2 whitespace-nowrap">{decision.date}</td>
-                  <td class="p-2">{decision.tournament ?? decision.stakes}</td>
-                  <td class="p-2 whitespace-nowrap">
-                    {decision.cards}
-                    <span class="text-gray-500">({decision.hand})</span>
-                  </td>
-                  <td class="p-2">{decision.situation}</td>
-                  <td class="p-2 whitespace-nowrap">{decision.effectiveBB}bb</td>
-                  <td class="p-2">{decision.heroAction}</td>
-                  <td class="p-2">
-                    {decision.chartAction ?? ""}
-                  </td>
-                  <td class="p-2">
-                    <span
-                      class="px-2 py-0.5 rounded whitespace-nowrap {verdictInfo[decision.verdict].badge}"
-                      title={decision.reason ?? verdictInfo[decision.verdict].help}
-                    >
-                      {verdictInfo[decision.verdict].label}
-                    </span>
-                  </td>
+        <div class="card overflow-hidden p-0">
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Game</th>
+                  <th>Hand</th>
+                  <th>Spot</th>
+                  <th>Stack</th>
+                  <th>You</th>
+                  <th>Chart</th>
+                  <th>Verdict</th>
                 </tr>
-                {#if decision.key === selectedKey}
-                  <tr>
-                    <td colspan="8" class="p-2">
-                      <div class="flex flex-col md:flex-row gap-4 items-start">
-                        {#if selectedGrid}
-                          <div class="grid grid-cols-13 gap-1 w-full max-w-xl aspect-square">
-                            <Range
-                              pokerRange={selectedGrid.attempt}
-                              compareTo={selectedGrid.answer}
-                              selectedAction={Action.Fold}
-                            />
-                          </div>
-                        {/if}
-                        <div class="flex flex-col gap-1">
-                          {#if decision.chart}
-                            <p class="font-semibold">{decision.chart.name}</p>
-                            <p>
-                              {decision.hand}: you chose {decision.heroAction}. The
-                              cell shows your action, its border the chart's.
-                            </p>
-                            <p class="text-gray-600">
-                              {verdictInfo[decision.verdict].help}
-                            </p>
-                            {#if decision.frequencies}
-                              <p class="text-gray-600">
-                                Measured frequencies: {formatFrequencies(
-                                  decision.frequencies
-                                )}
-                              </p>
-                            {/if}
-                            {#each decision.chart.notes as note}
-                              <p class="text-gray-600">{note}</p>
-                            {/each}
-                          {:else}
-                            <p>{decision.reason ?? verdictInfo[decision.verdict].help}</p>
-                          {/if}
-                          <p class="text-gray-500">Game #{decision.handId}</p>
-                        </div>
-                      </div>
+              </thead>
+              <tbody>
+                {#each visible as decision (decision.key)}
+                  <tr
+                    class="cursor-pointer transition-colors hover:bg-ink-850 {decision.key ===
+                    selectedKey
+                      ? 'bg-ink-800'
+                      : ''}"
+                    onclick={() => select(decision)}
+                  >
+                    <td class="whitespace-nowrap text-ink-300">{decision.date}</td>
+                    <td class="whitespace-nowrap text-ink-300">{decision.tournament ?? decision.stakes}</td>
+                    <td class="font-medium whitespace-nowrap">
+                      {decision.cards}
+                      <span class="font-normal muted">({decision.hand})</span>
+                    </td>
+                    <td class="whitespace-nowrap">{decision.situation}</td>
+                    <td class="whitespace-nowrap tabular-nums">{decision.effectiveBB}bb</td>
+                    <td>{decision.heroAction}</td>
+                    <td>
+                      {decision.chartAction ?? ""}
+                    </td>
+                    <td>
+                      <span
+                        class="badge {verdictInfo[decision.verdict].badge}"
+                        title={decision.reason ?? verdictInfo[decision.verdict].help}
+                      >
+                        {verdictInfo[decision.verdict].label}
+                      </span>
                     </td>
                   </tr>
-                {/if}
-              {/each}
-            </tbody>
-          </table>
+                  {#if decision.key === selectedKey}
+                    <tr class="bg-ink-850">
+                      <td colspan="8">
+                        <div class="flex flex-col items-start gap-5 py-2 md:flex-row">
+                          {#if selectedGrid}
+                            <div class="range-grid w-full max-w-md">
+                              <Range
+                                pokerRange={selectedGrid.attempt}
+                                compareTo={selectedGrid.answer}
+                                selectedAction={Action.Fold}
+                              />
+                            </div>
+                          {/if}
+                          <div class="flex flex-col gap-2">
+                            {#if decision.chart}
+                              <p class="font-semibold">{decision.chart.name}</p>
+                              <p>
+                                {decision.hand}: you chose {decision.heroAction}. The
+                                cell shows your action, its outline the chart's.
+                              </p>
+                              <p class="text-ink-300">
+                                {verdictInfo[decision.verdict].help}
+                              </p>
+                              {#if decision.frequencies}
+                                <p class="text-ink-300">
+                                  Measured frequencies: {formatFrequencies(
+                                    decision.frequencies
+                                  )}
+                                </p>
+                              {/if}
+                              {#each decision.chart.notes as note}
+                                <p class="text-ink-300">{note}</p>
+                              {/each}
+                            {:else}
+                              <p>{decision.reason ?? verdictInfo[decision.verdict].help}</p>
+                            {/if}
+                            <p class="text-sm muted">Game #{decision.handId}</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {/if}
+                {/each}
+              </tbody>
+            </table>
+          </div>
         </div>
       {/if}
     {/if}

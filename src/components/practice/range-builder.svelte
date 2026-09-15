@@ -1,11 +1,5 @@
 <script lang="ts">
-  import {
-    PokerRange,
-    Action,
-    Hand,
-    HandStrings,
-    PokerRangeLength,
-  } from "../../utils/range.svelte";
+  import { PokerRange } from "../../utils/range.svelte";
 
   import RangeLayout from "../range/range-layout.svelte";
 
@@ -39,27 +33,29 @@
   }
 </script>
 
-<RangeLayout {pokerRange}>
-  <div class="flex flex-col">
-    <div class="m-1">
-      <label for="">Import: </label>
-      <input
-        type="file"
-        class="border border-gray-300 rounded px-2 py-1"
-        onchange={importRange}
-      />
+<div class="page">
+  <header class="flex flex-col gap-2">
+    <span class="eyebrow">Tools</span>
+    <h1 class="page-title">Range builder</h1>
+    <p class="page-lead">
+      Paint a range, give it a name, and download it as a file you can import in
+      the trainers.
+    </p>
+  </header>
+
+  <RangeLayout {pokerRange}>
+    <div class="flex flex-col gap-4 border-t border-ink-700 pt-4">
+      <label class="flex flex-col gap-2">
+        <span class="label">Name</span>
+        <input type="text" class="input" bind:value={pokerRange.name} />
+      </label>
+      <button class="btn btn-primary w-full" onclick={() => downloadRange()}
+        >Download range</button
+      >
+      <label class="flex flex-col gap-2 border-t border-ink-700 pt-4">
+        <span class="label">Import a range file</span>
+        <input type="file" class="file-input" onchange={importRange} />
+      </label>
     </div>
-    <div class="m-1">
-      <label for="">Name: </label>
-      <input
-        type="text"
-        class="border border-gray-300 rounded px-2 py-1"
-        bind:value={pokerRange.name}
-      />
-    </div>
-    <button
-      class="bg-gray-300 hover:bg-gray-400 px-3 py-1 m-1 rounded"
-      onclick={() => downloadRange()}>download</button
-    >
-  </div>
-</RangeLayout>
+  </RangeLayout>
+</div>
