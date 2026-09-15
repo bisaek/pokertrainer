@@ -89,8 +89,9 @@
   .nav-link {
     @apply rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-ink-300 transition-colors hover:bg-ink-800 hover:text-ink-100;
   }
+  /* The current page is marked by its text color only. */
   .nav-link-active {
-    @apply bg-ink-800 text-accent-300 hover:text-accent-300;
+    @apply text-accent-300 hover:bg-transparent hover:text-accent-300;
   }
 
   /* Surfaces */
