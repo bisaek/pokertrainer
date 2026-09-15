@@ -12,6 +12,12 @@
     resolveLesson,
     type Course,
   } from "@utils/courses";
+  import {
+    loadCustomCourses,
+    parseCourse,
+    removeCustomCourse,
+    upsertCustomCourse,
+  } from "@utils/course-file";
 
   const PROGRESS_KEY = "pokertrainer.courses.v1";
   const gameLabels: Record<string, string> = { mtt: "Tournament", cash: "Cash" };
@@ -23,6 +29,8 @@
   let manifest: RangeInfo[] = $state.raw([]);
   let manifestReady: Promise<RangeInfo[]> = Promise.resolve([]);
   let progress: Progress = $state.raw({});
+  let customCourses: Course[] = $state.raw([]);
+  let loadMessage: { kind: "ok" | "error"; text: string } | null = $state(null);
   let courseId: string | null = $state(null);
   let lessonIndex: number | null = $state(null);
   let practicing = $state(false);
@@ -30,7 +38,8 @@
   let statsLoading = $state(false);
   let statsToken = 0;
 
-  const course = $derived(courses.find((c) => c.id === courseId) ?? null);
+  const allCourses = $derived([...courses, ...customCourses]);
+  const course = $derived(allCourses.find((c) => c.id === courseId) ?? null);
   const lesson = $derived(
     course && lessonIndex !== null ? (course.lessons[lessonIndex] ?? null) : null
   );
@@ -68,6 +77,7 @@
     } catch {
       progress = {};
     }
+    customCourses = loadCustomCourses();
     manifestReady = fetchManifest().then((json) => (manifest = json));
   });
 
@@ -77,6 +87,10 @@
     } catch {
       // Storage is full or blocked; progress lasts until the page is closed.
     }
+  }
+
+  function isCustom(c: Course) {
+    return customCourses.some((item) => item.id === c.id);
   }
 
   function completedIn(c: Course) {
@@ -144,6 +158,47 @@
     const share = row.shares.find((s) => s.action === action);
     return share ? `${share.percent.toFixed(1)}%` : "–";
   }
+
+  async function loadCourseFile(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const result = parseCourse(JSON.parse(await file.text()));
+      if ("errors" in result) {
+        loadMessage = {
+          kind: "error",
+          text: `Couldn't load ${file.name}: ${result.errors.slice(0, 3).join(" ")}`,
+        };
+        return;
+      }
+      const loaded = result.course;
+      const existed = customCourses.some((item) => item.id === loaded.id);
+      customCourses = upsertCustomCourse(loaded);
+      const withoutCharts = loaded.lessons.filter(
+        (item) => !resolveLesson(loaded, item, manifest)
+      ).length;
+      loadMessage = {
+        kind: "ok",
+        text:
+          `${existed ? "Updated" : "Added"} “${loaded.name}”.` +
+          (manifest.length > 0 && withoutCharts > 0
+            ? ` ${withoutCharts} of its lessons have no matching charts.`
+            : ""),
+      };
+    } catch {
+      loadMessage = { kind: "error", text: `Couldn't load ${file.name}: it isn't valid JSON.` };
+    } finally {
+      input.value = "";
+    }
+  }
+
+  function removeCourse(c: Course) {
+    if (!confirm(`Remove "${c.name}" from your courses?`)) return;
+    customCourses = removeCustomCourse(c.id);
+    loadMessage = { kind: "ok", text: `Removed “${c.name}”.` };
+    if (courseId === c.id) openCourse(null);
+  }
 </script>
 
 {#snippet progressBar(done: number, total: number)}
@@ -164,6 +219,29 @@
       <span aria-hidden="true">←</span>
       {label}
     </button>
+  </div>
+{/snippet}
+
+{#snippet courseCard(item: Course)}
+  <div class="card card-interactive flex flex-col p-0" data-course-card>
+    <button class="flex flex-1 flex-col gap-3 p-4 text-left sm:p-5" onclick={() => openCourse(item)}>
+      <span class="label">
+        {isCustom(item) ? "Your course · " : ""}{gameLabels[item.game] ?? item.game} ·
+        {item.lessons.length}
+        {item.lessons.length === 1 ? "lesson" : "lessons"}
+      </span>
+      <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
+      <span class="flex-1 text-sm text-ink-300">{item.description}</span>
+      {@render progressBar(completedIn(item), item.lessons.length)}
+    </button>
+    {#if isCustom(item)}
+      <div class="flex gap-1 border-t border-ink-700 px-3 py-2">
+        <a class="btn btn-ghost text-sm" href="/course-builder?edit={encodeURIComponent(item.id)}"
+          >Edit</a
+        >
+        <button class="btn btn-ghost text-sm" onclick={() => removeCourse(item)}>Remove</button>
+      </div>
+    {/if}
   </div>
 {/snippet}
 
@@ -192,7 +270,7 @@
       {/if}
     </header>
 
-    <div class="flex flex-col gap-4 text-lg leading-relaxed text-ink-300">
+    <div class="flex flex-col gap-4 text-lg leading-relaxed text-ink-300" data-lesson-body>
       {#each lesson.body as paragraph}
         <p>{paragraph}</p>
       {/each}
@@ -294,9 +372,14 @@
   <div class="page page-narrow">
     <header class="flex flex-col gap-3">
       {@render backButton("All courses", () => openCourse(null))}
-      <span class="eyebrow">{gameLabels[course.game] ?? course.game} · {course.stack}bb</span>
+      <span class="eyebrow">
+        {isCustom(course) ? "Your course · " : ""}{gameLabels[course.game] ?? course.game} ·
+        {course.stack}bb
+      </span>
       <h1 class="page-title">{course.name}</h1>
-      <p class="page-lead">{course.description}</p>
+      {#if course.description}
+        <p class="page-lead">{course.description}</p>
+      {/if}
     </header>
 
     <section class="card flex flex-col gap-4">
@@ -312,11 +395,22 @@
               ? "Review from the start"
               : "Continue"}
         </button>
-        {#if completedIn(course) > 0}
-          <button class="btn btn-ghost ml-auto text-sm" onclick={() => resetProgress(course)}
-            >Reset progress</button
-          >
-        {/if}
+        <div class="ml-auto flex flex-wrap gap-1">
+          {#if isCustom(course)}
+            <a
+              class="btn btn-ghost text-sm"
+              href="/course-builder?edit={encodeURIComponent(course.id)}">Edit in course builder</a
+            >
+            <button class="btn btn-ghost text-sm" onclick={() => removeCourse(course)}
+              >Remove course</button
+            >
+          {/if}
+          {#if completedIn(course) > 0}
+            <button class="btn btn-ghost text-sm" onclick={() => resetProgress(course)}
+              >Reset progress</button
+            >
+          {/if}
+        </div>
       </div>
     </section>
 
@@ -356,18 +450,50 @@
     </header>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {#each courses as item (item.id)}
-        <button
-          class="card card-interactive flex flex-col gap-3"
-          onclick={() => openCourse(item)}
-        >
-          <span class="label">
-            {gameLabels[item.game] ?? item.game} · {item.lessons.length} lessons
-          </span>
-          <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
-          <span class="flex-1 text-sm text-ink-300">{item.description}</span>
-          {@render progressBar(completedIn(item), item.lessons.length)}
-        </button>
+        {@render courseCard(item)}
       {/each}
     </div>
+
+    <section class="flex flex-col gap-4" data-your-courses>
+      <div class="flex flex-wrap items-center gap-3">
+        <h2 class="section-title">Your courses</h2>
+        <div class="ml-auto flex flex-wrap gap-2">
+          <label class="btn btn-secondary">
+            Load course file
+            <input
+              type="file"
+              accept=".json,application/json"
+              class="hidden"
+              onchange={loadCourseFile}
+            />
+          </label>
+          <a href="/course-builder" class="btn btn-primary">Create a course</a>
+        </div>
+      </div>
+      {#if loadMessage}
+        <p
+          role="status"
+          class="text-sm {loadMessage.kind === 'error' ? 'text-red-300' : 'text-emerald-300'}"
+          data-load-message
+        >
+          {loadMessage.text}
+        </p>
+      {/if}
+      {#if customCourses.length === 0}
+        <div class="card flex flex-col items-center gap-2 border-dashed py-10 text-center">
+          <p class="font-semibold">No courses of your own yet</p>
+          <p class="max-w-md text-sm muted">
+            Build one in the course builder, or load a course file someone shared
+            with you.
+          </p>
+        </div>
+      {:else}
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {#each customCourses as item (item.id)}
+            {@render courseCard(item)}
+          {/each}
+        </div>
+      {/if}
+    </section>
   </div>
 {/if}
