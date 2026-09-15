@@ -142,9 +142,9 @@
           {#each drill.exercises as _, index}
             <div
               class="h-1.5 flex-1 rounded-full {index < exerciseIndex
-                ? 'bg-felt-500'
+                ? 'bg-accent-500'
                 : index === exerciseIndex
-                  ? 'bg-felt-500/50'
+                  ? 'bg-accent-500/50'
                   : 'bg-ink-800'}"
             ></div>
           {/each}
@@ -156,7 +156,7 @@
   {#if finished}
     <section class="card flex flex-col items-center gap-5 py-12 text-center">
       <div
-        class="grid h-14 w-14 place-items-center rounded-full bg-felt-500/15 text-3xl text-felt-300"
+        class="grid h-14 w-14 place-items-center rounded-full bg-accent-500/15 text-3xl text-accent-300"
         aria-hidden="true"
       >
         ✓
@@ -196,7 +196,7 @@
           </div>
         {/if}
         {#if compareTo}
-          <p class="text-sm font-medium {isCorrect ? 'text-felt-300' : 'text-red-300'}">
+          <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
             {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
           </p>
           <button class="btn btn-primary w-full" onclick={next}>

@@ -248,7 +248,7 @@
       {/if}
     {/if}
 
-    <section class="card flex flex-col gap-3 border-felt-600/50 bg-felt-500/5">
+    <section class="card flex flex-col gap-3 border-accent-600/50 bg-accent-500/5">
       <h2 class="section-title">Practice</h2>
       {#if drill}
         <p class="text-ink-300" data-practice-summary>
@@ -332,7 +332,7 @@
                 course,
                 item.id
               )
-                ? 'bg-felt-500 text-ink-950'
+                ? 'bg-accent-500 text-ink-950'
                 : 'bg-ink-800 text-ink-300'}"
             >
               {isCompleted(course, item.id) ? "✓" : index + 1}

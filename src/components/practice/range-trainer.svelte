@@ -93,7 +93,7 @@
   <RangeLayout {pokerRange} {compareTo} {isCorrect}>
     <div class="flex flex-col gap-3">
       {#if compareTo}
-        <p class="text-sm font-medium {isCorrect ? 'text-felt-300' : 'text-red-300'}">
+        <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
           {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
         </p>
         <button class="btn btn-primary w-full" onclick={next}>

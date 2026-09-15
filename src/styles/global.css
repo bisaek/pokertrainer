@@ -4,22 +4,22 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  /* Surfaces and text, from the page background (950) to the brightest text (100). */
-  --color-ink-950: #090e0c;
-  --color-ink-900: #0f1613;
-  --color-ink-850: #131c18;
-  --color-ink-800: #19241f;
-  --color-ink-700: #24322c;
-  --color-ink-600: #364740;
-  --color-ink-400: #82958c;
-  --color-ink-300: #adbcb5;
-  --color-ink-100: #e8efeb;
+  /* Surfaces and text: warm charcoal, from the page background (950) to the brightest text (100). */
+  --color-ink-950: #0f0e0d;
+  --color-ink-900: #161513;
+  --color-ink-850: #1c1a17;
+  --color-ink-800: #23211d;
+  --color-ink-700: #302d28;
+  --color-ink-600: #47423b;
+  --color-ink-400: #9b948a;
+  --color-ink-300: #c4bdb3;
+  --color-ink-100: #f3efe9;
 
-  /* Accent: poker table felt. */
-  --color-felt-300: #7ee2b0;
-  --color-felt-400: #45d08f;
-  --color-felt-500: #22b573;
-  --color-felt-600: #178a57;
+  /* Accent: poker chip gold. Green is kept for correct answers and the Call action. */
+  --color-accent-300: #f8d88f;
+  --color-accent-400: #f1c05a;
+  --color-accent-500: #e2a833;
+  --color-accent-600: #b3801d;
 
   /* Chart actions, matching the PokerCoaching charts the ranges come from. */
   --color-action-allin: #7d1f1f;
@@ -43,10 +43,10 @@
     @apply bg-ink-950 font-sans text-ink-100 antialiased;
   }
   ::selection {
-    background-color: color-mix(in oklab, var(--color-felt-400) 35%, transparent);
+    background-color: color-mix(in oklab, var(--color-accent-400) 35%, transparent);
   }
   :focus-visible {
-    outline: 2px solid var(--color-felt-400);
+    outline: 2px solid var(--color-accent-400);
     outline-offset: 2px;
   }
   button:not(:disabled),
@@ -64,7 +64,7 @@
     @apply max-w-3xl;
   }
   .eyebrow {
-    @apply text-xs font-semibold tracking-[0.14em] text-felt-400 uppercase;
+    @apply text-xs font-semibold tracking-[0.14em] text-accent-400 uppercase;
   }
   .page-title {
     @apply text-3xl font-bold tracking-tight text-ink-100 sm:text-4xl;
@@ -82,7 +82,7 @@
     @apply text-ink-400;
   }
   .link {
-    @apply text-felt-300 underline-offset-4 hover:underline;
+    @apply text-accent-300 underline-offset-4 hover:underline;
   }
 
   /* Navigation */
@@ -90,7 +90,7 @@
     @apply rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap text-ink-300 transition-colors hover:bg-ink-800 hover:text-ink-100;
   }
   .nav-link-active {
-    @apply bg-ink-800 text-felt-300 hover:text-felt-300;
+    @apply bg-ink-800 text-accent-300 hover:text-accent-300;
   }
 
   /* Surfaces */
@@ -98,7 +98,7 @@
     @apply rounded-2xl border border-ink-700 bg-ink-900 p-4 sm:p-5;
   }
   .card-interactive {
-    @apply text-left transition-colors hover:border-felt-600 hover:bg-ink-850;
+    @apply text-left transition-colors hover:border-accent-600 hover:bg-ink-850;
   }
 
   /* Controls */
@@ -109,7 +109,7 @@
     @apply px-5 py-2.5 text-base;
   }
   .btn-primary {
-    @apply bg-felt-500 text-ink-950 hover:bg-felt-400;
+    @apply bg-accent-500 text-ink-950 hover:bg-accent-400;
   }
   .btn-secondary {
     @apply border border-ink-700 bg-ink-800 text-ink-100 hover:bg-ink-700;
@@ -121,10 +121,10 @@
     @apply inline-flex items-center rounded-full border border-ink-700 bg-ink-850 px-3 py-1 text-sm text-ink-300 transition-colors select-none hover:border-ink-600 hover:text-ink-100;
   }
   .chip-active {
-    @apply border-felt-500 bg-felt-500/15 text-felt-300 hover:border-felt-500 hover:text-felt-300;
+    @apply border-accent-500 bg-accent-500/15 text-accent-300 hover:border-accent-500 hover:text-accent-300;
   }
   .input {
-    @apply w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-sm text-ink-100 outline-none placeholder:text-ink-400 focus:border-felt-500;
+    @apply w-full rounded-lg border border-ink-700 bg-ink-850 px-3 py-2 text-sm text-ink-100 outline-none placeholder:text-ink-400 focus:border-accent-500;
   }
   .file-input {
     @apply block w-full text-sm text-ink-400 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-100 hover:file:bg-ink-700;
@@ -139,13 +139,13 @@
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap;
   }
   .badge-good {
-    @apply bg-felt-500/15 text-felt-300;
+    @apply bg-emerald-500/15 text-emerald-300;
   }
   .badge-mistake {
     @apply bg-red-500/15 text-red-300;
   }
   .badge-outside {
-    @apply bg-amber-500/15 text-amber-300;
+    @apply bg-orange-500/15 text-orange-300;
   }
   .badge-none {
     @apply bg-ink-800 text-ink-400;
@@ -154,7 +154,7 @@
     @apply h-2 w-full overflow-hidden rounded-full bg-ink-800;
   }
   .progress-bar {
-    @apply h-full rounded-full bg-felt-500 transition-[width] duration-300;
+    @apply h-full rounded-full bg-accent-500 transition-[width] duration-300;
   }
 
   /* Tables */
@@ -185,7 +185,7 @@
     transition: outline-color 150ms;
   }
   .range-grid-correct {
-    outline-color: var(--color-felt-400);
+    outline-color: var(--color-emerald-400);
   }
   .range-grid-wrong {
     outline-color: var(--color-action-raise);
@@ -239,7 +239,7 @@
   .action-option-selected {
     box-shadow:
       0 0 0 2px var(--color-ink-900),
-      0 0 0 4px var(--color-felt-300);
+      0 0 0 4px var(--color-accent-300);
   }
   .action-dot {
     display: inline-block;
