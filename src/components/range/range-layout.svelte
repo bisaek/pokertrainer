@@ -3,9 +3,6 @@
   import {
     PokerRange,
     Action,
-    Hand,
-    HandStrings,
-    PokerRangeLength,
     getButtonClass,
   } from "../../utils/range.svelte";
 
@@ -26,6 +23,9 @@
   let selectedAction: Action = $state(Action.Fold);
 
   function keyPressed(e: KeyboardEvent) {
+    // Typing in a field (like a range name) shouldn't switch the action.
+    const target = e.target as HTMLElement | null;
+    if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
     if (e.key === "1") selectedAction = Action.Raise;
     else if (e.key === "2") selectedAction = Action.Call;
     else if (e.key === "3") selectedAction = Action.Fold;
@@ -34,35 +34,39 @@
 
   function isCorrectClass() {
     if (isCorrect === undefined) return "";
-    else if (isCorrect) return "ring-4 ring-offset-2 ring-green-300";
-    else return "ring-4 ring-offset-2 ring-red-300";
+    return isCorrect ? "range-grid-correct" : "range-grid-wrong";
   }
 </script>
 
 <svelte:window onkeypress={keyPressed} />
 
 <!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div class="flex flex-row justify-center gap-8 h-auto select-none">
-  <div class="grid grid-cols-13 gap-1 h-200 w-200 my-auto {isCorrectClass()}">
-    <Range {pokerRange} {selectedAction} {compareTo} />
-  </div>
-  <div class="flex flex-col justify-between my-auto h-200">
-    <div class="flex flex-col">
-      {#each Object.values(Action) as action}
-        <button
-          class={`inline-block px-3 py-1 m-1 rounded ${getButtonClass(action)} ${
-            selectedAction === action
-              ? "ring-4 ring-offset-2 ring-blue-300"
-              : ""
-          }`}
-          onclick={() => (selectedAction = action)}
-        >
-          {action}
-        </button>
-      {/each}
-    </div>
-    <div class="flex flex-col">
-      {@render children?.()}
+<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_19rem]">
+  <div class="mx-auto w-full max-w-[46rem]">
+    <div class="range-grid {isCorrectClass()}">
+      <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
   </div>
+  <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
+    <div class="flex flex-col gap-2">
+      <span class="label">Paint with</span>
+      <div class="grid grid-cols-2 gap-2">
+        {#each Object.values(Action) as action, index}
+          <button
+            class="action-option {getButtonClass(action)} {selectedAction === action
+              ? 'action-option-selected'
+              : ''}"
+            onclick={() => (selectedAction = action)}
+          >
+            {action}
+            <span class="kbd" aria-hidden="true">{index + 1}</span>
+          </button>
+        {/each}
+      </div>
+      <p class="text-xs muted">
+        Drag across cells to paint. Hold Shift for a line or Ctrl for a box.
+      </p>
+    </div>
+    {@render children?.()}
+  </aside>
 </div>

@@ -66,51 +66,61 @@
     onback={() => (drill = null)}
   />
 {:else}
-  <div class="p-4 flex flex-col gap-6">
-    <div class="flex flex-wrap items-center gap-2">
-      <h2 class="mr-1">Game</h2>
-      {#each games as game}
-        <button
-          class="p-2 border rounded cursor-pointer {game === selectedGame
-            ? 'bg-blue-200 hover:bg-blue-300'
-            : 'hover:bg-gray-200'}"
-          onclick={() => selectGame(game)}
-        >
-          {gameLabels[game] ?? game}
-        </button>
-      {/each}
-      <h2 class="ml-6 mr-1">Effective stack</h2>
-      {#each stacks as stack}
-        <button
-          class="p-2 border rounded cursor-pointer {stack === selectedStack
-            ? 'bg-blue-200 hover:bg-blue-300'
-            : 'hover:bg-gray-200'}"
-          onclick={() => (selectedStack = stack)}
-        >
-          {stack}bb
-        </button>
-      {/each}
+  <div class="page">
+    <header class="flex flex-col gap-2">
+      <span class="eyebrow">Learn</span>
+      <h1 class="page-title">Drills</h1>
+      <p class="page-lead">
+        Short, focused practice for one spot at a time. Pick a game and stack to
+        see the drills that have charts.
+      </p>
+    </header>
+
+    <div class="card flex flex-wrap items-center gap-x-8 gap-y-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="label mr-1">Game</span>
+        {#each games as game}
+          <button
+            class="chip {game === selectedGame ? 'chip-active' : ''}"
+            onclick={() => selectGame(game)}
+          >
+            {gameLabels[game] ?? game}
+          </button>
+        {/each}
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="label mr-1">Effective stack</span>
+        {#each stacks as stack}
+          <button
+            class="chip {stack === selectedStack ? 'chip-active' : ''}"
+            onclick={() => (selectedStack = stack)}
+          >
+            {stack}bb
+          </button>
+        {/each}
+      </div>
     </div>
 
     {#each categories as category}
-      <section>
-        <h2 class="text-2xl mb-2">{category.name}</h2>
-        <div
-          class="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
+      <section class="flex flex-col gap-3">
+        <h2 class="section-title flex items-baseline gap-2">
+          {category.name}
+          <span class="text-sm font-normal muted">{category.drills.length}</span>
+        </h2>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {#each category.drills as item}
             <button
-              class="text-left p-3 border rounded cursor-pointer hover:bg-gray-100"
+              class="card card-interactive flex flex-col gap-1.5"
               onclick={() => (drill = item)}
             >
-              <div class="font-semibold">{item.name}</div>
-              <div class="text-sm text-gray-600">{item.description}</div>
-              <div class="text-xs text-gray-500 mt-1">
+              <span class="font-semibold text-ink-100">{item.name}</span>
+              <span class="text-sm text-ink-300">{item.description}</span>
+              <span class="mt-1 text-xs muted">
                 {item.chartCount}
                 {item.chartCount === 1 ? "chart" : "charts"} · {item.exercises
                   .map(describeExercise)
                   .join(", then ")}
-              </div>
+              </span>
             </button>
           {/each}
         </div>

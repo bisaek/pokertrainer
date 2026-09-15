@@ -70,29 +70,24 @@
 </script>
 
 {#snippet optionButton(label: string, selected: boolean, onclick: () => void)}
-  <button
-    class="p-2 border m-1 rounded text-center cursor-pointer {selected
-      ? 'bg-blue-200 hover:bg-blue-300'
-      : 'hover:bg-gray-200'}"
-    {onclick}
-  >
+  <button class="chip {selected ? 'chip-active' : ''}" {onclick}>
     {label}
   </button>
 {/snippet}
 
 {#snippet heading(label: string, selected: unknown[])}
-  <h2>
+  <h3 class="label flex items-center gap-2">
     {label}
     {#if emptyMeansAll && selected.length === 0}
-      <span class="text-sm text-gray-500">(all)</span>
+      <span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>
     {/if}
-  </h2>
+  </h3>
 {/snippet}
 
-<div class="flex flex-col">
-  <div>
-    <h2>Game</h2>
-    <div class="flex flex-wrap">
+<div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-2">
+    <h3 class="label">Game</h3>
+    <div class="flex flex-wrap gap-1.5">
       {#each games as game}
         {@render optionButton(gameLabels[game] ?? game, value.game === game, () =>
           selectGame(game)
@@ -100,9 +95,9 @@
       {/each}
     </div>
   </div>
-  <div>
+  <div class="flex flex-col gap-2">
     {@render heading("Effective stack", value.stacks)}
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap gap-1.5">
       {#each stacks as stack}
         {@render optionButton(`${stack}bb`, value.stacks.includes(stack), () =>
           update({ stacks: toggle(value.stacks, stack) })
@@ -110,9 +105,9 @@
       {/each}
     </div>
   </div>
-  <div>
+  <div class="flex flex-col gap-2">
     {@render heading("Your position", value.positions)}
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap gap-1.5">
       {#each positions as position}
         {@render optionButton(position, value.positions.includes(position), () =>
           update({ positions: toggle(value.positions, position) })
@@ -120,9 +115,9 @@
       {/each}
     </div>
   </div>
-  <div>
+  <div class="flex flex-col gap-2">
     {@render heading("Situation", value.types)}
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap gap-1.5">
       {#each types as type}
         {@render optionButton(type, value.types.includes(type), () =>
           update({ types: toggle(value.types, type) })
@@ -131,9 +126,9 @@
     </div>
   </div>
   {#if opponents.length > 0}
-    <div>
+    <div class="flex flex-col gap-2">
       {@render heading("Opponent", value.opponents)}
-      <div class="flex flex-wrap">
+      <div class="flex flex-wrap gap-1.5">
         {#each opponents as opponent}
           {@render optionButton(opponent, value.opponents.includes(opponent), () =>
             update({ opponents: toggle(value.opponents, opponent) })

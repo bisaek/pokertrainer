@@ -1,11 +1,161 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import Layout from "../layouts/Layout.astro";
+import { courses } from "../utils/courses";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const rangesDir = join(process.cwd(), "public", "ranges");
+
+function countCharts(dir: string): number {
+  return readdirSync(dir, { withFileTypes: true }).reduce(
+    (count, entry) =>
+      count +
+      (entry.isDirectory()
+        ? countCharts(join(dir, entry.name))
+        : entry.name.endsWith(".json")
+          ? 1
+          : 0),
+    0
+  );
+}
+
+const chartCount = countCharts(rangesDir);
+const lessonCount = courses.reduce((count, course) => count + course.lessons.length, 0);
+
+// A real chart for the hero picture: the cash-game button opening range.
+const heroChart = JSON.parse(
+  readFileSync(join(rangesDir, "cash", "100", "RFI", "BTN.json"), "utf8")
+);
+const RANKS = "AKQJT98765432";
+const actionClass: Record<string, string> = {
+  "All in": "action-allin",
+  Raise: "action-raise",
+  Call: "action-call",
+  Fold: "action-fold",
+};
+function handName(index: number) {
+  const row = Math.floor(index / 13);
+  const col = index % 13;
+  if (row === col) return RANKS[row] + RANKS[col];
+  return col > row ? `${RANKS[row]}${RANKS[col]}s` : `${RANKS[col]}${RANKS[row]}o`;
+}
+
+const sections = [
+  {
+    group: "Learn",
+    title: "Courses",
+    href: "/courses",
+    text: "Step-by-step lessons for cash games, tournaments and short stacks, with practice after every lesson.",
+  },
+  {
+    group: "Learn",
+    title: "Drills",
+    href: "/drills",
+    text: "Focused practice for one spot at a time: opens, big blind defense, 3-bets, 4-bets and shoves.",
+  },
+  {
+    group: "Train",
+    title: "Range trainer",
+    href: "/range-trainer",
+    text: "Paint a chart from memory, then check it cell by cell.",
+  },
+  {
+    group: "Train",
+    title: "Hand trainer",
+    href: "/hand-trainer",
+    text: "See a hand, pick the action. Wrong answers come back until you get them right.",
+  },
+  {
+    group: "Tools",
+    title: "Review",
+    href: "/review",
+    text: "Import 888poker hand histories and grade every preflop decision against the charts.",
+  },
+  {
+    group: "Tools",
+    title: "Range builder",
+    href: "/range-builder",
+    text: "Paint your own ranges and save them as files to practice with.",
+  },
+];
+
+const steps = [
+  { title: "Learn", text: "A short lesson explains the spot and shows the numbers from the charts." },
+  { title: "Drill", text: "Rebuild the charts from memory, then answer hands until the answers are automatic." },
+  { title: "Review", text: "Import your real hands and train the decisions you got wrong." },
+];
 ---
 
 <Layout>
-	<Welcome />
+  <div class="page gap-16">
+    <section class="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_26rem]">
+      <div class="flex flex-col gap-6">
+        <span class="eyebrow">Preflop trainer</span>
+        <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
+          Know your preflop ranges without thinking.
+        </h1>
+        <p class="page-lead">
+          Learn the charts in short lessons, drill them until they're automatic,
+          and check your real hands against them.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="/courses" class="btn btn-primary btn-lg">Start a course</a>
+          <a href="/drills" class="btn btn-secondary btn-lg">Browse drills</a>
+        </div>
+        <p class="text-sm muted">
+          {chartCount} charts · {courses.length} courses · {lessonCount} lessons
+        </p>
+      </div>
+      <figure class="flex flex-col gap-3">
+        <div class="range-grid" aria-hidden="true">
+          {
+            heroChart.range.map((action: string | null, index: number) => (
+              <div class:list={["range-cell", action ? actionClass[action] : "action-empty"]}>
+                {handName(index)}
+              </div>
+            ))
+          }
+        </div>
+        <figcaption class="flex flex-wrap items-center justify-between gap-2 text-sm muted">
+          <span>{heroChart.name}</span>
+          <span>
+            <span class="action-dot action-raise"></span>Raise
+            <span class="action-dot action-fold ml-3"></span>Fold
+          </span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="flex flex-col gap-4">
+      <h2 class="section-title">Everything in one place</h2>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          sections.map((section) => (
+            <a href={section.href} class="card card-interactive flex flex-col gap-2">
+              <span class="label">{section.group}</span>
+              <span class="text-lg font-semibold text-ink-100">{section.title}</span>
+              <span class="text-sm text-ink-300">{section.text}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="flex flex-col gap-4">
+      <h2 class="section-title">How it works</h2>
+      <ol class="grid gap-3 md:grid-cols-3">
+        {
+          steps.map((step, index) => (
+            <li class="card flex flex-col gap-2">
+              <span class="grid h-8 w-8 place-items-center rounded-full bg-felt-500/15 text-sm font-semibold text-felt-300">
+                {index + 1}
+              </span>
+              <span class="font-semibold">{step.title}</span>
+              <span class="text-sm text-ink-300">{step.text}</span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
 </Layout>

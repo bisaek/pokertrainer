@@ -428,18 +428,19 @@ const HandStrings: string[] = [
 
 const PokerRangeLength = 13 * 13;
 
+// Color classes for an action, defined in src/styles/global.css.
 function getButtonClass(action: Action | null): string {
   switch (action) {
     case Action.Fold:
-      return "bg-gray-300 hover:bg-gray-400";
+      return "action-fold";
     case Action.Call:
-      return "bg-green-500 hover:bg-green-600 text-white";
+      return "action-call";
     case Action.Raise:
-      return "bg-red-500 hover:bg-red-600 text-white";
+      return "action-raise";
     case Action.AllIn:
-      return "bg-blue-500 hover:bg-blue-600 text-white";
+      return "action-allin";
     default:
-      return "bg-gray-100 hover:bg-gray-200";
+      return "action-empty";
   }
 }
 

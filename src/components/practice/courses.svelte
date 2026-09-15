@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import DrillRunner from "./drill-runner.svelte";
+  import { getButtonClass, type Action } from "@utils/range.svelte";
   import { fetchManifest, type RangeInfo } from "@utils/manifest";
   import { describeExercise } from "@utils/drills";
   import { ACTION_ORDER, actionShares, type ActionShare } from "@utils/chart-stats";
@@ -146,14 +147,23 @@
 </script>
 
 {#snippet progressBar(done: number, total: number)}
-  <div class="flex items-center gap-2">
-    <div class="h-2 flex-1 bg-gray-200 rounded">
+  <div class="flex items-center gap-3">
+    <div class="progress flex-1">
       <div
-        class="h-2 bg-green-500 rounded"
+        class="progress-bar"
         style="width: {total ? (done / total) * 100 : 0}%"
       ></div>
     </div>
-    <span class="text-sm text-gray-600 whitespace-nowrap">{done}/{total} lessons</span>
+    <span class="text-sm whitespace-nowrap tabular-nums muted">{done}/{total} lessons</span>
+  </div>
+{/snippet}
+
+{#snippet backButton(label: string, onclick: () => void)}
+  <div>
+    <button class="btn btn-ghost -ml-3" {onclick}>
+      <span aria-hidden="true">←</span>
+      {label}
+    </button>
   </div>
 {/snippet}
 
@@ -168,186 +178,193 @@
     doneActions={lessonDoneActions}
   />
 {:else if course && lesson && lessonIndex !== null}
-  <div class="p-4 flex flex-col gap-4 max-w-4xl mx-auto">
-    <div class="flex items-center gap-4">
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        onclick={() => openCourse(course)}>Back to course</button
-      >
-      <span class="text-gray-600">
+  <article class="page page-narrow">
+    <header class="flex flex-col gap-3">
+      {@render backButton("Back to course", () => openCourse(course))}
+      <span class="eyebrow">
         {course.name} · Lesson {lessonIndex + 1} of {course.lessons.length} ·
         {gameLabels[course.game] ?? course.game}
         {lessonStack(course, lesson)}bb
       </span>
+      <h1 class="page-title">{lesson.title}</h1>
+      {#if isCompleted(course, lesson.id)}
+        <div><span class="badge badge-good">✓ Completed</span></div>
+      {/if}
+    </header>
+
+    <div class="flex flex-col gap-4 text-lg leading-relaxed text-ink-300">
+      {#each lesson.body as paragraph}
+        <p>{paragraph}</p>
+      {/each}
     </div>
 
-    <h1 class="text-3xl">
-      {lesson.title}
-      {#if isCompleted(course, lesson.id)}
-        <span class="text-green-600 text-xl align-middle">✓ completed</span>
-      {/if}
-    </h1>
-
-    {#each lesson.body as paragraph}
-      <p class="text-lg">{paragraph}</p>
-    {/each}
-
     {#if lesson.stats}
-      <div class="overflow-x-auto">
-        {#if statsLoading}
-          <p class="text-gray-600">Loading charts…</p>
-        {:else if stats.length > 0}
-          <table class="text-sm">
-            <thead class="text-left border-b">
-              <tr>
-                <th class="p-2">Chart</th>
-                {#if showReach}
-                  <th class="p-2" title="Share of all starting hands that reach this spot"
-                    >Hands in chart</th
-                  >
-                {/if}
-                {#each statsActions as action}
-                  <th class="p-2 text-right">{action}</th>
-                {/each}
-              </tr>
-            </thead>
-            <tbody>
-              {#each stats as row}
-                <tr class="border-b">
-                  <td class="p-2 whitespace-nowrap">{row.name}</td>
+      {#if statsLoading}
+        <p class="muted">Loading charts…</p>
+      {:else if stats.length > 0}
+        <section class="card overflow-hidden p-0">
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Chart</th>
                   {#if showReach}
-                    <td class="p-2 text-right">{row.reach.toFixed(1)}%</td>
+                    <th
+                      class="text-right"
+                      title="Share of all starting hands that reach this spot"
+                      >Hands in chart</th
+                    >
                   {/if}
                   {#each statsActions as action}
-                    <td class="p-2 text-right">{percentFor(row, action)}</td>
+                    <th class="text-right"
+                      ><span
+                        class="action-dot {getButtonClass(action as Action)}"
+                        aria-hidden="true"
+                      ></span>{action}</th
+                    >
                   {/each}
                 </tr>
-              {/each}
-            </tbody>
-          </table>
-          <p class="text-xs text-gray-500 mt-1">
+              </thead>
+              <tbody>
+                {#each stats as row}
+                  <tr>
+                    <td class="whitespace-nowrap">{row.name}</td>
+                    {#if showReach}
+                      <td class="text-right tabular-nums">{row.reach.toFixed(1)}%</td>
+                    {/if}
+                    {#each statsActions as action}
+                      <td class="text-right tabular-nums">{percentFor(row, action)}</td>
+                    {/each}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+          <p class="px-4 py-3 text-xs muted">
             Share of the hands in each chart, weighted by hand combinations, using
             each hand's action in the trainers.
           </p>
-        {/if}
-      </div>
+        </section>
+      {/if}
     {/if}
 
-    <div class="border rounded p-3 flex flex-col gap-2">
-      <h2 class="text-xl">Practice</h2>
+    <section class="card flex flex-col gap-3 border-felt-600/50 bg-felt-500/5">
+      <h2 class="section-title">Practice</h2>
       {#if drill}
-        <p class="text-gray-600">
+        <p class="text-ink-300" data-practice-summary>
           {drill.chartCount}
           {drill.chartCount === 1 ? "chart" : "charts"}: {drill.exercises
             .map(describeExercise)
             .join(", then ")}. Finishing marks the lesson as completed.
         </p>
         <div>
-          <button
-            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-            onclick={() => (practicing = true)}>Start practice</button
+          <button class="btn btn-primary btn-lg" onclick={() => (practicing = true)}
+            >Start practice</button
           >
         </div>
       {:else if manifest.length > 0}
-        <p class="text-gray-600">No charts exist for this lesson.</p>
+        <p class="muted">No charts exist for this lesson.</p>
       {:else}
-        <p class="text-gray-600">Loading…</p>
+        <p class="muted">Loading…</p>
       {/if}
-    </div>
+    </section>
 
-    <div class="flex justify-between">
+    <nav class="flex flex-wrap justify-between gap-2">
       {#if lessonIndex > 0}
         <button
-          class="underline cursor-pointer"
+          class="btn btn-ghost"
           onclick={() => lessonIndex !== null && openLesson(course, lessonIndex - 1)}
-          >← {course.lessons[lessonIndex - 1].title}</button
+          ><span aria-hidden="true">←</span>
+          {course.lessons[lessonIndex - 1].title}</button
         >
       {:else}
         <span></span>
       {/if}
       {#if lessonIndex + 1 < course.lessons.length}
         <button
-          class="underline cursor-pointer"
+          class="btn btn-ghost"
           onclick={() => lessonIndex !== null && openLesson(course, lessonIndex + 1)}
-          >{course.lessons[lessonIndex + 1].title} →</button
+          >{course.lessons[lessonIndex + 1].title}
+          <span aria-hidden="true">→</span></button
         >
       {/if}
-    </div>
-  </div>
+    </nav>
+  </article>
 {:else if course}
-  <div class="p-4 flex flex-col gap-4 max-w-4xl mx-auto">
-    <div>
-      <button
-        class="bg-gray-300 hover:bg-gray-400 px-3 py-1 rounded"
-        onclick={() => openCourse(null)}>All courses</button
-      >
-    </div>
-    <h1 class="text-3xl">{course.name}</h1>
-    <p class="text-lg">{course.description}</p>
-    {@render progressBar(completedIn(course), course.lessons.length)}
-    <div class="flex gap-2">
-      <button
-        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-        onclick={() => openLesson(course, nextLessonIndex(course))}
-      >
-        {completedIn(course) === 0
-          ? "Start course"
-          : completedIn(course) === course.lessons.length
-            ? "Review from the start"
-            : "Continue"}
-      </button>
-      {#if completedIn(course) > 0}
-        <button
-          class="ml-auto text-sm underline cursor-pointer"
-          onclick={() => resetProgress(course)}>Reset progress</button
-        >
-      {/if}
-    </div>
+  <div class="page page-narrow">
+    <header class="flex flex-col gap-3">
+      {@render backButton("All courses", () => openCourse(null))}
+      <span class="eyebrow">{gameLabels[course.game] ?? course.game} · {course.stack}bb</span>
+      <h1 class="page-title">{course.name}</h1>
+      <p class="page-lead">{course.description}</p>
+    </header>
 
-    <ol class="flex flex-col gap-2">
+    <section class="card flex flex-col gap-4">
+      {@render progressBar(completedIn(course), course.lessons.length)}
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          class="btn btn-primary btn-lg"
+          onclick={() => openLesson(course, nextLessonIndex(course))}
+        >
+          {completedIn(course) === 0
+            ? "Start course"
+            : completedIn(course) === course.lessons.length
+              ? "Review from the start"
+              : "Continue"}
+        </button>
+        {#if completedIn(course) > 0}
+          <button class="btn btn-ghost ml-auto text-sm" onclick={() => resetProgress(course)}
+            >Reset progress</button
+          >
+        {/if}
+      </div>
+    </section>
+
+    <ol class="card divide-y divide-ink-800 overflow-hidden p-0">
       {#each course.lessons as item, index (item.id)}
         <li>
           <button
-            class="w-full text-left p-3 border rounded cursor-pointer hover:bg-gray-100 flex items-center gap-3"
+            class="flex w-full items-center gap-4 px-4 py-3.5 text-left transition-colors hover:bg-ink-850"
             onclick={() => openLesson(course, index)}
           >
             <span
-              class="w-7 h-7 rounded-full flex items-center justify-center text-sm {isCompleted(
+              class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold {isCompleted(
                 course,
                 item.id
               )
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-200'}"
+                ? 'bg-felt-500 text-ink-950'
+                : 'bg-ink-800 text-ink-300'}"
             >
               {isCompleted(course, item.id) ? "✓" : index + 1}
             </span>
-            <span class="flex-1">{item.title}</span>
-            <span class="text-sm text-gray-500"
-              >{lessonStack(course, item)}bb</span
-            >
+            <span class="flex-1 font-medium">{item.title}</span>
+            <span class="text-sm muted">{lessonStack(course, item)}bb</span>
           </button>
         </li>
       {/each}
     </ol>
   </div>
 {:else}
-  <div class="p-4 flex flex-col gap-4 max-w-4xl mx-auto">
-    <h1 class="text-3xl">Courses</h1>
-    <p class="text-gray-600">
-      Step-by-step lessons: a short explanation, the numbers from the charts,
-      then practice. Your progress is saved in this browser.
-    </p>
-    <div class="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+  <div class="page">
+    <header class="flex flex-col gap-2">
+      <span class="eyebrow">Learn</span>
+      <h1 class="page-title">Courses</h1>
+      <p class="page-lead">
+        Step-by-step lessons: a short explanation, the numbers from the charts,
+        then practice. Your progress is saved in this browser.
+      </p>
+    </header>
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {#each courses as item (item.id)}
         <button
-          class="text-left p-4 border rounded cursor-pointer hover:bg-gray-100 flex flex-col gap-2"
+          class="card card-interactive flex flex-col gap-3"
           onclick={() => openCourse(item)}
         >
-          <span class="text-xs uppercase tracking-wide text-gray-500">
-            {gameLabels[item.game] ?? item.game}
+          <span class="label">
+            {gameLabels[item.game] ?? item.game} · {item.lessons.length} lessons
           </span>
-          <span class="text-xl font-semibold">{item.name}</span>
-          <span class="text-sm text-gray-600 flex-1">{item.description}</span>
+          <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
+          <span class="flex-1 text-sm text-ink-300">{item.description}</span>
           {@render progressBar(completedIn(item), item.lessons.length)}
         </button>
       {/each}

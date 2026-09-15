@@ -1,27 +1,51 @@
 ---
-const menuItems = [
-  { name: "Courses", link: "/courses" },
-  { name: "Range builder", link: "/range-builder" },
-  { name: "Ranger trainer", link: "/range-trainer" },
-  { name: "Hand trainer", link: "/hand-trainer" },
-  { name: "Drills", link: "/drills" },
-  { name: "Review", link: "/review" },
+// Groups are separated by a divider: learning, training, and tools.
+const groups = [
+  [
+    { name: "Courses", link: "/courses" },
+    { name: "Drills", link: "/drills" },
+  ],
+  [
+    { name: "Range trainer", link: "/range-trainer" },
+    { name: "Hand trainer", link: "/hand-trainer" },
+  ],
+  [
+    { name: "Review", link: "/review" },
+    { name: "Range builder", link: "/range-builder" },
+  ],
 ];
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
-<nav class="navbar">
-  <div class="flex p-4">
-    <a href="/" class="absolute">Poker trainer</a>
-    <ul class="flex gap-4 justify-around mx-auto">
+<header class="sticky top-0 z-40 border-b border-ink-800 bg-ink-950/85 backdrop-blur">
+  <nav class="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+    <a href="/" class="flex shrink-0 items-center gap-2 font-semibold text-ink-100">
+      <span
+        class="grid h-8 w-8 place-items-center rounded-lg bg-felt-500 text-lg text-ink-950"
+        aria-hidden="true">♠</span
+      >
+      <span class="hidden sm:inline">Poker Trainer</span>
+    </a>
+    <ul class="no-scrollbar ml-auto flex items-center gap-1 overflow-x-auto">
       {
-        menuItems.map((item) => (
-          <li class="navbar-item">
-            <a href={item.link} class="navbar-link">
-              {item.name}
-            </a>
-          </li>
+        groups.map((items, index) => (
+          <Fragment>
+            {index > 0 && <li class="mx-1 h-5 w-px shrink-0 bg-ink-700" aria-hidden="true" />}
+            {items.map((item) => (
+              <li>
+                <a
+                  href={item.link}
+                  class:list={["nav-link", { "nav-link-active": path === item.link }]}
+                  aria-current={path === item.link ? "page" : undefined}
+                >
+                  {item.name}
+                </a>
+              </li>
+            ))}
+          </Fragment>
         ))
       }
     </ul>
-  </div>
-</nav>
+  </nav>
+</header>
