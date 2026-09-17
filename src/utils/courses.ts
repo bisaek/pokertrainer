@@ -1,6 +1,4 @@
 import {
-  learn,
-  quiz,
   resolveDrill,
   resolveUrls,
   type Drill,
@@ -57,6 +55,33 @@ export function lessonStatsUrls(
   return resolveUrls(lesson.stats, manifest, course.game, lessonStack(course, lesson));
 }
 
+// Hands in the wider quiz that closes a lesson about a single spot.
+const MIXED_HANDS = 40;
+
+// A lesson drills harder than a drill does: rebuild each chart until it's right
+// `times` in a row, answer `hands` hands from those charts, and then answer hands
+// drawn from every chart of the same situation at this stack, so the spot is
+// practiced among its neighbours instead of on its own.
+function learn(filter: RangeFilter, times: number, hands: number): ExerciseTemplate[] {
+  return [
+    { kind: "range", filter, timesInARow: times },
+    { kind: "hands", filter, count: hands },
+    ...mixedQuiz(filter),
+  ];
+}
+
+// A lesson that only reviews charts the course has already taught.
+function quiz(filter: RangeFilter, hands: number): ExerciseTemplate[] {
+  return [{ kind: "hands", filter, count: hands }, ...mixedQuiz(filter)];
+}
+
+// Nothing to widen when the lesson already covers its whole situation.
+function mixedQuiz(filter: RangeFilter): ExerciseTemplate[] {
+  const narrowed = (filter.positions?.length ?? 0) + (filter.opponents?.length ?? 0) > 0;
+  if (!narrowed) return [];
+  return [{ kind: "hands", filter: { types: filter.types }, count: MIXED_HANDS }];
+}
+
 const TABLE_NOTE =
   "The table shows how each chart splits its hands between actions.";
 
@@ -80,7 +105,7 @@ export const courses: Course[] = [
           "Start with the two earliest seats.",
         ],
         stats: { types: ["RFI"] },
-        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1"] }, 1, 60),
       },
       {
         id: "middle-opens",
@@ -90,7 +115,7 @@ export const courses: Course[] = [
           "While you rebuild these charts, notice which hands get added compared with the earlier seats.",
         ],
         stats: { types: ["RFI"], positions: ["UTG+1", "LJ", "HJ"] },
-        exercises: learn({ types: ["RFI"], positions: ["LJ", "HJ"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["LJ", "HJ"] }, 1, 60),
       },
       {
         id: "late-opens",
@@ -100,7 +125,7 @@ export const courses: Course[] = [
           "That makes these the widest opening ranges at the table.",
         ],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN"] },
-        exercises: learn({ types: ["RFI"], positions: ["CO", "BTN"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["CO", "BTN"] }, 1, 60),
       },
       {
         id: "small-blind",
@@ -110,7 +135,7 @@ export const courses: Course[] = [
           "Look at the table: this chart limps (calls) as well as raising. Pay attention to which hands raise and which limp.",
         ],
         stats: { types: ["RFI"], positions: ["SB"] },
-        exercises: learn({ types: ["RFI"], positions: ["SB"] }, 1, 40),
+        exercises: learn({ types: ["RFI"], positions: ["SB"] }, 1, 80),
       },
       {
         id: "bb-vs-late",
@@ -125,7 +150,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["CO", "BTN"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -139,7 +164,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["UTG", "UTG+1", "LJ", "HJ"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -153,7 +178,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI", "vs limp"], positions: ["BB"], opponents: ["SB"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -164,7 +189,7 @@ export const courses: Course[] = [
           "Compare the charts against early and late openers: the later the opener, the wider their range and the more hands you continue with.",
         ],
         stats: { types: ["vs RFI"], positions: ["BTN"] },
-        exercises: learn({ types: ["vs RFI"], positions: ["BTN"] }, 1, 40),
+        exercises: learn({ types: ["vs RFI"], positions: ["BTN"] }, 1, 80),
       },
       {
         id: "sb-vs-open",
@@ -174,7 +199,7 @@ export const courses: Course[] = [
           TABLE_NOTE + " Compare how often the small blind 3-bets with how often it calls.",
         ],
         stats: { types: ["vs RFI"], positions: ["SB"] },
-        exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 40),
+        exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 80),
       },
       {
         id: "vs-3bet-late",
@@ -184,7 +209,7 @@ export const courses: Course[] = [
           "Against a 3-bet you can 4-bet, call, or fold.",
         ],
         stats: { types: ["vs 3-bet"], positions: ["CO", "BTN"] },
-        exercises: learn({ types: ["vs 3-bet"], positions: ["CO", "BTN"] }, 1, 40),
+        exercises: learn({ types: ["vs 3-bet"], positions: ["CO", "BTN"] }, 1, 80),
       },
       {
         id: "vs-3bet-early",
@@ -194,7 +219,7 @@ export const courses: Course[] = [
           "There are many charts here, one per opponent, so this lesson is a hand quiz.",
         ],
         stats: { types: ["vs 3-bet"], positions: ["UTG"] },
-        exercises: quiz({ types: ["vs 3-bet"], positions: ["UTG", "UTG+1"] }, 40),
+        exercises: quiz({ types: ["vs 3-bet"], positions: ["UTG", "UTG+1"] }, 80),
       },
       {
         id: "vs-4bet",
@@ -203,7 +228,7 @@ export const courses: Course[] = [
           "You 3-bet and got 4-bet. Only a narrow part of your range is left, and the pot is already big.",
           "This hand quiz mixes every position.",
         ],
-        exercises: quiz({ types: ["vs 4-bet"] }, 40),
+        exercises: quiz({ types: ["vs 4-bet"] }, 80),
       },
       {
         id: "cash-final",
@@ -211,7 +236,7 @@ export const courses: Course[] = [
         body: [
           "Hands from every chart in this course: opens, facing an open, blind vs blind, and facing 3-bets.",
         ],
-        exercises: quiz({ types: ["RFI", "vs RFI", "vs limp", "vs 3-bet"] }, 60),
+        exercises: quiz({ types: ["RFI", "vs RFI", "vs limp", "vs 3-bet"] }, 120),
       },
     ],
   },
@@ -231,7 +256,7 @@ export const courses: Course[] = [
           TABLE_NOTE + " Start with the three earliest seats.",
         ],
         stats: { types: ["RFI"] },
-        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 60),
       },
       {
         id: "opens-late",
@@ -240,7 +265,7 @@ export const courses: Course[] = [
           "From the hijack onwards the ranges get much wider. The small blind has only the big blind left, but plays the rest of the hand out of position.",
         ],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] },
-        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 40),
+        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 80),
       },
       {
         id: "bb-vs-late",
@@ -253,7 +278,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["CO", "BTN", "SB"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -266,7 +291,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["UTG", "UTG+1", "LJ", "HJ"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -276,7 +301,7 @@ export const courses: Course[] = [
           "On the button you play in position after the flop. Against an open you can 3-bet, call, or fold.",
         ],
         stats: { types: ["vs RFI"], positions: ["BTN"] },
-        exercises: learn({ types: ["vs RFI"], positions: ["BTN"] }, 1, 40),
+        exercises: learn({ types: ["vs RFI"], positions: ["BTN"] }, 1, 80),
       },
       {
         id: "sb-vs-open",
@@ -286,7 +311,7 @@ export const courses: Course[] = [
             TABLE_NOTE,
         ],
         stats: { types: ["vs RFI"], positions: ["SB"] },
-        exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 40),
+        exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 80),
       },
       {
         id: "vs-3bet",
@@ -295,7 +320,7 @@ export const courses: Course[] = [
           "These charts only contain the hands you opened with; the others are left empty. The first column of the table shows how many hands reach the spot.",
         ],
         stats: { types: ["vs 3-bet"], positions: ["CO", "BTN", "SB"] },
-        exercises: learn({ types: ["vs 3-bet"], positions: ["CO", "BTN", "SB"] }, 1, 40),
+        exercises: learn({ types: ["vs 3-bet"], positions: ["CO", "BTN", "SB"] }, 1, 80),
       },
       {
         id: "vs-3bet-shove",
@@ -303,7 +328,7 @@ export const courses: Course[] = [
         body: [
           "When someone 3-bets all-in, you can only call or fold. There's no more betting after this, so the only question is whether your hand is strong enough to call for your stack.",
         ],
-        exercises: quiz({ types: ["vs 3-bet all-in"] }, 40),
+        exercises: quiz({ types: ["vs 3-bet all-in"] }, 80),
       },
       {
         id: "vs-4bet-shove",
@@ -311,13 +336,13 @@ export const courses: Course[] = [
         body: [
           "You 3-bet and the opener moved all-in. Again it's call or fold, now against a range that was strong enough to open and then shove.",
         ],
-        exercises: quiz({ types: ["vs 4-bet all-in"] }, 40),
+        exercises: quiz({ types: ["vs 4-bet all-in"] }, 80),
       },
       {
         id: "mtt-30-final",
         title: "Final exam",
         body: ["Hands from the opening, facing-an-open and 3-bet charts in this course."],
-        exercises: quiz({ types: ["RFI", "vs RFI", "vs 3-bet"] }, 60),
+        exercises: quiz({ types: ["RFI", "vs RFI", "vs 3-bet"] }, 120),
       },
     ],
   },
@@ -338,14 +363,14 @@ export const courses: Course[] = [
             " Compare it with the 30bb charts if you took the tournament course.",
         ],
         stats: { types: ["RFI"] },
-        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 60),
       },
       {
         id: "20-opens-late",
         title: "Opening at 20bb: late position",
         body: ["The hijack, cutoff, button and small blind at 20bb."],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] },
-        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 40),
+        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 80),
       },
       {
         id: "20-bb",
@@ -357,7 +382,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["BTN", "SB"] },
           1,
-          40
+          80
         ),
       },
       {
@@ -367,13 +392,13 @@ export const courses: Course[] = [
           "When a player opens all-in, you can only call or fold. The shover's range is wide when they're in late position, but calling risks your tournament.",
         ],
         stats: { types: ["vs all-in"] },
-        exercises: learn({ types: ["vs all-in"] }, 1, 30),
+        exercises: learn({ types: ["vs all-in"] }, 1, 60),
       },
       {
         id: "20-3bet-shoves",
         title: "Facing a 3-bet shove at 20bb",
         body: ["You opened and got 3-bet all-in. This hand quiz covers every position."],
-        exercises: quiz({ types: ["vs 3-bet all-in"] }, 40),
+        exercises: quiz({ types: ["vs 3-bet all-in"] }, 80),
       },
       {
         id: "12-opens-early",
@@ -383,7 +408,7 @@ export const courses: Course[] = [
           "At 12bb these charts use a mix of small raises and all-ins. Look at the All in column in the table, and while you rebuild the charts, notice which hands shove and which raise.",
         ],
         stats: { types: ["RFI"] },
-        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1", "LJ"] }, 1, 60),
       },
       {
         id: "12-opens-late",
@@ -391,7 +416,7 @@ export const courses: Course[] = [
         stack: 12,
         body: ["The hijack, cutoff and button at 12bb."],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN"] },
-        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN"] }, 1, 30),
+        exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN"] }, 1, 60),
       },
       {
         id: "12-bb-vs-shove",
@@ -404,7 +429,7 @@ export const courses: Course[] = [
         exercises: learn(
           { types: ["vs all-in"], positions: ["BB"], opponents: ["CO", "BTN", "SB"] },
           1,
-          30
+          60
         ),
       },
       {
@@ -412,14 +437,14 @@ export const courses: Course[] = [
         title: "Calling shoves at 12bb",
         stack: 12,
         body: ["Facing an open shove from every seat."],
-        exercises: quiz({ types: ["vs all-in"] }, 40),
+        exercises: quiz({ types: ["vs all-in"] }, 80),
       },
       {
         id: "short-final",
         title: "Final exam",
         stack: 12,
         body: ["Hands from the 12bb opening and shove-calling charts."],
-        exercises: quiz({ types: ["RFI", "vs all-in"] }, 60),
+        exercises: quiz({ types: ["RFI", "vs all-in"] }, 120),
       },
     ],
   },
