@@ -285,6 +285,14 @@ export function resolveDrill(
   return { name: drill.name, description: drill.description, chartCount, exercises };
 }
 
+// The same thing in as few words as a chip can hold.
+export function shortExercise(exercise: DrillExercise): string {
+  if (exercise.kind === "hands") return `${exercise.count} hands`;
+  return exercise.timesInARow === 1
+    ? "Rebuild each chart"
+    : `Rebuild each chart ${exercise.timesInARow}×`;
+}
+
 export function describeExercise(exercise: DrillExercise): string {
   if (exercise.kind === "hands") return `answer ${exercise.count} hands`;
   if (exercise.timesInARow === 1) return "rebuild each chart once";

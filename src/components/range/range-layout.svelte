@@ -91,7 +91,13 @@
       </p>
       <SpotToggle range={spotRange} class="-ml-3 self-start" />
     </div>
-    {@render actions?.()}
+    {#if actions}
+      <div
+        class="max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-30 max-lg:border-t max-lg:border-ink-700 max-lg:bg-ink-950/95 max-lg:px-4 max-lg:py-3 max-lg:backdrop-blur"
+      >
+        {@render actions()}
+      </div>
+    {/if}
     {#if children}
       <div class="flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {@render children()}

@@ -216,10 +216,12 @@
   {:else if exercise.kind === "range"}
     <RangeLayout {pokerRange} {compareTo} {isCorrect} spotRange={queue[0]?.range}>
       {#snippet actions()}
-        <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
+        <div
+          class="flex flex-col gap-3 border-t border-ink-700 pt-4 max-lg:flex-row max-lg:items-center max-lg:justify-between max-lg:gap-4 max-lg:border-0 max-lg:pt-0"
+        >
           {#if queue[0]}
             <div class="flex flex-col gap-1">
-              <span class="label">Rebuild this chart</span>
+              <span class="label max-lg:hidden">Rebuild this chart</span>
               <h2 class="text-lg leading-snug font-semibold" data-chart-name>
                 {queue[0].range.name}
               </h2>
@@ -236,11 +238,11 @@
             <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
               {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
             </p>
-            <button class="btn btn-primary w-full" onclick={next}>
+            <button class="btn btn-primary w-full max-lg:w-auto" onclick={next}>
               Next <span class="kbd" aria-hidden="true">Enter</span>
             </button>
           {:else}
-            <button class="btn btn-primary w-full" onclick={check}>
+            <button class="btn btn-primary w-full max-lg:w-auto" onclick={check}>
               Check <span class="kbd" aria-hidden="true">Enter</span>
             </button>
           {/if}

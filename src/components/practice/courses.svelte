@@ -3,7 +3,7 @@
   import DrillRunner from "./drill-runner.svelte";
   import { getButtonClass, type Action } from "@utils/range.svelte";
   import { fetchChart, fetchManifest, type RangeInfo } from "@utils/manifest";
-  import { describeExercise } from "@utils/drills";
+  import { shortExercise } from "@utils/drills";
   import { ACTION_ORDER, actionShares, type ActionShare } from "@utils/chart-stats";
   import {
     courses,
@@ -258,12 +258,21 @@
     <section class="card flex flex-col gap-3 border-accent-600/50 bg-accent-500/5">
       <h2 class="section-title">Practice</h2>
       {#if drill}
-        <p class="text-ink-300" data-practice-summary>
-          {drill.chartCount}
-          {drill.chartCount === 1 ? "chart" : "charts"}: {drill.exercises
-            .map(describeExercise)
-            .join(", then ")}. Finishing marks the lesson as completed.
-        </p>
+        <div class="flex flex-col gap-3" data-practice-summary>
+          <ol class="flex flex-wrap items-center gap-2">
+            {#each drill.exercises as exercise, index}
+              {#if index > 0}
+                <li class="text-ink-600" aria-hidden="true">→</li>
+              {/if}
+              <li class="chip cursor-default">{shortExercise(exercise)}</li>
+            {/each}
+          </ol>
+          <p class="text-sm muted">
+            {drill.chartCount}
+            {drill.chartCount === 1 ? "chart" : "charts"} in this lesson. Finishing it
+            marks the lesson as completed.
+          </p>
+        </div>
         <div>
           <button class="btn btn-primary btn-lg" onclick={() => (practicing = true)}
             >Start practice</button
@@ -345,7 +354,11 @@
               {isCompleted(course, item.id) ? "✓" : index + 1}
             </span>
             <span class="flex-1 font-medium">{item.title}</span>
-            <span class="text-sm muted">{lessonStack(course, item)}bb</span>
+            <!-- The course header already says the stack; only a lesson that leaves
+                 it needs to say so. -->
+            {#if lessonStack(course, item) !== course.stack}
+              <span class="text-sm text-accent-300">{lessonStack(course, item)}bb</span>
+            {/if}
           </button>
         </li>
       {/each}

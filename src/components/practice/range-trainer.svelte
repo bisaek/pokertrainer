@@ -97,16 +97,18 @@
     spotRange={pokerRangesHaveNotFinished[0]}
   >
     {#snippet actions()}
-      <div class="flex flex-col gap-3">
+      <div
+        class="flex flex-col gap-3 max-lg:flex-row max-lg:items-center max-lg:justify-between max-lg:gap-4"
+      >
         {#if compareTo}
           <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
             {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
           </p>
-          <button class="btn btn-primary w-full" onclick={next}>
+          <button class="btn btn-primary w-full max-lg:w-auto" onclick={next}>
             Next <span class="kbd" aria-hidden="true">Enter</span>
           </button>
         {:else}
-          <button class="btn btn-primary w-full" onclick={check}>
+          <button class="btn btn-primary w-full max-lg:w-auto" onclick={check}>
             Check <span class="kbd" aria-hidden="true">Enter</span>
           </button>
         {/if}

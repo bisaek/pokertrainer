@@ -68,6 +68,10 @@
   }
   /* A training screen fits the viewport instead of scrolling. Below lg there isn't
      room for that, so those pages scroll as usual. */
+  /* Room for the action bar phones pin to the bottom of a training screen. */
+  .page-screen {
+    @apply max-lg:pb-28;
+  }
   .page-screen {
     @apply gap-4 py-4 lg:h-[calc(100dvh-var(--nav-height))] lg:gap-5 lg:overflow-hidden lg:py-5;
   }

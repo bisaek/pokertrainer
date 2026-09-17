@@ -76,7 +76,9 @@
       </p>
     </header>
 
-    <div class="card flex flex-wrap items-center gap-x-8 gap-y-3">
+    <div
+      class="card sticky top-[var(--nav-height)] z-30 flex flex-wrap items-center gap-x-8 gap-y-3"
+    >
       <div class="flex flex-wrap items-center gap-2">
         <span class="label mr-1">Game</span>
         {#each games as game}

@@ -28,7 +28,32 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
       >
       <span class="hidden sm:inline">Poker Trainer</span>
     </a>
-    <ul class="no-scrollbar ml-auto flex items-center gap-1 overflow-x-auto">
+    <details class="relative ml-auto sm:hidden">
+      <summary
+        class="nav-link flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden"
+      >
+        <span aria-hidden="true">☰</span>
+        {groups.flat().find((item) => item.link === path)?.name ?? "Menu"}
+      </summary>
+      <ul
+        class="absolute right-0 z-50 mt-2 flex w-56 flex-col rounded-xl border border-ink-700 bg-ink-900 p-2 shadow-xl shadow-black/50"
+      >
+        {
+          groups.flat().map((item) => (
+            <li>
+              <a
+                href={item.link}
+                class:list={["nav-link block", { "nav-link-active": path === item.link }]}
+                aria-current={path === item.link ? "page" : undefined}
+              >
+                {item.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </details>
+    <ul class="no-scrollbar ml-auto hidden items-center gap-1 overflow-x-auto sm:flex">
       {
         groups.map((items, index) => (
           <Fragment>
