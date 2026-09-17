@@ -201,10 +201,12 @@
 <svelte:window onkeydown={keyDown} />
 
 <div class="page page-screen">
-  <header class="flex flex-col gap-1">
-    <span class="eyebrow">Play</span>
-    <h1 class="page-title">Table game</h1>
-    <p class="page-lead text-base">
+  <header class="flex flex-col gap-1 lg:flex-row lg:items-baseline lg:gap-4">
+    <div class="flex flex-col gap-1">
+      <span class="eyebrow">Play</span>
+      <h1 class="page-title">Table game</h1>
+    </div>
+    <p class="page-lead text-base lg:pb-1">
       The same charts, dealt as hands at a table: your seat, the stacks, what
       the players before you did, and one decision.
     </p>

@@ -9,11 +9,13 @@
   let {
     range,
     cards = [],
+    shape = "wide",
   }: {
     // The chart being trained.
     range: PokerRange | undefined;
     // The hand being asked, when there is one.
     cards?: [string, string][];
+    shape?: "wide" | "compact";
   } = $props();
 
   let manifest: RangeInfo[] = $state.raw([]);
@@ -46,5 +48,5 @@
 </script>
 
 {#if tableView.shown && situation}
-  <PokerTable {situation} {cards} />
+  <PokerTable {situation} {cards} {shape} />
 {/if}

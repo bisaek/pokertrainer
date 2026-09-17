@@ -154,13 +154,15 @@
   <div class="page-panel flex flex-col gap-6">
     {#if current}
       <SpotToggle range={current.range} class="-ml-3 self-start" />
-      <SpotTable
-        range={current.range}
-        cards={[
-          [HandStrings[current.hand].charAt(0), cardSuits[0]],
-          [HandStrings[current.hand].charAt(1), cardSuits[1]],
-        ]}
-      />
+      <div class="w-full max-w-[44rem]">
+        <SpotTable
+          range={current.range}
+          cards={[
+            [HandStrings[current.hand].charAt(0), cardSuits[0]],
+            [HandStrings[current.hand].charAt(1), cardSuits[1]],
+          ]}
+        />
+      </div>
     {/if}
     {#if compareToWithMistakes && current}
       <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">

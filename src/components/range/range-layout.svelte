@@ -61,7 +61,7 @@
     : 'lg:grid-cols-[minmax(0,1fr)_19rem]'}"
 >
   <div
-    class="mx-auto flex w-full max-w-[46rem] items-center justify-center lg:min-h-0 lg:[container-type:size]"
+    class="mx-auto flex w-full max-w-[46rem] items-start justify-center lg:min-h-0 lg:[container-type:size]"
   >
     <div class="w-full lg:w-[min(100cqw,100cqh)]">
       <div class="range-grid {isCorrectClass()}">
@@ -71,11 +71,11 @@
   </div>
   {#if withTable}
     <div
-      class="flex items-center justify-center lg:min-h-0 lg:[container-type:size]"
+      class="flex items-start justify-center lg:min-h-0 lg:[container-type:size]"
     >
-      <!-- 177cqh keeps the felt's 16:9 inside the height it has. -->
-      <div class="w-full lg:w-[min(100cqw,177cqh)]">
-        <SpotTable range={spotRange} />
+      <!-- 133cqh keeps the felt's 4:3 inside the height it has. -->
+      <div class="w-full lg:w-[min(100cqw,133cqh)]">
+        <SpotTable range={spotRange} shape="compact" />
       </div>
     </div>
   {/if}
