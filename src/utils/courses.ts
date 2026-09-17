@@ -66,7 +66,22 @@ function learn(filter: RangeFilter, times: number, hands: number): ExerciseTempl
   return [
     { kind: "range", filter, timesInARow: times },
     { kind: "hands", filter, count: hands },
+    // Build the charts once more, now that the hands have shown you their edges.
+    { kind: "range", filter, timesInARow: 1 },
     ...mixedQuiz(filter),
+  ];
+}
+
+// A review lesson: rebuild charts from earlier lessons, then answer hands drawn
+// from everything the course has covered up to here.
+function review(
+  rebuild: RangeFilter,
+  recall: RangeFilter,
+  hands: number
+): ExerciseTemplate[] {
+  return [
+    { kind: "range", filter: rebuild, timesInARow: 1 },
+    { kind: "hands", filter: recall, count: hands },
   ];
 }
 
@@ -105,7 +120,7 @@ export const courses: Course[] = [
           "Start with the two earliest seats.",
         ],
         stats: { types: ["RFI"] },
-        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1"] }, 1, 60),
+        exercises: learn({ types: ["RFI"], positions: ["UTG", "UTG+1"] }, 2, 60),
       },
       {
         id: "middle-opens",
@@ -115,7 +130,7 @@ export const courses: Course[] = [
           "While you rebuild these charts, notice which hands get added compared with the earlier seats.",
         ],
         stats: { types: ["RFI"], positions: ["UTG+1", "LJ", "HJ"] },
-        exercises: learn({ types: ["RFI"], positions: ["LJ", "HJ"] }, 1, 60),
+        exercises: learn({ types: ["RFI"], positions: ["LJ", "HJ"] }, 2, 60),
       },
       {
         id: "late-opens",
@@ -125,7 +140,7 @@ export const courses: Course[] = [
           "That makes these the widest opening ranges at the table.",
         ],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN"] },
-        exercises: learn({ types: ["RFI"], positions: ["CO", "BTN"] }, 1, 60),
+        exercises: learn({ types: ["RFI"], positions: ["CO", "BTN"] }, 2, 60),
       },
       {
         id: "small-blind",
@@ -135,7 +150,20 @@ export const courses: Course[] = [
           "Look at the table: this chart limps (calls) as well as raising. Pay attention to which hands raise and which limp.",
         ],
         stats: { types: ["RFI"], positions: ["SB"] },
-        exercises: learn({ types: ["RFI"], positions: ["SB"] }, 1, 80),
+        exercises: learn({ types: ["RFI"], positions: ["SB"] }, 2, 80),
+      },
+      {
+        id: "review-opens",
+        title: "Review: opening ranges",
+        body: [
+          "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+          "Rebuild four of the opening charts from memory, then answer hands from every seat that opens. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "HJ", "BTN", "SB"] },
+          { types: ["RFI"] },
+          100
+        ),
       },
       {
         id: "bb-vs-late",
@@ -149,7 +177,7 @@ export const courses: Course[] = [
         stats: { types: ["vs RFI"], positions: ["BB"] },
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["CO", "BTN"] },
-          1,
+          2,
           80
         ),
       },
@@ -177,7 +205,7 @@ export const courses: Course[] = [
         stats: { types: ["vs RFI", "vs limp"], positions: ["BB"], opponents: ["SB"] },
         exercises: learn(
           { types: ["vs RFI", "vs limp"], positions: ["BB"], opponents: ["SB"] },
-          1,
+          2,
           80
         ),
       },
@@ -202,6 +230,19 @@ export const courses: Course[] = [
         exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 80),
       },
       {
+        id: "review-defense",
+        title: "Review: opening and defending",
+        body: [
+          "Defense charts fade faster than opening charts, because there is a different one for every opener you can face.",
+          "Rebuild the big blind against an early open and against the button, then answer hands from everything so far: opens, limps and defense. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions.",
+        ],
+        exercises: review(
+          { types: ["vs RFI"], positions: ["BB"], opponents: ["UTG", "BTN"] },
+          { types: ["RFI", "vs RFI", "vs limp"] },
+          120
+        ),
+      },
+      {
         id: "vs-3bet-late",
         title: "When your late open gets 3-bet",
         body: [
@@ -222,6 +263,19 @@ export const courses: Course[] = [
         exercises: quiz({ types: ["vs 3-bet"], positions: ["UTG", "UTG+1"] }, 80),
       },
       {
+        id: "review-3bets",
+        title: "Review: 3-bets and everything before them",
+        body: [
+          "Facing a 3-bet is where the earlier charts matter most: what you can continue with depends on how wide you opened in the first place.",
+          "Rebuild the button against a big blind 3-bet, then answer hands drawn from the whole course so far.",
+        ],
+        exercises: review(
+          { types: ["vs 3-bet"], positions: ["BTN"], opponents: ["BB"] },
+          { types: ["RFI", "vs RFI", "vs limp", "vs 3-bet"] },
+          120
+        ),
+      },
+      {
         id: "vs-4bet",
         title: "Facing a 4-bet",
         body: [
@@ -234,9 +288,13 @@ export const courses: Course[] = [
         id: "cash-final",
         title: "Final exam",
         body: [
-          "Hands from every chart in this course: opens, facing an open, blind vs blind, and facing 3-bets.",
+          "Three charts to rebuild from memory, then hands from every chart in this course: opens, facing an open, blind vs blind, and facing 3-bets.",
         ],
-        exercises: quiz({ types: ["RFI", "vs RFI", "vs limp", "vs 3-bet"] }, 120),
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "BTN", "SB"] },
+          { types: ["RFI", "vs RFI", "vs limp", "vs 3-bet"] },
+          160
+        ),
       },
     ],
   },
@@ -266,6 +324,19 @@ export const courses: Course[] = [
         ],
         stats: { types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] },
         exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 80),
+      },
+      {
+        id: "review-opens",
+        title: "Review: opening ranges",
+        body: [
+          "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+          "Rebuild three of the 30bb opening charts from memory, then answer hands from every seat that opens. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "CO", "BTN"] },
+          { types: ["RFI"] },
+          100
+        ),
       },
       {
         id: "bb-vs-late",
@@ -314,6 +385,19 @@ export const courses: Course[] = [
         exercises: quiz({ types: ["vs RFI"], positions: ["SB"] }, 80),
       },
       {
+        id: "review-defense",
+        title: "Review: opening and defending",
+        body: [
+          "The big blind defends very wide at 30bb with antes, and those charts are the ones that slip first.",
+          "Rebuild two of them, then answer hands from every opening and defense chart in the course so far.",
+        ],
+        exercises: review(
+          { types: ["vs RFI"], positions: ["BB"], opponents: ["UTG", "BTN"] },
+          { types: ["RFI", "vs RFI"] },
+          120
+        ),
+      },
+      {
         id: "vs-3bet",
         title: "When your late open gets 3-bet",
         body: [
@@ -339,10 +423,29 @@ export const courses: Course[] = [
         exercises: quiz({ types: ["vs 4-bet all-in"] }, 80),
       },
       {
+        id: "review-shoves",
+        title: "Review: facing shoves",
+        body: [
+          "The charts for facing a shove only call or fold, which makes them easy to mix up with the spots where raising is still an option.",
+          "Rebuild the small blind's opening chart to keep it fresh, then answer hands from the 3-bet shove and 4-bet shove charts.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["SB"] },
+          { types: ["vs 3-bet all-in", "vs 4-bet all-in"] },
+          120
+        ),
+      },
+      {
         id: "mtt-30-final",
         title: "Final exam",
-        body: ["Hands from the opening, facing-an-open and 3-bet charts in this course."],
-        exercises: quiz({ types: ["RFI", "vs RFI", "vs 3-bet"] }, 120),
+        body: [
+          "Two charts to rebuild from memory, then hands from the opening, facing-an-open and 3-bet charts in this course.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "BTN"] },
+          { types: ["RFI", "vs RFI", "vs 3-bet"] },
+          160
+        ),
       },
     ],
   },
@@ -373,6 +476,19 @@ export const courses: Course[] = [
         exercises: learn({ types: ["RFI"], positions: ["HJ", "CO", "BTN", "SB"] }, 1, 80),
       },
       {
+        id: "review-20-opens",
+        title: "Review: opening at 20bb",
+        body: [
+          "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+          "Rebuild two of the 20bb opening charts from memory, then answer hands from every seat that opens at this stack. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "BTN"] },
+          { types: ["RFI"] },
+          100
+        ),
+      },
+      {
         id: "20-bb",
         title: "Big blind at 20bb",
         body: [
@@ -381,7 +497,7 @@ export const courses: Course[] = [
         stats: { types: ["vs RFI"], positions: ["BB"] },
         exercises: learn(
           { types: ["vs RFI"], positions: ["BB"], opponents: ["BTN", "SB"] },
-          1,
+          2,
           80
         ),
       },
@@ -399,6 +515,19 @@ export const courses: Course[] = [
         title: "Facing a 3-bet shove at 20bb",
         body: ["You opened and got 3-bet all-in. This hand quiz covers every position."],
         exercises: quiz({ types: ["vs 3-bet all-in"] }, 80),
+      },
+      {
+        id: "review-20",
+        title: "Review: the whole 20bb game",
+        body: [
+          "Everything you have done at 20bb in one lesson, before the stacks get shorter and the charts change again.",
+          "Rebuild an early and a late opening chart, then answer hands from the opening, big blind and shove-facing charts at 20bb.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG+1", "CO"] },
+          { types: ["RFI", "vs RFI", "vs all-in", "vs 3-bet all-in"] },
+          120
+        ),
       },
       {
         id: "12-opens-early",
@@ -443,8 +572,14 @@ export const courses: Course[] = [
         id: "short-final",
         title: "Final exam",
         stack: 12,
-        body: ["Hands from the 12bb opening and shove-calling charts."],
-        exercises: quiz({ types: ["RFI", "vs all-in"] }, 120),
+        body: [
+          "Two charts to rebuild from memory, then hands from the 12bb opening and shove-calling charts.",
+        ],
+        exercises: review(
+          { types: ["RFI"], positions: ["UTG", "BTN"] },
+          { types: ["RFI", "vs all-in"] },
+          160
+        ),
       },
     ],
   },

@@ -287,7 +287,8 @@ export function resolveDrill(
 
 export function describeExercise(exercise: DrillExercise): string {
   if (exercise.kind === "hands") return `answer ${exercise.count} hands`;
-  return exercise.timesInARow === 1
-    ? "rebuild each chart once"
-    : `rebuild each chart ${exercise.timesInARow} times in a row`;
+  if (exercise.timesInARow === 1) return "rebuild each chart once";
+  const times =
+    exercise.timesInARow === 2 ? "twice" : `${exercise.timesInARow} times`;
+  return `rebuild each chart ${times} in a row`;
 }
