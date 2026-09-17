@@ -2,10 +2,10 @@
   import DrillRunner from "./drill-runner.svelte";
   import { fetchManifest, type RangeInfo } from "@utils/manifest";
   import {
-    describeExercise,
     drillCategories,
     resolveDrill,
     type Drill,
+    type DrillExercise,
   } from "@utils/drills";
 
   const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
@@ -47,6 +47,18 @@
       selectGame(game);
     });
   });
+
+  // The card meta line is data, not a sentence: "1 chart · 2× rebuild · 30 hands".
+  function compactExercise(exercise: DrillExercise) {
+    return exercise.kind === "hands"
+      ? `${exercise.count} hands`
+      : `${exercise.timesInARow}× rebuild`;
+  }
+
+  function drillMeta(item: Drill) {
+    const charts = `${item.chartCount} ${item.chartCount === 1 ? "chart" : "charts"}`;
+    return [charts, ...item.exercises.map(compactExercise)].join(" · ");
+  }
 
   function selectGame(game: string) {
     selectedGame = game;
@@ -112,16 +124,13 @@
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {#each category.drills as item}
             <button
-              class="card card-interactive flex flex-col gap-1.5"
+              class="card card-interactive flex h-full flex-col gap-1.5"
               onclick={() => (drill = item)}
             >
-              <span class="font-semibold text-ink-100">{item.name}</span>
-              <span class="text-sm text-ink-300">{item.description}</span>
-              <span class="mt-1 text-xs muted">
-                {item.chartCount}
-                {item.chartCount === 1 ? "chart" : "charts"} · {item.exercises
-                  .map(describeExercise)
-                  .join(", then ")}
+              <span class="text-base font-semibold text-ink-100">{item.name}</span>
+              <span class="text-sm text-ink-400">{item.description}</span>
+              <span class="mt-auto truncate pt-2 text-xs tabular-nums text-ink-500">
+                {drillMeta(item)}
               </span>
             </button>
           {/each}

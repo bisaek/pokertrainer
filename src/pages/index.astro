@@ -85,6 +85,8 @@ const sections = [
   },
 ];
 
+const groups = [...new Set(sections.map((section) => section.group))];
+
 const steps = [
   { title: "Learn", text: "A short lesson explains the spot and shows the numbers from the charts." },
   { title: "Drill", text: "Rebuild the charts from memory, then answer hands until the answers are automatic." },
@@ -132,19 +134,25 @@ const steps = [
       </figure>
     </section>
 
-    <section class="flex flex-col gap-4">
+    <section class="flex flex-col gap-6">
       <h2 class="section-title">Everything in one place</h2>
-      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {
-          sections.map((section) => (
-            <a href={section.href} class="card card-interactive flex flex-col gap-2">
-              <span class="label">{section.group}</span>
-              <span class="text-lg font-semibold text-ink-100">{section.title}</span>
-              <span class="text-sm text-ink-300">{section.text}</span>
-            </a>
-          ))
-        }
-      </div>
+      {
+        groups.map((group) => (
+          <div class="flex flex-col gap-3">
+            <h3 class="label">{group}</h3>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {sections
+                .filter((section) => section.group === group)
+                .map((section) => (
+                  <a href={section.href} class="card card-interactive flex h-full flex-col gap-2">
+                    <span class="text-lg font-semibold text-ink-100">{section.title}</span>
+                    <span class="text-sm text-ink-300">{section.text}</span>
+                  </a>
+                ))}
+            </div>
+          </div>
+        ))
+      }
     </section>
 
     <section class="flex flex-col gap-4">

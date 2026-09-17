@@ -14,6 +14,7 @@
   --color-ink-800: #23211d;
   --color-ink-700: #302d28;
   --color-ink-600: #47423b;
+  --color-ink-500: #6f6961;
   --color-ink-400: #9b948a;
   --color-ink-300: #c4bdb3;
   --color-ink-100: #f3efe9;
@@ -145,6 +146,9 @@
   .chip {
     @apply inline-flex items-center rounded-full border border-ink-700 bg-ink-850 px-3 py-1 text-sm text-ink-300 transition-colors select-none hover:border-ink-600 hover:text-ink-100;
   }
+  .chip-static {
+    @apply inline-flex items-center rounded-md border border-ink-800 bg-ink-850 px-2 py-0.5 text-xs text-ink-400;
+  }
   .chip-active {
     @apply border-accent-500 bg-accent-500/15 text-accent-300 hover:border-accent-500 hover:text-accent-300;
   }
@@ -190,6 +194,7 @@
     @apply border-b border-ink-700 px-3 py-2.5 text-left text-xs font-semibold tracking-wide whitespace-nowrap text-ink-400 uppercase;
   }
   .table td {
+    font-variant-numeric: tabular-nums;
     @apply border-b border-ink-800 px-3 py-2.5;
   }
 
@@ -198,7 +203,7 @@
     container-type: inline-size;
     display: grid;
     grid-template-columns: repeat(13, minmax(0, 1fr));
-    gap: 2px;
+    gap: 3px;
     aspect-ratio: 1;
     width: 100%;
     padding: 6px;
@@ -220,7 +225,7 @@
     align-items: center;
     justify-content: center;
     min-width: 0;
-    border-radius: 4px;
+    border-radius: 5px;
     font-size: clamp(0.5rem, 2.4cqi, 0.9rem);
     font-weight: 600;
     line-height: 1;
@@ -253,6 +258,16 @@
   .action-fold {
     background-color: var(--color-action-fold);
     color: #eef5fc;
+  }
+  /* In a chart most hands are folds. As a button fold is a choice and stays blue,
+     but as 70% of a grid it is the background, not the message: muted, so the
+     hands you actually play are what the eye lands on. */
+  .range-grid > .range-cell:nth-child(14n - 13) {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  }
+  .range-cell.action-fold {
+    background-color: #232a32;
+    color: #7c8794;
   }
   .action-empty {
     background-color: var(--color-ink-850);

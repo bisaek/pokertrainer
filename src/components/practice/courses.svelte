@@ -147,6 +147,12 @@
     statsLoading = false;
   }
 
+  // Reviews and the final exam close a block of lessons; marking them gives the
+  // list visible structure instead of sixteen identical rows.
+  function isMilestone(title: string) {
+    return title.startsWith("Review:") || title === "Final exam";
+  }
+
   function percentFor(row: StatsRow, action: string) {
     const share = row.shares.find((s) => s.action === action);
     return share ? `${share.percent.toFixed(1)}%` : "–";
@@ -154,15 +160,20 @@
 </script>
 
 {#snippet progressBar(done: number, total: number)}
-  <div class="flex items-center gap-3">
-    <div class="progress flex-1">
-      <div
-        class="progress-bar"
-        style="width: {total ? (done / total) * 100 : 0}%"
-      ></div>
+  <!-- An empty track is just a stray rule; say so in words until there is progress. -->
+  {#if done > 0}
+    <div class="flex items-center gap-3">
+      <div class="progress flex-1">
+        <div
+          class="progress-bar"
+          style="width: {total ? (done / total) * 100 : 0}%"
+        ></div>
+      </div>
+      <span class="text-sm whitespace-nowrap tabular-nums muted">{done}/{total} lessons</span>
     </div>
-    <span class="text-sm whitespace-nowrap tabular-nums muted">{done}/{total} lessons</span>
-  </div>
+  {:else}
+    <span class="text-xs tabular-nums text-ink-500">{total} lessons · not started</span>
+  {/if}
 {/snippet}
 
 {#snippet backButton(label: string, onclick: () => void)}
@@ -264,7 +275,7 @@
               {#if index > 0}
                 <li class="text-ink-600" aria-hidden="true">→</li>
               {/if}
-              <li class="chip cursor-default">{shortExercise(exercise)}</li>
+              <li class="chip-static">{shortExercise(exercise)}</li>
             {/each}
           </ol>
           <p class="text-sm muted">
@@ -340,7 +351,11 @@
       {#each course.lessons as item, index (item.id)}
         <li>
           <button
-            class="flex w-full items-center gap-4 px-4 py-3.5 text-left transition-colors hover:bg-ink-850"
+            class="flex w-full items-center gap-4 border-l-2 px-4 py-2.5 text-left transition-colors hover:bg-ink-850 {isMilestone(
+              item.title
+            )
+              ? 'border-accent-600/40 bg-accent-500/[0.04]'
+              : 'border-transparent'}"
             onclick={() => openLesson(course, index)}
           >
             <span
@@ -380,8 +395,9 @@
           class="card card-interactive flex flex-col gap-3"
           onclick={() => openCourse(item)}
         >
+          <!-- The lesson count is on the progress line below; say the stack here. -->
           <span class="label">
-            {gameLabels[item.game] ?? item.game} · {item.lessons.length} lessons
+            {gameLabels[item.game] ?? item.game} · {item.stack}bb
           </span>
           <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
           <span class="flex-1 text-sm text-ink-300">{item.description}</span>

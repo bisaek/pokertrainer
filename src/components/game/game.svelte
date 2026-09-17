@@ -232,8 +232,10 @@
           No charts match the filter, so there is nothing to deal.
         </p>
       {:else}
+        <!-- A fixed share of the height: opening the chart after a mistake must not
+             crush the table you were just looking at. -->
         <section
-          class="card flex items-center justify-center p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:[container-type:size]"
+          class="card flex items-center justify-center p-4 sm:p-6 lg:min-h-0 lg:shrink-0 lg:grow-0 lg:basis-[58%] lg:[container-type:size]"
         >
           <div class="w-full lg:w-[min(100cqw,177cqh)]">
             <PokerTable
@@ -249,7 +251,7 @@
 
         <!-- The chart, when it is opened after a mistake, scrolls in here rather
              than pushing the table off the screen. -->
-        <section class="card flex flex-col gap-4 lg:max-h-[55%] lg:shrink-0 lg:overflow-y-auto">
+        <section class="card flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <h2 class="text-xl font-semibold" data-hand>
               {HandStrings[current.hand]} in the {current.info.position}

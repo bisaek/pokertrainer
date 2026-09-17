@@ -93,8 +93,8 @@ const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1);
 // the hero run up the left side, the ones that already acted down the right.
 function seatAt(index: number, heroIndex: number, count: number) {
   const angle = Math.PI / 2 + ((index - heroIndex) * 2 * Math.PI) / count;
-  // Kept inside the felt so the widest seat label still fits on a phone.
-  return { x: 50 + 38 * Math.cos(angle), y: 50 + 38 * Math.sin(angle) };
+  // Kept inside the rail so a seat never hangs off the table.
+  return { x: 50 + 36 * Math.cos(angle), y: 50 + 37 * Math.sin(angle) };
 }
 
 // Which spot a chart is, or null when it can't be placed at a table: an imported
@@ -152,10 +152,6 @@ export function buildSituation(info: RangeInfo, tablePositions: string[]): Situa
           ? "Limps"
           : capitalize(`${raiseName(against.level)} to ${bb(opponentBet)}`);
     }
-    if (waiting && blind(position) > 0) {
-      action = position === "SB" ? "Small blind" : "Big blind";
-    }
-
     return { position, hero, folded, waiting, action, chips, ...seatAt(index, heroIndex, positions.length) };
   });
 
