@@ -9,6 +9,7 @@
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
   import Card from "./card.svelte";
+  import StudyLink from "@components/range/study-link.svelte";
 
   let {
     ranges,
@@ -142,6 +143,7 @@
           Not quite. Try again: the chart shows where you went wrong.
         </p>
       {/if}
+      <StudyLink chartName={current.range.name} />
     {:else}
       <p class="py-10 muted">Pick one or more charts to start.</p>
     {/if}

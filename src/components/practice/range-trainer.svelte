@@ -4,6 +4,7 @@
 
   import RangeLayout from "../range/range-layout.svelte";
   import RangesSelecter from "../range/ranges-selecter.svelte";
+  import StudyLink from "../range/study-link.svelte";
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
@@ -103,6 +104,9 @@
         <button class="btn btn-primary w-full" onclick={check}>
           Check <span class="kbd" aria-hidden="true">Enter</span>
         </button>
+      {/if}
+      {#if pokerRangesHaveNotFinished[0]}
+        <StudyLink chartName={pokerRangesHaveNotFinished[0].name} />
       {/if}
     </div>
 

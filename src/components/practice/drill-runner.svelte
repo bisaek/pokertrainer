@@ -2,6 +2,7 @@
   import { onDestroy, untrack } from "svelte";
   import RangeLayout from "@components/range/range-layout.svelte";
   import HandQuiz from "./hand-quiz.svelte";
+  import StudyLink from "@components/range/study-link.svelte";
   import { Action, PokerRange } from "@utils/range.svelte";
   import { fetchChart } from "@utils/manifest";
   import { blankRangeFor, isRangeCorrect } from "@utils/practice";
@@ -227,6 +228,7 @@
               {/if}
             </p>
           </div>
+          <StudyLink chartName={queue[0].range.name} />
         {/if}
         {#if compareTo}
           <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
