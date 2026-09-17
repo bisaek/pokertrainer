@@ -41,6 +41,18 @@ export async function fetchManifest(): Promise<RangeInfo[]> {
   return response.json();
 }
 
+// Loads a chart file. Chart paths contain "+" (UTG+1), which most servers serve
+// as-is but some read as a space, so a 404 is retried with the escaped form.
+export async function fetchChart(url: string): Promise<unknown> {
+  const response = await fetch(url);
+  if (response.ok) return response.json();
+  if (url.includes("+")) {
+    const escaped = await fetch(url.replaceAll("+", "%2B"));
+    if (escaped.ok) return escaped.json();
+  }
+  throw new Error(`Couldn't load ${decodeURI(url)} (${response.status})`);
+}
+
 export function rangeUrl(range: RangeInfo): string {
   // encodeURI keeps "+" (as in UTG+1) literal; "%2B" isn't served.
   return encodeURI(

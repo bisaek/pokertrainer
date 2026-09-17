@@ -6,6 +6,7 @@
   import { Action, PokerRange } from "@utils/range.svelte";
   import {
     emptyFilter,
+    fetchChart,
     fetchManifest,
     matchesFilter,
     rangeInfoFromUrl,
@@ -164,7 +165,9 @@
   function loadChart(url: string): Promise<ChartFile> {
     let chart = chartCache.get(url);
     if (!chart) {
-      chart = fetch(url).then((response) => response.json());
+      chart = fetchChart(url) as Promise<ChartFile>;
+      // Don't cache a failure: the next attempt should try again.
+      chart.catch(() => chartCache.delete(url));
       chartCache.set(url, chart);
     }
     return chart;

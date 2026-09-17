@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { PokerRange } from "@utils/range.svelte";
+  import { Action, PokerRange } from "@utils/range.svelte";
   import {
     emptyFilter,
+    fetchChart,
     fetchManifest,
     matchesFilter,
     rangeUrl,
@@ -35,12 +36,20 @@
       matchesFilter(range, filter, false)
     );
 
-    const ranges = await Promise.all(
+    // A chart that fails to load is skipped rather than losing the whole selection.
+    const loaded = await Promise.all(
       matching.map(async (range) => {
-        const response = await fetch(rangeUrl(range));
-        return PokerRange.fromJSON(await response.json());
+        try {
+          return PokerRange.fromJSON(
+            (await fetchChart(rangeUrl(range))) as { range: Action[]; name: string }
+          );
+        } catch (error) {
+          console.error(error);
+          return null;
+        }
       })
     );
+    const ranges = loaded.filter((range) => range !== null);
 
     // Ignore results from an older click that finished after a newer one.
     if (request !== latestRequest) return;

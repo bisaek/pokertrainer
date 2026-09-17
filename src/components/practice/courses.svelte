@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import DrillRunner from "./drill-runner.svelte";
   import { getButtonClass, type Action } from "@utils/range.svelte";
-  import { fetchManifest, type RangeInfo } from "@utils/manifest";
+  import { fetchChart, fetchManifest, type RangeInfo } from "@utils/manifest";
   import { describeExercise } from "@utils/drills";
   import { ACTION_ORDER, actionShares, type ActionShare } from "@utils/chart-stats";
   import {
@@ -131,12 +131,19 @@
     }
     statsLoading = true;
     const loaded = await manifestReady;
-    const charts = await Promise.all(
-      lessonStatsUrls(c, target, loaded).map(async (url) => (await fetch(url)).json())
-    );
-    // Ignore stats for a lesson that is no longer open.
-    if (token !== statsToken) return;
-    stats = charts.map((chart) => ({ name: chart.name, ...actionShares(chart.range) }));
+    try {
+      const charts = (await Promise.all(
+        lessonStatsUrls(c, target, loaded).map((url) => fetchChart(url))
+      )) as { name: string; range: (string | null)[] }[];
+      // Ignore stats for a lesson that is no longer open.
+      if (token !== statsToken) return;
+      stats = charts.map((chart) => ({ name: chart.name, ...actionShares(chart.range) }));
+    } catch (error) {
+      // The table is extra information; the lesson still works without it.
+      console.error(error);
+      if (token !== statsToken) return;
+      stats = [];
+    }
     statsLoading = false;
   }
 

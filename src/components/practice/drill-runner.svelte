@@ -2,7 +2,8 @@
   import { onDestroy, untrack } from "svelte";
   import RangeLayout from "@components/range/range-layout.svelte";
   import HandQuiz from "./hand-quiz.svelte";
-  import { PokerRange } from "@utils/range.svelte";
+  import { Action, PokerRange } from "@utils/range.svelte";
+  import { fetchChart } from "@utils/manifest";
   import { blankRangeFor, isRangeCorrect } from "@utils/practice";
   import { describeExercise, type Drill } from "@utils/drills";
 
@@ -31,6 +32,7 @@
   let exerciseIndex = $state(0);
   let exerciseRanges: PokerRange[] = $state.raw([]);
   let loading = $state(true);
+  let loadError: string | null = $state(null);
   let finished = $state(false);
   let loadToken = 0;
 
@@ -60,19 +62,27 @@
     const token = ++loadToken;
     exerciseIndex = index;
     loading = true;
-    const ranges = await Promise.all(
-      current.exercises[index].urls.map(async (url) =>
-        PokerRange.fromJSON(await (await fetch(url)).json())
-      )
-    );
-    // Ignore a load that finished after leaving or restarting the drill.
-    if (token !== loadToken) return;
-    exerciseRanges = ranges;
-    queue = ranges.map((range) => ({ range, streak: 0 }));
-    compareTo = undefined;
-    isCorrect = undefined;
-    pokerRange = blankRangeFor(ranges[0]);
-    loading = false;
+    loadError = null;
+    try {
+      const ranges = await Promise.all(
+        current.exercises[index].urls.map(async (url) =>
+          PokerRange.fromJSON((await fetchChart(url)) as { range: Action[]; name: string })
+        )
+      );
+      // Ignore a load that finished after leaving or restarting the drill.
+      if (token !== loadToken) return;
+      exerciseRanges = ranges;
+      queue = ranges.map((range) => ({ range, streak: 0 }));
+      compareTo = undefined;
+      isCorrect = undefined;
+      pokerRange = blankRangeFor(ranges[0]);
+      loading = false;
+    } catch (error) {
+      if (token !== loadToken) return;
+      // Without this the drill would sit on "Loading…" forever.
+      loadError = error instanceof Error ? error.message : String(error);
+      loading = false;
+    }
   }
 
   function finishExercise() {
@@ -180,6 +190,20 @@
         {/each}
         <button class="btn btn-secondary" onclick={() => restart()}
           >{againLabel}</button
+        >
+        <button class="btn btn-ghost" onclick={onback}>{backLabel}</button>
+      </div>
+    </section>
+  {:else if loadError}
+    <section
+      class="card flex flex-col items-center gap-3 border-red-500/40 py-12 text-center"
+      data-load-error
+    >
+      <p class="text-lg font-semibold">This drill's charts didn't load</p>
+      <p class="max-w-md text-sm muted">{loadError}</p>
+      <div class="flex flex-wrap justify-center gap-2">
+        <button class="btn btn-primary" onclick={() => loadExercise(drill, exerciseIndex)}
+          >Try again</button
         >
         <button class="btn btn-ghost" onclick={onback}>{backLabel}</button>
       </div>
