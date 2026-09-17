@@ -7,7 +7,6 @@
     cards = [],
     heroAction = null,
     result = null,
-    fill = false,
   }: {
     situation: Situation;
     // The hero's two cards as [rank, suit] pairs, e.g. ["A", "S"]; none when the
@@ -16,14 +15,12 @@
     // What the hero just did, shown in front of their seat.
     heroAction?: string | null;
     result?: "correct" | "wrong" | null;
-    // Fill the height of its container instead of keeping a fixed shape.
-    fill?: boolean;
   } = $props();
 </script>
 
 <!-- container-type: size so everything on the felt scales with the smaller side. -->
 <div
-  class="relative w-full aspect-4/3 sm:aspect-16/9 {fill ? 'lg:aspect-auto lg:h-full' : ''}"
+  class="relative aspect-4/3 w-full sm:aspect-16/9"
   data-table
   style="container-type: size"
 >

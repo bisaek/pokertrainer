@@ -9,14 +9,11 @@
   let {
     range,
     cards = [],
-    fill = false,
   }: {
     // The chart being trained.
     range: PokerRange | undefined;
     // The hand being asked, when there is one.
     cards?: [string, string][];
-    // Fill the height it is given instead of keeping its own shape.
-    fill?: boolean;
   } = $props();
 
   let manifest: RangeInfo[] = $state.raw([]);
@@ -49,5 +46,5 @@
 </script>
 
 {#if tableView.shown && situation}
-  <PokerTable {situation} {cards} {fill} />
+  <PokerTable {situation} {cards} />
 {/if}

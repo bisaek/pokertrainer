@@ -230,16 +230,19 @@
           No charts match the filter, so there is nothing to deal.
         </p>
       {:else}
-        <section class="card flex p-4 sm:p-6 lg:min-h-0 lg:flex-1">
-          <PokerTable
-            fill={true}
-            situation={current.situation}
-            cards={current.cards}
-            heroAction={chosen === null
-              ? null
-              : heroActionLabel(chosen, current.situation)}
-            result={chosen === null ? null : wasRight ? "correct" : "wrong"}
-          />
+        <section
+          class="card flex items-center justify-center p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:[container-type:size]"
+        >
+          <div class="w-full lg:w-[min(100cqw,177cqh)]">
+            <PokerTable
+              situation={current.situation}
+              cards={current.cards}
+              heroAction={chosen === null
+                ? null
+                : heroActionLabel(chosen, current.situation)}
+              result={chosen === null ? null : wasRight ? "correct" : "wrong"}
+            />
+          </div>
         </section>
 
         <!-- The chart, when it is opened after a mistake, scrolls in here rather

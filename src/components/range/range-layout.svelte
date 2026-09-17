@@ -60,14 +60,23 @@
     ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_19rem]'
     : 'lg:grid-cols-[minmax(0,1fr)_19rem]'}"
 >
-  <div class="mx-auto flex w-full max-w-[46rem] justify-center lg:min-h-0">
-    <div class="range-grid lg:range-grid-fit {isCorrectClass()}">
-      <Range {pokerRange} {selectedAction} {compareTo} />
+  <div
+    class="mx-auto flex w-full max-w-[46rem] items-center justify-center lg:min-h-0 lg:[container-type:size]"
+  >
+    <div class="w-full lg:w-[min(100cqw,100cqh)]">
+      <div class="range-grid {isCorrectClass()}">
+        <Range {pokerRange} {selectedAction} {compareTo} />
+      </div>
     </div>
   </div>
   {#if withTable}
-    <div class="flex items-center lg:min-h-0">
-      <SpotTable range={spotRange} fill={true} />
+    <div
+      class="flex items-center justify-center lg:min-h-0 lg:[container-type:size]"
+    >
+      <!-- 177cqh keeps the felt's 16:9 inside the height it has. -->
+      <div class="w-full lg:w-[min(100cqw,177cqh)]">
+        <SpotTable range={spotRange} />
+      </div>
     </div>
   {/if}
   <aside class="card flex flex-col gap-5 lg:min-h-0">
