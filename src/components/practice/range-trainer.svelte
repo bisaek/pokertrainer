@@ -78,8 +78,8 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="page">
-  <header class="flex flex-col gap-2 select-none">
+<div class="page page-screen">
+  <header class="flex flex-col gap-1 select-none">
     <span class="eyebrow">Range trainer</span>
     <h1 class="page-title" data-chart-name>
       {pokerRangesHaveNotFinished[0]?.name ?? "Pick a chart to practice"}
@@ -96,20 +96,22 @@
     {isCorrect}
     spotRange={pokerRangesHaveNotFinished[0]}
   >
-    <div class="flex flex-col gap-3">
-      {#if compareTo}
-        <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
-          {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
-        </p>
-        <button class="btn btn-primary w-full" onclick={next}>
-          Next <span class="kbd" aria-hidden="true">Enter</span>
-        </button>
-      {:else}
-        <button class="btn btn-primary w-full" onclick={check}>
-          Check <span class="kbd" aria-hidden="true">Enter</span>
-        </button>
-      {/if}
-    </div>
+    {#snippet actions()}
+      <div class="flex flex-col gap-3">
+        {#if compareTo}
+          <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
+            {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
+          </p>
+          <button class="btn btn-primary w-full" onclick={next}>
+            Next <span class="kbd" aria-hidden="true">Enter</span>
+          </button>
+        {:else}
+          <button class="btn btn-primary w-full" onclick={check}>
+            Check <span class="kbd" aria-hidden="true">Enter</span>
+          </button>
+        {/if}
+      </div>
+    {/snippet}
 
     <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
       <h2 class="section-title">Charts</h2>

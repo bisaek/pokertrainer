@@ -1,5 +1,5 @@
-import { positionOrder, type RangeInfo } from "./manifest";
-import { Action } from "./range.svelte";
+import { positionOrder, rangeInfoFromName, type RangeInfo } from "./manifest";
+import { Action, PokerRange } from "./range.svelte";
 
 // The table picture around a chart: who sits where, what has happened before it
 // is the hero's turn, and what the hero's options cost. The bet sizes here are
@@ -95,6 +95,18 @@ function seatAt(index: number, heroIndex: number, count: number) {
   const angle = Math.PI / 2 + ((index - heroIndex) * 2 * Math.PI) / count;
   // Kept inside the felt so the widest seat label still fits on a phone.
   return { x: 50 + 38 * Math.cos(angle), y: 50 + 38 * Math.sin(angle) };
+}
+
+// Which spot a chart is, or null when it can't be placed at a table: an imported
+// range, or one of the old charts named for a group of seats ("UTG+1/+2 vs UTG").
+export function spotFor(range: PokerRange | undefined): RangeInfo | null {
+  if (!range) return null;
+  const info = range.source ?? rangeInfoFromName(range.name);
+  if (!info) return null;
+  const seated =
+    positionOrder.includes(info.position) &&
+    (info.opponent === null || positionOrder.includes(info.opponent));
+  return seated ? info : null;
 }
 
 export function buildSituation(info: RangeInfo, tablePositions: string[]): Situation {

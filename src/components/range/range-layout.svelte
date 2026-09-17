@@ -8,23 +8,33 @@
 
   import Range from "./range.svelte";
   import SpotTable from "@components/game/spot-table.svelte";
+  import SpotToggle from "@components/game/spot-toggle.svelte";
+  import { spotFor } from "@utils/table";
+  import { tableView } from "@utils/table-view.svelte";
 
   let {
     pokerRange = new PokerRange(),
     compareTo = undefined,
     isCorrect = undefined,
     spotRange = undefined,
-    children,
+    actions = undefined,
+    children = undefined,
   }: {
     pokerRange: PokerRange;
     compareTo?: PokerRange;
     isCorrect?: boolean;
     // The chart being rebuilt, so the spot can be shown as a table.
     spotRange?: PokerRange;
-    children: Snippet;
+    // What to do with the chart, kept in view; anything else scrolls under it.
+    actions?: Snippet;
+    children?: Snippet;
   } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
+
+  // With the table open the chart shares the width with it rather than shrinking
+  // to fit both on top of each other.
+  const withTable = $derived(tableView.shown && spotFor(spotRange) !== null);
 
   function keyPressed(e: KeyboardEvent) {
     // Typing in a field (like a range name) shouldn't switch the action.
@@ -45,14 +55,22 @@
 <svelte:window onkeypress={keyPressed} />
 
 <!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_19rem]">
-  <div class="mx-auto flex w-full max-w-[46rem] flex-col gap-4">
-    <div class="range-grid {isCorrectClass()}">
+<div
+  class="grid items-start gap-6 select-none lg:min-h-0 lg:flex-1 lg:items-stretch {withTable
+    ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_19rem]'
+    : 'lg:grid-cols-[minmax(0,1fr)_19rem]'}"
+>
+  <div class="mx-auto flex w-full max-w-[46rem] justify-center lg:min-h-0">
+    <div class="range-grid lg:range-grid-fit {isCorrectClass()}">
       <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
-    <SpotTable range={spotRange} />
   </div>
-  <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
+  {#if withTable}
+    <div class="flex items-center lg:min-h-0">
+      <SpotTable range={spotRange} fill={true} />
+    </div>
+  {/if}
+  <aside class="card flex flex-col gap-5 lg:min-h-0">
     <div class="flex flex-col gap-2">
       <span class="label">Paint with</span>
       <div class="grid grid-cols-2 gap-2">
@@ -71,7 +89,13 @@
       <p class="text-xs muted">
         Drag across cells to paint. Hold Shift for a line or Ctrl for a box.
       </p>
+      <SpotToggle range={spotRange} class="-ml-3 self-start" />
     </div>
-    {@render children?.()}
+    {@render actions?.()}
+    {#if children}
+      <div class="flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        {@render children()}
+      </div>
+    {/if}
   </aside>
 </div>

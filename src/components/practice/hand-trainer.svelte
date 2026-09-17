@@ -26,8 +26,8 @@
   }
 </script>
 
-<div class="page">
-  <header class="flex flex-col gap-2">
+<div class="page page-screen">
+  <header class="flex flex-col gap-1">
     <span class="eyebrow">Train</span>
     <h1 class="page-title">Hand trainer</h1>
     <p class="page-lead">

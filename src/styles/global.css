@@ -4,6 +4,9 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
+  /* The navbar: h-14 plus its bottom border. Keep in step with navbar.astro. */
+  --nav-height: calc(3.5rem + 1px);
+
   /* Surfaces and text: warm charcoal, from the page background (950) to the brightest text (100). */
   --color-ink-950: #0f0e0d;
   --color-ink-900: #161513;
@@ -62,6 +65,18 @@
   }
   .page-narrow {
     @apply max-w-3xl;
+  }
+  /* A training screen fits the viewport instead of scrolling. Below lg there isn't
+     room for that, so those pages scroll as usual. */
+  .page-screen {
+    @apply gap-4 py-4 lg:h-[calc(100dvh-var(--nav-height))] lg:gap-5 lg:overflow-hidden lg:py-5;
+  }
+  .page-screen-body {
+    @apply lg:min-h-0 lg:flex-1;
+  }
+  /* A column inside a training screen: it, not the page, does any scrolling. */
+  .page-panel {
+    @apply lg:min-h-0 lg:overflow-y-auto;
   }
   .eyebrow {
     @apply text-xs font-semibold tracking-[0.14em] text-accent-400 uppercase;
@@ -264,4 +279,12 @@
   .compare-fold {
     box-shadow: inset 0 0 0 3px var(--color-action-fold);
   }
+}
+
+/* Sized by its height, so a chart fits a screen that must not scroll. */
+@utility range-grid-fit {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
 }

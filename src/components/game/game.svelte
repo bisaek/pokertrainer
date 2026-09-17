@@ -200,19 +200,20 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div class="page">
-  <header class="flex flex-col gap-2">
+<div class="page page-screen">
+  <header class="flex flex-col gap-1">
     <span class="eyebrow">Play</span>
     <h1 class="page-title">Table game</h1>
-    <p class="page-lead">
-      The same charts, dealt as hands at a table. You see your seat, the stacks
-      and what the players before you did, and you act — the chart says whether
-      you were right.
+    <p class="page-lead text-base">
+      The same charts, dealt as hands at a table: your seat, the stacks, what
+      the players before you did, and one decision.
     </p>
   </header>
 
-  <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-    <div class="flex flex-col gap-4">
+  <div
+    class="page-screen-body grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-stretch"
+  >
+    <div class="flex flex-col gap-4 lg:min-h-0">
       {#if loadError}
         <section
           class="card flex flex-col items-center gap-3 border-red-500/40 py-12 text-center"
@@ -229,8 +230,9 @@
           No charts match the filter, so there is nothing to deal.
         </p>
       {:else}
-        <section class="card gap-4 p-4 sm:p-6">
+        <section class="card flex p-4 sm:p-6 lg:min-h-0 lg:flex-1">
           <PokerTable
+            fill={true}
             situation={current.situation}
             cards={current.cards}
             heroAction={chosen === null
@@ -240,7 +242,9 @@
           />
         </section>
 
-        <section class="card flex flex-col gap-4">
+        <!-- The chart, when it is opened after a mistake, scrolls in here rather
+             than pushing the table off the screen. -->
+        <section class="card flex flex-col gap-4 lg:max-h-[55%] lg:shrink-0 lg:overflow-y-auto">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <h2 class="text-xl font-semibold" data-hand>
               {HandStrings[current.hand]} in the {current.info.position}
@@ -308,7 +312,7 @@
       {/if}
     </div>
 
-    <div class="flex flex-col gap-6 lg:sticky lg:top-20">
+    <div class="page-panel flex flex-col gap-6">
       <section class="card flex flex-col gap-3">
         <h2 class="section-title">This session</h2>
         <dl class="grid grid-cols-2 gap-3 text-center">

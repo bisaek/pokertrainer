@@ -144,8 +144,8 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="page">
-  <header class="flex flex-col gap-3">
+<div class="page page-screen">
+  <header class="flex flex-col gap-2">
     <div>
       <button class="btn btn-ghost -ml-3" onclick={onback}>
         <span aria-hidden="true">←</span>
@@ -215,35 +215,37 @@
     <p class="py-12 text-center muted">Loading…</p>
   {:else if exercise.kind === "range"}
     <RangeLayout {pokerRange} {compareTo} {isCorrect} spotRange={queue[0]?.range}>
-      <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
-        {#if queue[0]}
-          <div class="flex flex-col gap-1">
-            <span class="label">Rebuild this chart</span>
-            <h2 class="text-lg leading-snug font-semibold" data-chart-name>
-              {queue[0].range.name}
-            </h2>
-            <p class="text-sm muted">
-              {queue.length}
-              {queue.length === 1 ? "chart" : "charts"} left
-              {#if exercise.timesInARow > 1}
-                · correct in a row: {queue[0].streak}/{exercise.timesInARow}
-              {/if}
+      {#snippet actions()}
+        <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
+          {#if queue[0]}
+            <div class="flex flex-col gap-1">
+              <span class="label">Rebuild this chart</span>
+              <h2 class="text-lg leading-snug font-semibold" data-chart-name>
+                {queue[0].range.name}
+              </h2>
+              <p class="text-sm muted">
+                {queue.length}
+                {queue.length === 1 ? "chart" : "charts"} left
+                {#if exercise.timesInARow > 1}
+                  · correct in a row: {queue[0].streak}/{exercise.timesInARow}
+                {/if}
+              </p>
+            </div>
+          {/if}
+          {#if compareTo}
+            <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
+              {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
             </p>
-          </div>
-        {/if}
-        {#if compareTo}
-          <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
-            {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
-          </p>
-          <button class="btn btn-primary w-full" onclick={next}>
-            Next <span class="kbd" aria-hidden="true">Enter</span>
-          </button>
-        {:else}
-          <button class="btn btn-primary w-full" onclick={check}>
-            Check <span class="kbd" aria-hidden="true">Enter</span>
-          </button>
-        {/if}
-      </div>
+            <button class="btn btn-primary w-full" onclick={next}>
+              Next <span class="kbd" aria-hidden="true">Enter</span>
+            </button>
+          {:else}
+            <button class="btn btn-primary w-full" onclick={check}>
+              Check <span class="kbd" aria-hidden="true">Enter</span>
+            </button>
+          {/if}
+        </div>
+      {/snippet}
     </RangeLayout>
   {:else}
     {#key exerciseIndex}

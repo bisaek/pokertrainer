@@ -7,6 +7,7 @@
     cards = [],
     heroAction = null,
     result = null,
+    fill = false,
   }: {
     situation: Situation;
     // The hero's two cards as [rank, suit] pairs, e.g. ["A", "S"]; none when the
@@ -15,13 +16,16 @@
     // What the hero just did, shown in front of their seat.
     heroAction?: string | null;
     result?: "correct" | "wrong" | null;
+    // Fill the height of its container instead of keeping a fixed shape.
+    fill?: boolean;
   } = $props();
 </script>
 
+<!-- container-type: size so everything on the felt scales with the smaller side. -->
 <div
-  class="relative aspect-4/3 w-full sm:aspect-16/9"
+  class="relative w-full aspect-4/3 sm:aspect-16/9 {fill ? 'lg:aspect-auto lg:h-full' : ''}"
   data-table
-  style="container-type: inline-size"
+  style="container-type: size"
 >
   <!-- The felt -->
   <div
@@ -33,12 +37,12 @@
     class="absolute top-[32%] left-1/2 flex w-[52%] -translate-x-1/2 flex-col items-center gap-1 text-center"
   >
     <span
-      class="rounded-full bg-ink-950/70 px-3 py-1 text-[3.2cqw] font-semibold tabular-nums text-accent-300 sm:text-[2.4cqw]"
+      class="rounded-full bg-ink-950/70 px-3 py-1 text-[max(0.625rem,3.2cqmin)] font-semibold tabular-nums text-accent-300 sm:text-[max(0.625rem,2.4cqmin)]"
       data-pot
     >
       Pot {situation.pot}bb
     </span>
-    <p class="text-[3cqw] leading-snug text-ink-300 sm:text-[2.2cqw]" data-headline>
+    <p class="text-[max(0.625rem,3cqmin)] leading-snug text-ink-300 sm:text-[max(0.625rem,2.2cqmin)]" data-headline>
       {situation.headline}
     </p>
   </div>
@@ -47,13 +51,13 @@
     <!-- Before the hero acts their seat still shows the raise that got them here. -->
     {@const label = seat.hero ? (heroAction ?? seat.action) : seat.action}
     <div
-      class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[0.4cqw]"
+      class="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-[0.4cqmin]"
       style="left: {seat.x}%; top: {seat.y}%"
       data-seat={seat.position}
       data-seat-hero={seat.hero ? "" : undefined}
     >
       <div
-        class="flex min-w-[13cqw] flex-col items-center rounded-lg border px-[1.6cqw] py-[1cqw] text-center
+        class="flex min-w-[13cqmin] flex-col items-center rounded-lg border px-[1.6cqmin] py-[1cqmin] text-center
           {seat.hero
           ? 'border-accent-500 bg-ink-850'
           : seat.folded
@@ -61,18 +65,18 @@
             : 'border-ink-700 bg-ink-900'}"
       >
         <span
-          class="text-[3.4cqw] font-semibold sm:text-[2.4cqw]
+          class="text-[max(0.625rem,3.4cqmin)] font-semibold sm:text-[max(0.625rem,2.4cqmin)]
             {seat.hero ? 'text-accent-300' : 'text-ink-100'}"
         >
           {seat.position}
         </span>
-        <span class="text-[2.8cqw] text-ink-400 sm:text-[1.9cqw]">
+        <span class="text-[max(0.625rem,2.8cqmin)] text-ink-400 sm:text-[max(0.625rem,1.9cqmin)]">
           {seat.hero ? "You" : `${situation.stack}bb`}
         </span>
       </div>
       {#if seat.position === "BTN"}
         <span
-          class="absolute -top-[1cqw] -right-[2.5cqw] grid h-[4.5cqw] w-[4.5cqw] place-items-center rounded-full bg-ink-100 text-[2.6cqw] font-bold text-ink-950"
+          class="absolute -top-[1cqmin] -right-[2.5cqmin] grid h-[4.5cqmin] w-[4.5cqmin] place-items-center rounded-full bg-ink-100 text-[max(0.625rem,2.6cqmin)] font-bold text-ink-950"
           title="Dealer button"
         >
           D
@@ -80,7 +84,7 @@
       {/if}
       {#if label}
         <span
-          class="rounded-full px-[1.6cqw] py-[0.5cqw] text-[2.6cqw] whitespace-nowrap sm:text-[1.8cqw]
+          class="rounded-full px-[1.6cqmin] py-[0.5cqmin] text-[max(0.625rem,2.6cqmin)] whitespace-nowrap sm:text-[max(0.625rem,1.8cqmin)]
             {seat.hero && heroAction
             ? result === 'correct'
               ? 'bg-emerald-500/15 text-emerald-300'
@@ -97,7 +101,7 @@
       {/if}
       {#if seat.chips > 0 && !seat.folded}
         <span
-          class="rounded-full bg-ink-950/80 px-[1.4cqw] py-[0.4cqw] text-[2.4cqw] tabular-nums text-accent-400 sm:text-[1.7cqw]"
+          class="rounded-full bg-ink-950/80 px-[1.4cqmin] py-[0.4cqmin] text-[max(0.625rem,2.4cqmin)] tabular-nums text-accent-400 sm:text-[max(0.625rem,1.7cqmin)]"
           data-seat-chips={seat.position}
         >
           {seat.chips}bb
@@ -108,7 +112,7 @@
 
   <!-- The hero's cards, dealt in front of their seat -->
   <div
-    class="absolute top-[64%] left-1/2 flex origin-center -translate-x-1/2 -translate-y-1/2 scale-[0.55] gap-2 sm:scale-75"
+    class="absolute top-[64%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 gap-[1.5cqmin] [&_img]:h-[26cqmin] [&_img]:w-auto"
     data-hero-cards
   >
     {#each cards as [rank, suit]}

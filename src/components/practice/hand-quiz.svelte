@@ -9,6 +9,7 @@
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
   import SpotTable from "@components/game/spot-table.svelte";
+  import SpotToggle from "@components/game/spot-toggle.svelte";
   import Card from "./card.svelte";
 
   let {
@@ -107,8 +108,10 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-  <section class="card flex flex-col items-center gap-5 text-center lg:sticky lg:top-20">
+<div
+  class="grid items-start gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-stretch"
+>
+  <section class="card page-panel flex flex-col items-center gap-5 text-center">
     {#if current}
       <div class="flex w-full items-center justify-between text-sm">
         <span class="muted">Hands left</span>
@@ -148,8 +151,9 @@
     {/if}
   </section>
 
-  <div class="flex flex-col gap-6">
+  <div class="page-panel flex flex-col gap-6">
     {#if current}
+      <SpotToggle range={current.range} class="-ml-3 self-start" />
       <SpotTable
         range={current.range}
         cards={[
