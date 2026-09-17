@@ -93,11 +93,20 @@
   function next() {
     const [item, ...rest] = queue;
     if (!item || exercise?.kind !== "range") return;
-    const streak = isCorrect ? item.streak + 1 : 0;
-    queue =
-      streak >= exercise.timesInARow
-        ? rest
-        : [...rest, { range: item.range, streak }];
+    if (isCorrect) {
+      const streak = item.streak + 1;
+      queue =
+        streak >= exercise.timesInARow
+          ? rest
+          : [...rest, { range: item.range, streak }];
+    } else {
+      // Wrong: rebuild it again right away, and once more at the end.
+      const again = { range: item.range, streak: 0 };
+      queue =
+        rest.at(-1)?.range === item.range
+          ? [again, ...rest]
+          : [again, ...rest, { range: item.range, streak: 0 }];
+    }
     compareTo = undefined;
     isCorrect = undefined;
     if (queue.length === 0) {
