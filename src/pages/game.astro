@@ -1,0 +1,20 @@
+---
+import GameComponent from "../components/game/game.svelte";
+import Layout from "../layouts/Layout.astro";
+
+const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+const suits = ["H", "D", "C", "S"];
+---
+
+<Layout title="Table game">
+  <Fragment slot="head">
+    {
+      ranks.flatMap((rank) =>
+        suits.map((suit) => (
+          <link rel="preload" as="image" href={`/poker-cards/${rank}${suit}.svg`} />
+        ))
+      )
+    }
+  </Fragment>
+  <GameComponent client:load />
+</Layout>
