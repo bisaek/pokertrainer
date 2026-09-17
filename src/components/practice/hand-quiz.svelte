@@ -10,6 +10,7 @@
   import Range from "@components/range/range.svelte";
   import SpotTable from "@components/game/spot-table.svelte";
   import SpotToggle from "@components/game/spot-toggle.svelte";
+  import { tableView } from "@utils/table-view.svelte";
   import Card from "./card.svelte";
 
   let {
@@ -111,7 +112,7 @@
 <div
   class="grid items-start gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-stretch"
 >
-  <section class="card page-panel flex flex-col items-center gap-5 text-center">
+  <section class="card page-panel flex flex-col items-center gap-4 text-center lg:self-start">
     {#if current}
       <div class="flex w-full items-center justify-between text-sm">
         <span class="muted">Hands left</span>
@@ -123,10 +124,12 @@
       <h2 class="text-5xl font-bold tracking-tight" data-quiz-hand>
         {HandStrings[current.hand]}
       </h2>
-      <div class="flex justify-center gap-3">
-        <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
-        <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
-      </div>
+      {#if !tableView.shown}
+        <div class="flex justify-center gap-3">
+          <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
+          <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
+        </div>
+      {/if}
 
       <div class="grid w-full grid-cols-2 gap-2">
         {#each Object.values(Action) as action, index}

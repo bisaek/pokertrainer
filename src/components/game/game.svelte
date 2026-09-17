@@ -45,6 +45,10 @@
   let loadError: string | null = $state(null);
   let showChart = $state(false);
 
+  // The hands played this session, newest first, so the space under the actions
+  // shows your run rather than sitting empty.
+  type Played = { hand: string; chart: string; chose: Action; answer: Action | null };
+  let log: Played[] = $state.raw([]);
   let hands = $state(0);
   let correct = $state(0);
   let streak = $state(0);
@@ -146,6 +150,15 @@
     if (!current || chosen !== null) return;
     chosen = action;
     hands++;
+    log = [
+      {
+        hand: HandStrings[current.hand],
+        chart: current.chart.name,
+        chose: action,
+        answer: current.chart.range[current.hand],
+      },
+      ...log,
+    ].slice(0, 40);
     if (current.chart.range[current.hand] === action) {
       correct++;
       streak++;
@@ -162,6 +175,7 @@
   }
 
   function resetScore() {
+    log = [];
     hands = 0;
     correct = 0;
     streak = 0;
@@ -232,12 +246,10 @@
           No charts match the filter, so there is nothing to deal.
         </p>
       {:else}
-        <!-- A fixed share of the height: opening the chart after a mistake must not
-             crush the table you were just looking at. -->
-        <section
-          class="card flex items-center justify-center p-4 sm:p-6 lg:min-h-0 lg:shrink-0 lg:grow-0 lg:basis-[58%] lg:[container-type:size]"
-        >
-          <div class="w-full lg:w-[min(100cqw,177cqh)]">
+        <!-- Sized by what it needs, so opening the chart after a mistake pushes
+             into the space below rather than crushing the table. -->
+        <section class="card flex justify-center p-3 sm:p-4 lg:shrink-0">
+          <div class="w-full max-w-[46rem]">
             <PokerTable
               situation={current.situation}
               cards={current.cards}
@@ -297,6 +309,33 @@
               >
                 {showChart ? "Hide the chart" : "Show the chart"}
               </button>
+            </div>
+          {/if}
+
+          {#if log.length > 0 && !showChart}
+            <div class="flex min-h-0 flex-1 flex-col gap-1.5 border-t border-ink-800 pt-3">
+              <span class="label">This session</span>
+              <ol class="min-h-0 flex-1 overflow-y-auto text-xs" data-log>
+                {#each log as played, index}
+                  <li
+                    class="flex items-baseline gap-3 border-b border-ink-850 py-1 last:border-0
+                      {index === 0 ? 'text-ink-300' : 'text-ink-400'}"
+                  >
+                    <span class="w-10 shrink-0 font-semibold tabular-nums text-ink-100">
+                      {played.hand}
+                    </span>
+                    <span class="flex-1 truncate">{played.chart}</span>
+                    <span class="shrink-0 tabular-nums">{played.chose}</span>
+                    <span
+                      class="w-20 shrink-0 text-right {played.chose === played.answer
+                        ? 'text-emerald-400'
+                        : 'text-red-400'}"
+                    >
+                      {played.chose === played.answer ? "correct" : played.answer}
+                    </span>
+                  </li>
+                {/each}
+              </ol>
             </div>
           {/if}
 

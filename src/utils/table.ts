@@ -78,16 +78,19 @@ function blind(position: string): number {
   return 0;
 }
 
-// "raises"/"3-bets" for a seat label, "raise"/"3-bet" when the hero is the one doing it.
+// A seat label is a noun - "raise 2.5bb" - while the sentence above the table
+// needs a verb, in whichever person is doing it.
 function raiseName(level: number): string {
+  return level === 2 ? "raise" : `${level}-bet`;
+}
+
+function theyRaise(level: number): string {
   return level === 2 ? "raises" : `${level}-bets`;
 }
 
 function myRaiseName(level: number): string {
   return level === 2 ? "raise" : `${level}-bet`;
 }
-
-const capitalize = (text: string) => text[0].toUpperCase() + text.slice(1);
 
 // Seats sit around an oval with the hero at the bottom; the seats that act after
 // the hero run up the left side, the ones that already acted down the right.
@@ -138,19 +141,19 @@ export function buildSituation(info: RangeInfo, tablePositions: string[]): Situa
     const waiting = !hero && !isOpponent && index > lastToAct;
 
     let chips = blind(position);
-    let action: string | null = folded ? "Folds" : null;
+    let action: string | null = folded ? "fold" : null;
     if (folded) chips = 0;
     if (hero) {
       chips = Math.max(chips, heroBet);
-      if (heroBet > 0) action = capitalize(`${raiseName(against!.level - 1)} to ${bb(heroBet)}`);
+      if (heroBet > 0) action = `${raiseName(against!.level - 1)} ${bb(heroBet)}`;
     }
     if (isOpponent && against) {
       chips = Math.max(chips, opponentBet);
       action = against.allIn
-        ? `All in ${bb(opponentBet)}`
+        ? `all in ${bb(opponentBet)}`
         : against.level === 1
-          ? "Limps"
-          : capitalize(`${raiseName(against.level)} to ${bb(opponentBet)}`);
+          ? "limp"
+          : `${raiseName(against.level)} ${bb(opponentBet)}`;
     }
     return { position, hero, folded, waiting, action, chips, ...seatAt(index, heroIndex, positions.length) };
   });
@@ -187,7 +190,7 @@ function headlineFor(
   const mine = heroBet > 0 ? `You ${myRaiseName(against.level - 1)} to ${bb(heroBet)}. ` : "";
   if (against.level === 1) return `${mine}${opponent} limps.`;
   if (against.allIn) return `${mine}${opponent} moves all in for ${bb(opponentBet)}.`;
-  return `${mine}${opponent} ${raiseName(against.level)} to ${bb(opponentBet)}.`;
+  return `${mine}${opponent} ${theyRaise(against.level)} to ${bb(opponentBet)}.`;
 }
 
 // What an action costs the hero, for the buttons and the seat label.
@@ -208,12 +211,12 @@ export function actionLabel(action: Action, situation: Situation): string {
 export function heroActionLabel(action: Action, situation: Situation): string {
   switch (action) {
     case Action.Fold:
-      return "Folds";
+      return "fold";
     case Action.Call:
-      return situation.toCall === 0 ? "Checks" : `Calls ${bb(situation.toCall)}`;
+      return situation.toCall === 0 ? "check" : `call ${bb(situation.toCall)}`;
     case Action.Raise:
-      return `Raises to ${bb(situation.raiseTo)}`;
+      return `raise ${bb(situation.raiseTo)}`;
     case Action.AllIn:
-      return `All in ${bb(situation.stack)}`;
+      return `all in ${bb(situation.stack)}`;
   }
 }

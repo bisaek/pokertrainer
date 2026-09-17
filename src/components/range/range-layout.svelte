@@ -73,8 +73,8 @@
     <div
       class="flex items-start justify-center lg:min-h-0 lg:[container-type:size]"
     >
-      <!-- 133cqh keeps the felt's 4:3 inside the height it has. -->
-      <div class="w-full lg:w-[min(100cqw,133cqh)]">
+      <!-- 150cqh keeps the schematic's 3:2 inside the height it has. -->
+      <div class="w-full lg:w-[min(100cqw,150cqh)]">
         <SpotTable range={spotRange} shape="compact" />
       </div>
     </div>
