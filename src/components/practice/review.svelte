@@ -102,7 +102,7 @@
   const selectedGrid = $derived.by(() => {
     const decision = decisions.find((d) => d.key === selectedKey);
     if (!decision?.chart || selectedChart?.url !== decision.chart.url) return null;
-    const answer = chartToRange(selectedChart.chart);
+    const answer = chartToRange(selectedChart.chart, selectedChart.url);
     const cells = [...answer.range];
     cells[decision.handIndex] = decision.gradedAction ?? decision.heroAction;
     return { answer, attempt: new PokerRange(answer.name, cells) };
@@ -173,8 +173,11 @@
     return chart;
   }
 
-  function chartToRange(chart: ChartFile) {
-    return PokerRange.fromJSON(chart as { range: Action[]; name: string });
+  function chartToRange(chart: ChartFile, url: string) {
+    return PokerRange.fromJSON(
+      chart as { range: Action[]; name: string },
+      rangeInfoFromUrl(url) ?? undefined
+    );
   }
 
   async function importFiles(event: Event) {
@@ -233,7 +236,7 @@
       const id = `${url}#${decision.handIndex}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      if (!ranges.has(url)) ranges.set(url, chartToRange(await loadChart(url)));
+      if (!ranges.has(url)) ranges.set(url, chartToRange(await loadChart(url), url));
       questions.push({ range: ranges.get(url)!, hand: decision.handIndex });
     }
     training = { kind: "hands", questions };
@@ -242,7 +245,7 @@
   async function practiceMissedCharts() {
     const urls = [...new Set(mistakes.map((decision) => decision.chart!.url))];
     const ranges = await Promise.all(
-      urls.map(async (url) => chartToRange(await loadChart(url)))
+      urls.map(async (url) => chartToRange(await loadChart(url), url))
     );
     training = { kind: "charts", ranges };
   }

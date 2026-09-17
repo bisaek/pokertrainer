@@ -7,16 +7,20 @@
   } from "../../utils/range.svelte";
 
   import Range from "./range.svelte";
+  import SpotTable from "@components/game/spot-table.svelte";
 
   let {
     pokerRange = new PokerRange(),
     compareTo = undefined,
     isCorrect = undefined,
+    spotRange = undefined,
     children,
   }: {
     pokerRange: PokerRange;
     compareTo?: PokerRange;
     isCorrect?: boolean;
+    // The chart being rebuilt, so the spot can be shown as a table.
+    spotRange?: PokerRange;
     children: Snippet;
   } = $props();
 
@@ -42,10 +46,11 @@
 
 <!-- select-none: dragging to paint cells shouldn't highlight text. -->
 <div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_19rem]">
-  <div class="mx-auto w-full max-w-[46rem]">
+  <div class="mx-auto flex w-full max-w-[46rem] flex-col gap-4">
     <div class="range-grid {isCorrectClass()}">
       <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
+    <SpotTable range={spotRange} />
   </div>
   <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
     <div class="flex flex-col gap-2">

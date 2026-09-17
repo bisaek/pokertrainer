@@ -1,6 +1,11 @@
+import type { RangeInfo } from "./manifest";
+
 class PokerRange {
   range: (Action | null)[];
   name: string;
+  // Which chart this is, when it was loaded from the app's own files. Charts
+  // whose name covers several seats ("UTG+1/+2 vs UTG") only know it from here.
+  source?: RangeInfo;
 
   constructor(
     name: string = "My Range",
@@ -28,8 +33,13 @@ class PokerRange {
     };
   }
 
-  static fromJSON(json: { range: Action[]; name: string }): PokerRange {
-    return new PokerRange(json.name, json.range);
+  static fromJSON(
+    json: { range: Action[]; name: string },
+    source?: RangeInfo
+  ): PokerRange {
+    const range = new PokerRange(json.name, json.range);
+    range.source = source;
+    return range;
   }
 }
 function lineFromTwoHands(hand1: Hand, hand2: Hand): number[][] {

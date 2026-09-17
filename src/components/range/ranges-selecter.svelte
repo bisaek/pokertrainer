@@ -41,7 +41,8 @@
       matching.map(async (range) => {
         try {
           return PokerRange.fromJSON(
-            (await fetchChart(rangeUrl(range))) as { range: Action[]; name: string }
+            (await fetchChart(rangeUrl(range))) as { range: Action[]; name: string },
+            range
           );
         } catch (error) {
           console.error(error);

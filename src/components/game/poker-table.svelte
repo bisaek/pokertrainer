@@ -4,13 +4,14 @@
 
   let {
     situation,
-    cards,
+    cards = [],
     heroAction = null,
     result = null,
   }: {
     situation: Situation;
-    // The hero's two cards as [rank, suit] pairs, e.g. ["A", "S"].
-    cards: [string, string][];
+    // The hero's two cards as [rank, suit] pairs, e.g. ["A", "S"]; none when the
+    // whole chart is being trained rather than one hand.
+    cards?: [string, string][];
     // What the hero just did, shown in front of their seat.
     heroAction?: string | null;
     result?: "correct" | "wrong" | null;

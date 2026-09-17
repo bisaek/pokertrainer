@@ -8,6 +8,7 @@
   } from "@utils/range.svelte";
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
+  import SpotTable from "@components/game/spot-table.svelte";
   import Card from "./card.svelte";
 
   let {
@@ -148,6 +149,15 @@
   </section>
 
   <div class="flex flex-col gap-6">
+    {#if current}
+      <SpotTable
+        range={current.range}
+        cards={[
+          [HandStrings[current.hand].charAt(0), cardSuits[0]],
+          [HandStrings[current.hand].charAt(1), cardSuits[1]],
+        ]}
+      />
+    {/if}
     {#if compareToWithMistakes && current}
       <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">
         <div class="range-grid">

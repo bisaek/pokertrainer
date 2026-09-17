@@ -83,6 +83,27 @@ export function parseSituation(situation: string): {
   return { type: match[2] ? `vs ${match[2]}` : "vs RFI", opponent: match[1] };
 }
 
+const gamesByLabel: Record<string, string> = { Cash: "cash", MTT: "mtt" };
+
+// Reads the same back from a chart's name, e.g. "Cash 100bb SB vs UTG RFI".
+// Null for a range that isn't one of ours, like a file the user imported.
+export function rangeInfoFromName(name: string): RangeInfo | null {
+  const match = name.match(/^(\S+) (\d+)bb (\S+) (.+)$/);
+  if (!match) return null;
+  const [, label, stack, position, rest] = match;
+  const game = gamesByLabel[label];
+  if (!game) return null;
+  // "vs UTG RFI" is the chart for facing UTG's open, which lives in "vs UTG".
+  const situation = rest === "RFI" ? rest : rest.replace(/ RFI$/, "");
+  return {
+    game,
+    stack: Number(stack),
+    situation,
+    ...parseSituation(situation),
+    position,
+  };
+}
+
 // Reads a range's game, stack, situation and position back from its URL.
 export function rangeInfoFromUrl(url: string): RangeInfo | null {
   const match = decodeURI(url).match(

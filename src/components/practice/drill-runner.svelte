@@ -3,7 +3,7 @@
   import RangeLayout from "@components/range/range-layout.svelte";
   import HandQuiz from "./hand-quiz.svelte";
   import { Action, PokerRange } from "@utils/range.svelte";
-  import { fetchChart } from "@utils/manifest";
+  import { fetchChart, rangeInfoFromUrl } from "@utils/manifest";
   import { blankRangeFor, isRangeCorrect } from "@utils/practice";
   import { describeExercise, type Drill } from "@utils/drills";
 
@@ -66,7 +66,10 @@
     try {
       const ranges = await Promise.all(
         current.exercises[index].urls.map(async (url) =>
-          PokerRange.fromJSON((await fetchChart(url)) as { range: Action[]; name: string })
+          PokerRange.fromJSON(
+            (await fetchChart(url)) as { range: Action[]; name: string },
+            rangeInfoFromUrl(url) ?? undefined
+          )
         )
       );
       // Ignore a load that finished after leaving or restarting the drill.
@@ -211,7 +214,7 @@
   {:else if loading || !exercise}
     <p class="py-12 text-center muted">Loading…</p>
   {:else if exercise.kind === "range"}
-    <RangeLayout {pokerRange} {compareTo} {isCorrect}>
+    <RangeLayout {pokerRange} {compareTo} {isCorrect} spotRange={queue[0]?.range}>
       <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
         {#if queue[0]}
           <div class="flex flex-col gap-1">

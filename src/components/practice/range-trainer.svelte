@@ -90,7 +90,12 @@
     </p>
   </header>
 
-  <RangeLayout {pokerRange} {compareTo} {isCorrect}>
+  <RangeLayout
+    {pokerRange}
+    {compareTo}
+    {isCorrect}
+    spotRange={pokerRangesHaveNotFinished[0]}
+  >
     <div class="flex flex-col gap-3">
       {#if compareTo}
         <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
