@@ -41,14 +41,22 @@ export async function fetchManifest(): Promise<RangeInfo[]> {
   return response.json();
 }
 
-// Loads a chart file. Chart paths contain "+" (UTG+1), which most servers serve
-// as-is but some read as a space, so a 404 is retried with the escaped form.
+// Whether this host wants "+" in a path escaped. Vercel answers 404 for a folder
+// like "vs UTG+1" but serves "vs UTG%2B1"; the dev server does the opposite.
+let escapePlus = false;
+
+// Loads a chart file, trying both spellings of "+" and remembering which one this
+// host accepts, so only the first chart pays for a wrong guess.
 export async function fetchChart(url: string): Promise<unknown> {
-  const response = await fetch(url);
+  const escaped = url.replaceAll("+", "%2B");
+  const response = await fetch(escapePlus ? escaped : url);
   if (response.ok) return response.json();
   if (url.includes("+")) {
-    const escaped = await fetch(url.replaceAll("+", "%2B"));
-    if (escaped.ok) return escaped.json();
+    const retry = await fetch(escapePlus ? url : escaped);
+    if (retry.ok) {
+      escapePlus = !escapePlus;
+      return retry.json();
+    }
   }
   throw new Error(`Couldn't load ${decodeURI(url)} (${response.status})`);
 }
