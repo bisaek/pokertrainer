@@ -55,31 +55,29 @@
 <svelte:window onkeypress={keyPressed} />
 
 <!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div
-  class="grid items-start gap-6 select-none lg:min-h-0 lg:flex-1 lg:items-stretch {withTable
-    ? 'lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_19rem]'
-    : 'lg:grid-cols-[minmax(0,1fr)_19rem]'}"
->
-  <div
-    class="mx-auto flex w-full max-w-[46rem] items-start justify-center lg:min-h-0 lg:[container-type:size]"
-  >
-    <div class="w-full lg:w-[min(100cqw,100cqh)]">
-      <div class="range-grid {isCorrectClass()}">
-        <Range {pokerRange} {selectedAction} {compareTo} />
-      </div>
-    </div>
-  </div>
+<div class="flex flex-col gap-3 select-none lg:min-h-0 lg:flex-1">
+  <!-- The spot runs across the top: it is a strip, so it needs the width, not a
+       column of its own. -->
   {#if withTable}
-    <div
-      class="flex items-start justify-center lg:min-h-0 lg:[container-type:size]"
-    >
-      <!-- 150cqh keeps the schematic's 3:2 inside the height it has. -->
-      <div class="w-full lg:w-[min(100cqw,150cqh)]">
-        <SpotTable range={spotRange} shape="compact" />
-      </div>
+    <div class="lg:mx-auto lg:w-full lg:max-w-[72rem]">
+      <SpotTable range={spotRange} />
     </div>
   {/if}
-  <aside class="card flex flex-col gap-5 lg:min-h-0">
+
+  <!-- Capped and centred, so the chart is not stranded to the left of a void. -->
+  <div
+    class="grid items-start gap-4 lg:mx-auto lg:min-h-0 lg:w-full lg:max-w-[72rem] lg:flex-1 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-stretch"
+  >
+    <div
+      class="mx-auto flex w-full max-w-[46rem] items-start justify-center lg:min-h-0 lg:max-w-none lg:[container-type:size]"
+    >
+      <div class="w-full lg:w-[min(100cqw,100cqh)]">
+        <div class="range-grid {isCorrectClass()}">
+          <Range {pokerRange} {selectedAction} {compareTo} />
+        </div>
+      </div>
+    </div>
+    <aside class="card flex flex-col gap-5 lg:min-h-0">
     <div class="flex flex-col gap-2">
       <span class="label">Paint with</span>
       <div class="grid grid-cols-2 gap-2">
@@ -107,10 +105,11 @@
         {@render actions()}
       </div>
     {/if}
-    {#if children}
-      <div class="flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-        {@render children()}
-      </div>
-    {/if}
-  </aside>
+      {#if children}
+        <div class="flex flex-col gap-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+          {@render children()}
+        </div>
+      {/if}
+    </aside>
+  </div>
 </div>

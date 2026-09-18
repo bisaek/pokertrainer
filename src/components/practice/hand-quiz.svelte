@@ -109,10 +109,18 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div
-  class="grid items-start gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-stretch"
->
-  <section class="card page-panel flex flex-col items-center gap-4 text-center lg:self-start">
+<div class="flex flex-col gap-3 lg:min-h-0 lg:flex-1">
+  {#if current}
+    <div class="flex items-start gap-3 lg:mx-auto lg:w-full lg:max-w-[72rem]">
+      <div class="min-w-0 flex-1"><SpotTable range={current.range} /></div>
+      <SpotToggle range={current.range} class="shrink-0" />
+    </div>
+  {/if}
+
+  <div
+    class="grid items-start gap-4 lg:mx-auto lg:w-full lg:max-w-[72rem] lg:min-h-0 lg:flex-1 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-stretch"
+  >
+    <section class="card page-panel flex flex-col items-center gap-4 text-center lg:self-start">
     {#if current}
       <div class="flex w-full items-center justify-between text-sm">
         <span class="muted">Hands left</span>
@@ -152,36 +160,25 @@
     {:else}
       <p class="py-10 muted">Pick one or more charts to start.</p>
     {/if}
-  </section>
+    </section>
 
-  <div class="page-panel flex flex-col gap-6">
-    {#if current}
-      <SpotToggle range={current.range} class="-ml-3 self-start" />
-      <div class="w-full max-w-[44rem]">
-        <SpotTable
-          range={current.range}
-          cards={[
-            [HandStrings[current.hand].charAt(0), cardSuits[0]],
-            [HandStrings[current.hand].charAt(1), cardSuits[1]],
-          ]}
-        />
-      </div>
-    {/if}
-    {#if compareToWithMistakes && current}
-      <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">
-        <div class="range-grid">
-          <Range
-            selectedAction={Action.Fold}
-            pokerRange={compareToWithMistakes}
-            compareTo={current.range}
-          />
-        </div>
-        <figcaption class="text-center text-xs muted">
-          The hand you missed is filled with your answer and outlined with the
-          chart's.
-        </figcaption>
-      </figure>
-    {/if}
-    {@render children?.()}
+    <div class="page-panel flex flex-col gap-4">
+      {#if compareToWithMistakes && current}
+        <figure class="mx-auto flex w-full max-w-[36rem] flex-col gap-2">
+          <div class="range-grid">
+            <Range
+              selectedAction={Action.Fold}
+              pokerRange={compareToWithMistakes}
+              compareTo={current.range}
+            />
+          </div>
+          <figcaption class="text-center text-xs text-ink-500">
+            The hand you missed is filled with your answer and outlined with the
+            chart's.
+          </figcaption>
+        </figure>
+      {/if}
+      {@render children?.()}
+    </div>
   </div>
 </div>

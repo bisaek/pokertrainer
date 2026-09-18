@@ -24,6 +24,7 @@
   } from "@utils/table";
   import RangeFilter from "@components/range/range-filter.svelte";
   import Range from "@components/range/range.svelte";
+  import Card from "@components/practice/card.svelte";
   import PokerTable from "./poker-table.svelte";
 
   type Hand = {
@@ -215,21 +216,17 @@
 <svelte:window onkeydown={keyDown} />
 
 <div class="page page-screen">
-  <header class="flex flex-col gap-1 lg:flex-row lg:items-baseline lg:gap-4">
-    <div class="flex flex-col gap-1">
-      <span class="eyebrow">Play</span>
-      <h1 class="page-title">Table game</h1>
-    </div>
-    <p class="page-lead text-base lg:pb-1">
-      The same charts, dealt as hands at a table: your seat, the stacks, what
-      the players before you did, and one decision.
+  <header class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <h1 class="page-title">Table game</h1>
+    <p class="page-lead">
+      The charts dealt as hands: your seat, the action in front of you, one decision.
     </p>
   </header>
 
   <div
-    class="page-screen-body grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-stretch"
+    class="page-screen-body grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-stretch"
   >
-    <div class="flex flex-col gap-4 lg:min-h-0">
+    <div class="flex flex-col gap-3 lg:min-h-0">
       {#if loadError}
         <section
           class="card flex flex-col items-center gap-3 border-red-500/40 py-12 text-center"
@@ -246,88 +243,119 @@
           No charts match the filter, so there is nothing to deal.
         </p>
       {:else}
-        <!-- Sized by what it needs, so opening the chart after a mistake pushes
-             into the space below rather than crushing the table. -->
-        <section class="card flex justify-center p-3 sm:p-4 lg:shrink-0">
-          <div class="w-full max-w-[46rem]">
-            <PokerTable
-              situation={current.situation}
-              cards={current.cards}
-              heroAction={chosen === null
-                ? null
-                : heroActionLabel(chosen, current.situation)}
-              result={chosen === null ? null : wasRight ? "correct" : "wrong"}
-            />
-          </div>
-        </section>
+        <!-- The spot, then the hand, then what you do with it: one column, nothing
+             reserved for decoration. The chart takes the same card when you open
+             it, since you never need both at once. -->
+        <section class="card flex shrink-0 flex-col gap-3">
+          <PokerTable
+            situation={current.situation}
+            heroAction={chosen === null
+              ? null
+              : heroActionLabel(chosen, current.situation)}
+            result={chosen === null ? null : wasRight ? "correct" : "wrong"}
+          />
 
-        <!-- The chart, when it is opened after a mistake, scrolls in here rather
-             than pushing the table off the screen. -->
-        <section class="card flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 class="text-xl font-semibold" data-hand>
-              {HandStrings[current.hand]} in the {current.info.position}
-            </h2>
-            <span class="chip chip-active cursor-default" data-chart-name>
-              {current.chart.name}
-            </span>
-          </div>
-
-          {#if chosen === null}
-            <div class="grid gap-2 sm:grid-cols-2">
-              {#each options as action, index}
-                <button
-                  class="btn btn-lg justify-between font-semibold hover:brightness-110 {getButtonClass(
-                    action
-                  )}"
-                  onclick={() => play(action)}
-                  data-action={action}
-                >
-                  {actionLabel(action, current.situation)}
-                  <span class="kbd" aria-hidden="true">{index + 1}</span>
-                </button>
+          <div class="flex flex-wrap items-center gap-3 border-t border-ink-800 pt-3">
+            <div class="flex shrink-0 gap-1.5 [&_img]:h-16 [&_img]:w-auto" data-hero-cards>
+              {#each current.cards as [rank, suit]}
+                <Card {rank} {suit} />
               {/each}
             </div>
-          {:else}
-            <p
-              class="text-lg font-semibold {wasRight
-                ? 'text-emerald-300'
-                : 'text-red-300'}"
-              data-result
+            <div class="flex min-w-0 flex-1 flex-col gap-2">
+              <div class="flex flex-wrap items-baseline gap-2">
+                <span class="text-sm font-semibold text-ink-100" data-hand>
+                  {HandStrings[current.hand]} in the {current.info.position}
+                </span>
+                <span class="chip-static" data-chart-name>{current.chart.name}</span>
+              </div>
+              {#if chosen === null}
+                <div class="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4">
+                  {#each options as action, index}
+                    <button
+                      class="btn justify-between font-semibold hover:brightness-110 {getButtonClass(
+                        action
+                      )}"
+                      onclick={() => play(action)}
+                      data-action={action}
+                    >
+                      {actionLabel(action, current.situation)}
+                      <span class="kbd" aria-hidden="true">{index + 1}</span>
+                    </button>
+                  {/each}
+                </div>
+              {:else}
+                <div class="flex flex-wrap items-center gap-3">
+                  <p
+                    class="text-sm font-semibold {wasRight
+                      ? 'text-emerald-400'
+                      : 'text-red-400'}"
+                    data-result
+                  >
+                    {wasRight
+                      ? "Correct."
+                      : `Not quite — the chart says ${current.chart.range[current.hand]}.`}
+                  </p>
+                  <button class="btn btn-primary" onclick={deal} data-next>
+                    Next hand <span class="kbd" aria-hidden="true">Enter</span>
+                  </button>
+                  <button
+                    class="btn btn-secondary"
+                    onclick={() => (showChart = !showChart)}
+                  >
+                    {showChart ? "Hide the chart" : "Show the chart"}
+                  </button>
+                </div>
+              {/if}
+            </div>
+          </div>
+
+          {#if showChart && answered}
+            <div
+              class="flex flex-col items-center gap-2 border-t border-ink-800 pt-3 lg:[container-type:size]"
             >
-              {wasRight
-                ? "Correct."
-                : `Not quite — the chart says ${current.chart.range[current.hand]}.`}
-            </p>
-            <div class="flex flex-wrap gap-2">
-              <button class="btn btn-primary" onclick={deal} data-next>
-                Next hand <span class="kbd" aria-hidden="true">Enter</span>
-              </button>
-              <button
-                class="btn btn-secondary"
-                onclick={() => (showChart = !showChart)}
-              >
-                {showChart ? "Hide the chart" : "Show the chart"}
-              </button>
+              <div class="w-full max-w-[26rem]">
+                <div class="range-grid">
+                  <Range
+                    selectedAction={Action.Fold}
+                    pokerRange={answered}
+                    compareTo={current.chart}
+                  />
+                </div>
+              </div>
+              <p class="text-xs text-ink-500">
+                Your answer is filled in, the chart's is outlined.
+              </p>
             </div>
           {/if}
+        </section>
 
-          {#if log.length > 0 && !showChart}
-            <div class="flex min-h-0 flex-1 flex-col gap-1.5 border-t border-ink-800 pt-3">
-              <span class="label">This session</span>
-              <ol class="min-h-0 flex-1 overflow-y-auto text-xs" data-log>
+        <!-- The hands played, filling the rest of the column rather than leaving it
+             empty; the newest is on top. -->
+        <section class="card flex flex-col gap-2 p-0 lg:min-h-0 lg:flex-1">
+          <div
+            class="flex items-baseline justify-between border-b border-ink-800 px-3 pt-2 pb-1.5"
+          >
+            <span class="label">Hands played</span>
+            <span class="label">You · chart</span>
+          </div>
+          {#if log.length === 0}
+            <p class="px-3 pb-3 text-xs text-ink-500">
+              Every hand you play is listed here with what the chart said.
+            </p>
+          {:else}
+            <ol class="min-h-0 flex-1 overflow-y-auto pb-1 text-xs" data-log>
                 {#each log as played, index}
                   <li
-                    class="flex items-baseline gap-3 border-b border-ink-850 py-1 last:border-0
+                    class="flex items-baseline gap-3 border-b border-ink-850 px-3 py-1 last:border-0
                       {index === 0 ? 'text-ink-300' : 'text-ink-400'}"
                   >
                     <span class="w-10 shrink-0 font-semibold tabular-nums text-ink-100">
                       {played.hand}
                     </span>
                     <span class="flex-1 truncate">{played.chart}</span>
-                    <span class="shrink-0 tabular-nums">{played.chose}</span>
+                    <span class="shrink-0">{played.chose}</span>
                     <span
-                      class="w-20 shrink-0 text-right {played.chose === played.answer
+                      class="w-16 shrink-0 text-right {played.chose === played.answer
                         ? 'text-emerald-400'
                         : 'text-red-400'}"
                     >
@@ -336,57 +364,40 @@
                   </li>
                 {/each}
               </ol>
-            </div>
-          {/if}
-
-          {#if showChart && answered}
-            <figure class="flex flex-col gap-2">
-              <div class="range-grid">
-                <Range
-                  selectedAction={Action.Fold}
-                  pokerRange={answered}
-                  compareTo={current.chart}
-                />
-              </div>
-              <figcaption class="text-center text-xs muted">
-                Your hand is filled with the action you chose and outlined with the
-                chart's.
-              </figcaption>
-            </figure>
-          {/if}
-        </section>
+            {/if}
+          </section>
       {/if}
     </div>
 
-    <div class="page-panel flex flex-col gap-6">
-      <section class="card flex flex-col gap-3">
-        <h2 class="section-title">This session</h2>
-        <dl class="grid grid-cols-2 gap-3 text-center">
-          <div class="rounded-lg bg-ink-900 py-3">
+    <div class="page-panel flex flex-col gap-3">
+      <section class="card flex flex-col gap-2">
+        <div class="flex items-baseline justify-between">
+          <h2 class="section-title">This session</h2>
+          <button class="btn btn-ghost -mr-2 text-xs" onclick={resetScore}>Reset</button>
+        </div>
+        <dl class="grid grid-cols-4 gap-2 text-center">
+          <div>
             <dt class="label">Hands</dt>
-            <dd class="text-2xl font-semibold tabular-nums" data-stat-hands>{hands}</dd>
+            <dd class="text-lg font-semibold tabular-nums" data-stat-hands>{hands}</dd>
           </div>
-          <div class="rounded-lg bg-ink-900 py-3">
-            <dt class="label">Correct</dt>
-            <dd class="text-2xl font-semibold tabular-nums" data-stat-correct>
+          <div>
+            <dt class="label">Right</dt>
+            <dd class="text-lg font-semibold tabular-nums" data-stat-correct>
               {hands === 0 ? "–" : `${Math.round((correct / hands) * 100)}%`}
             </dd>
           </div>
-          <div class="rounded-lg bg-ink-900 py-3">
+          <div>
             <dt class="label">Streak</dt>
-            <dd class="text-2xl font-semibold tabular-nums" data-stat-streak>{streak}</dd>
+            <dd class="text-lg font-semibold tabular-nums" data-stat-streak>{streak}</dd>
           </div>
-          <div class="rounded-lg bg-ink-900 py-3">
+          <div>
             <dt class="label">Best</dt>
-            <dd class="text-2xl font-semibold tabular-nums" data-stat-best>{best}</dd>
+            <dd class="text-lg font-semibold tabular-nums" data-stat-best>{best}</dd>
           </div>
         </dl>
-        <button class="btn btn-ghost self-start" onclick={resetScore}>
-          Reset score
-        </button>
       </section>
 
-      <section class="card flex flex-col gap-4">
+      <section class="card flex flex-col gap-3">
         <h2 class="section-title">What gets dealt</h2>
         <RangeFilter
           items={manifest}
@@ -394,9 +405,9 @@
           emptyMeansAll={true}
           onchange={deal}
         />
-        <p class="text-xs muted">
-          {pool.length} charts in the deck. Bet sizes at the table are ordinary
-          examples so the hand looks real; the answer only depends on the chart.
+        <p class="text-xs text-ink-500">
+          {pool.length} charts in the deck. Bet sizes are ordinary examples; the answer
+          only depends on the chart.
         </p>
       </section>
     </div>
