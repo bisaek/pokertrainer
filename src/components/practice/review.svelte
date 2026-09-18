@@ -266,15 +266,12 @@
 </script>
 
 {#if training}
-  <div class="page">
-    <header class="flex flex-col gap-3">
-      <div>
-        <button class="btn btn-ghost -ml-3" onclick={() => (training = null)}>
-          <span aria-hidden="true">←</span>
-          Back to review
-        </button>
-      </div>
-      <span class="eyebrow">Review</span>
+  <div class="page page-fill">
+    <header class="flex flex-wrap items-center gap-x-4 gap-y-1">
+      <button class="btn btn-ghost -ml-3" onclick={() => (training = null)}>
+        <span aria-hidden="true">←</span>
+        Back to review
+      </button>
       <h1 class="page-title">
         {training.kind === "hands" ? "Your mistakes" : "Charts you missed"}
       </h1>

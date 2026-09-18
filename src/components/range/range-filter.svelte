@@ -10,6 +10,7 @@
     items,
     value = $bindable(),
     emptyMeansAll = false,
+    inline = false,
     onchange = undefined,
   }: {
     // What can be filtered; only options that some item has are shown.
@@ -17,6 +18,8 @@
     value: RangeFilterValue;
     // Treat a row with nothing selected as everything, and say so.
     emptyMeansAll?: boolean;
+    // Lay the groups out as a wrapping bar instead of stacking them.
+    inline?: boolean;
     onchange?: () => void;
   } = $props();
 
@@ -52,6 +55,46 @@
     )
   );
 
+  type Option = { label: string; selected: boolean; pick: () => void };
+  type Group = { label: string; all: boolean; options: Option[] };
+
+  function multi<T>(
+    label: string,
+    choices: T[],
+    selected: T[],
+    set: (picked: T[]) => Partial<RangeFilterValue>,
+    name: (choice: T) => string = String
+  ): Group {
+    return {
+      label,
+      all: emptyMeansAll && selected.length === 0,
+      options: choices.map((choice) => ({
+        label: name(choice),
+        selected: selected.includes(choice),
+        pick: () => update(set(toggle(selected, choice))),
+      })),
+    };
+  }
+
+  // A group with nothing to choose from, like opponents for an open, is left out.
+  const groups: Group[] = $derived(
+    [
+      {
+        label: "Game",
+        all: false,
+        options: games.map((game) => ({
+          label: gameLabels[game] ?? game,
+          selected: value.game === game,
+          pick: () => selectGame(game),
+        })),
+      },
+      multi("Effective stack", stacks, value.stacks, (stacks) => ({ stacks }), (stack) => `${stack}bb`),
+      multi("Your position", positions, value.positions, (positions) => ({ positions })),
+      multi("Situation", types, value.types, (types) => ({ types })),
+      multi("Opponent", opponents, value.opponents, (opponents) => ({ opponents })),
+    ].filter((group) => group.options.length > 0)
+  );
+
   function update(next: Partial<RangeFilterValue>) {
     value = { ...value, ...next };
     onchange?.();
@@ -69,72 +112,22 @@
   }
 </script>
 
-{#snippet optionButton(label: string, selected: boolean, onclick: () => void)}
-  <button class="chip {selected ? 'chip-active' : ''}" {onclick}>
-    {label}
-  </button>
-{/snippet}
-
-{#snippet heading(label: string, selected: unknown[])}
-  <h3 class="label flex items-center gap-2">
-    {label}
-    {#if emptyMeansAll && selected.length === 0}
-      <span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>
-    {/if}
-  </h3>
-{/snippet}
-
-<div class="flex flex-col gap-4">
-  <div class="flex flex-col gap-2">
-    <h3 class="label">Game</h3>
-    <div class="flex flex-wrap gap-1.5">
-      {#each games as game}
-        {@render optionButton(gameLabels[game] ?? game, value.game === game, () =>
-          selectGame(game)
-        )}
-      {/each}
-    </div>
-  </div>
-  <div class="flex flex-col gap-2">
-    {@render heading("Effective stack", value.stacks)}
-    <div class="flex flex-wrap gap-1.5">
-      {#each stacks as stack}
-        {@render optionButton(`${stack}bb`, value.stacks.includes(stack), () =>
-          update({ stacks: toggle(value.stacks, stack) })
-        )}
-      {/each}
-    </div>
-  </div>
-  <div class="flex flex-col gap-2">
-    {@render heading("Your position", value.positions)}
-    <div class="flex flex-wrap gap-1.5">
-      {#each positions as position}
-        {@render optionButton(position, value.positions.includes(position), () =>
-          update({ positions: toggle(value.positions, position) })
-        )}
-      {/each}
-    </div>
-  </div>
-  <div class="flex flex-col gap-2">
-    {@render heading("Situation", value.types)}
-    <div class="flex flex-wrap gap-1.5">
-      {#each types as type}
-        {@render optionButton(type, value.types.includes(type), () =>
-          update({ types: toggle(value.types, type) })
-        )}
-      {/each}
-    </div>
-  </div>
-  {#if opponents.length > 0}
-    <div class="flex flex-col gap-2">
-      {@render heading("Opponent", value.opponents)}
+<div class="flex {inline ? 'flex-wrap gap-x-6 gap-y-2' : 'flex-col gap-4'}">
+  {#each groups as group (group.label)}
+    <div class="flex {inline ? 'flex-wrap items-center gap-x-2 gap-y-1.5' : 'flex-col gap-2'}">
+      <h3 class="label flex items-center gap-2">
+        {group.label}
+        {#if group.all}
+          <span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>
+        {/if}
+      </h3>
       <div class="flex flex-wrap gap-1.5">
-        {#each opponents as opponent}
-          {@render optionButton(opponent, value.opponents.includes(opponent), () =>
-            update({ opponents: toggle(value.opponents, opponent) })
-          )}
+        {#each group.options as option (option.label)}
+          <button class="chip {option.selected ? 'chip-active' : ''}" onclick={option.pick}>
+            {option.label}
+          </button>
         {/each}
       </div>
     </div>
-  {/if}
+  {/each}
 </div>

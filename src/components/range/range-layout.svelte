@@ -45,14 +45,19 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_22rem]">
-  <div class="mx-auto w-full max-w-[46rem]">
+<!-- select-none: dragging to paint cells shouldn't highlight text.
+     On a wide screen the row takes the height that is left on the page (see
+     .page-fill), the grid grows to fit it and the sidebar scrolls on its own
+     if it is the one that doesn't fit. -->
+<div
+  class="grid min-h-0 flex-1 gap-6 select-none lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[minmax(0,1fr)]"
+>
+  <div class="range-frame mx-auto max-w-[46rem] lg:max-w-none">
     <div class="range-grid {isCorrectClass()}">
       <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
   </div>
-  <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
+  <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">
     {#if spot}
       <PokerTable {spot} />
     {/if}

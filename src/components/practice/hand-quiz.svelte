@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack, type Snippet } from "svelte";
+  import { untrack } from "svelte";
   import {
     Action,
     getButtonClass,
@@ -16,7 +16,6 @@
     count = undefined,
     fixedQuestions = undefined,
     onfinish = undefined,
-    children,
   }: {
     ranges: PokerRange[];
     // How many hands to ask; all in-range hands when omitted.
@@ -25,7 +24,6 @@
     fixedQuestions?: Question[];
     // Called when every hand is answered; without it the quiz starts over.
     onfinish?: () => void;
-    children?: Snippet;
   } = $props();
 
   // Can hold 169 questions per range, so keep it raw and reassign on change.
@@ -107,16 +105,24 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-  <section class="card flex flex-col items-center gap-5 text-center lg:sticky lg:top-20">
+<!-- On a wide screen the row takes the height that is left on the page (see
+     .page-fill). The table and the chart of a mistake sit side by side so the
+     table keeps its place when a mistake appears. -->
+<div
+  class="grid min-h-0 flex-1 items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
+>
+  <section
+    class="card flex max-h-full flex-col items-center gap-4 overflow-y-auto text-center"
+  >
     {#if current}
-      <div class="flex w-full items-center justify-between text-sm">
-        <span class="muted">Hands left</span>
-        <span class="font-semibold tabular-nums">{questions.length}</span>
+      <div class="flex w-full items-center justify-between gap-3 text-sm">
+        <p class="chip chip-active cursor-default" data-quiz-range>
+          {current.range.name}
+        </p>
+        <span class="whitespace-nowrap muted">
+          <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
+        </span>
       </div>
-      <p class="chip chip-active cursor-default" data-quiz-range>
-        {current.range.name}
-      </p>
       <h2 class="text-5xl font-bold tracking-tight" data-quiz-hand>
         {HandStrings[current.hand]}
       </h2>
@@ -148,33 +154,40 @@
     {/if}
   </section>
 
-  <div class="flex flex-col gap-6">
-    {#if current?.range.spot}
-      <div class="mx-auto w-full max-w-[34rem] rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4">
-        <PokerTable
-          spot={current.range.spot}
-          heroCards={[
-            HandStrings[current.hand].charAt(0) + cardSuits[0],
-            HandStrings[current.hand].charAt(1) + cardSuits[1],
-          ]}
-        />
-      </div>
-    {/if}
-    {#if compareToWithMistakes && current}
-      <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">
-        <div class="range-grid">
-          <Range
-            selectedAction={Action.Fold}
-            pokerRange={compareToWithMistakes}
-            compareTo={current.range}
+  {#if current}
+    <div class="grid min-h-0 gap-6 lg:h-full lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
+      {#if current.range.spot}
+        <div
+          class="mx-auto w-full max-w-[34rem] self-start rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4"
+        >
+          <PokerTable
+            spot={current.range.spot}
+            heroCards={[
+              HandStrings[current.hand].charAt(0) + cardSuits[0],
+              HandStrings[current.hand].charAt(1) + cardSuits[1],
+            ]}
           />
         </div>
-        <figcaption class="text-center text-xs muted">
-          The hand you missed is filled with your answer and outlined with the
-          chart's.
-        </figcaption>
-      </figure>
-    {/if}
-    {@render children?.()}
-  </div>
+      {/if}
+      {#if compareToWithMistakes}
+        <!-- The caption comes first: the frame takes the rest of the column's
+             height, and the grid sits at the top of it. -->
+        <figure class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:max-w-none">
+          <figcaption class="text-center text-xs muted">
+            The hand you missed is filled with your answer and outlined with the
+            chart's.
+          </figcaption>
+          <div class="range-frame min-h-0 flex-1">
+            <div class="range-grid">
+              <Range
+                selectedAction={Action.Fold}
+                pokerRange={compareToWithMistakes}
+                compareTo={current.range}
+              />
+            </div>
+          </div>
+        </figure>
+      {/if}
+    </div>
+  {/if}
 </div>

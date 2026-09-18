@@ -33,14 +33,16 @@
   }
 </script>
 
-<div class="page">
-  <header class="flex flex-col gap-2">
+<div class="page page-fill">
+  <header class="flex flex-col gap-1">
     <span class="eyebrow">Tools</span>
-    <h1 class="page-title">Range builder</h1>
-    <p class="page-lead">
-      Paint a range, give it a name, and download it as a file you can import in
-      the trainers.
-    </p>
+    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <h1 class="page-title">Range builder</h1>
+      <p class="page-lead">
+        Paint a range, give it a name, and download it as a file you can import
+        in the trainers.
+      </p>
+    </div>
   </header>
 
   <RangeLayout {pokerRange}>
