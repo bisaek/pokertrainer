@@ -10,7 +10,9 @@
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
   import PokerTable from "@components/table/poker-table.svelte";
+  import { display } from "@utils/display.svelte";
   import Card from "./card.svelte";
+  import DisplayOptions from "./display-options.svelte";
 
   let {
     ranges,
@@ -35,6 +37,11 @@
   let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
+  // Whether the chart's column is drawn at all: it is when there is a
+  // mistake to review, or when the greyed-out stand-in is wanted.
+  const showChart = $derived(
+    compareToWithMistakes !== undefined || display.idleChart
+  );
 
   // Drawn greyed out while there is no mistake to review, so the chart keeps
   // its place on the page instead of appearing and disappearing.
@@ -115,16 +122,22 @@
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The board with the action bar under it takes the width it
      needs to fit that height (.table-frame); the chart gets a column as wide
-     as the row is tall, and the pair is centred together (.trainer-row). -->
+     as the row is tall, and the pair is centred together (.trainer-row).
+     Either part can be turned off from the Show menu: the row then holds
+     just the width of what is left. -->
 <div
-  class="trainer-row grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
+  class="trainer-row grid min-h-0 flex-1 gap-6 lg:grid-rows-[minmax(0,1fr)] {showChart
+    ? 'lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)]'
+    : 'trainer-row-no-chart lg:grid-cols-[minmax(0,1fr)]'} {display.board
+    ? ''
+    : 'trainer-row-no-board'}"
   style:--chart="{feedbackHeight}px"
   bind:clientHeight={feedbackHeight}
 >
   {#if current}
     <div class="table-frame">
       <div class="flex max-w-[34rem] flex-col gap-4 lg:max-w-none">
-        {#if current.range.spot}
+        {#if display.board && current.range.spot}
           <div class="rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4">
             <PokerTable
               spot={current.range.spot}
@@ -137,14 +150,14 @@
         {/if}
 
         <!-- The action bar. The board shows the hole cards on a wide screen;
-             on a narrow one the table is too small for that, so they are
-             drawn here too. -->
+             on a narrow one the table is too small for that, and without the
+             board there is nowhere else, so they are drawn here too. -->
         <section class="card flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p class="chip chip-active cursor-default" data-quiz-range>
               {current.range.name}
             </p>
-            <div class="flex gap-2 lg:hidden">
+            <div class="flex gap-2 {display.board ? 'lg:hidden' : ''}">
               <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
               <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
             </div>
@@ -154,9 +167,12 @@
             <span class="text-sm whitespace-nowrap muted">
               <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
             </span>
-            {#if compareToWithMistakes}
-              <p class="ml-auto text-sm text-red-300">Not quite. Try again.</p>
-            {/if}
+            <div class="ml-auto flex items-center gap-3">
+              {#if compareToWithMistakes}
+                <p class="text-sm text-red-300">Not quite. Try again.</p>
+              {/if}
+              <DisplayOptions />
+            </div>
           </div>
           <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {#each Object.values(Action) as action, index}
@@ -175,14 +191,8 @@
       </div>
     </div>
 
-    <!-- On a narrow screen the column is a row of its own, so the greyed-out
-         chart is left out rather than pushing the board off the page. -->
-    <div
-      class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none {compareToWithMistakes
-        ? ''
-        : 'max-lg:hidden'}"
-    >
-      {#if compareToWithMistakes}
+    {#if compareToWithMistakes}
+      <div class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none">
         <div class="range-grid">
           <Range
             selectedAction={Action.Fold}
@@ -190,12 +200,18 @@
             compareTo={current.range}
           />
         </div>
-      {:else}
+      </div>
+    {:else if display.idleChart}
+      <!-- On a narrow screen the column is a row of its own, so the greyed-out
+           chart is left out rather than pushing the board off the page. -->
+      <div
+        class="range-frame mx-auto min-h-0 w-full max-w-[40rem] max-lg:hidden lg:col-start-2 lg:max-w-none"
+      >
         <div class="range-grid range-grid-idle" aria-hidden="true">
           <Range selectedAction={Action.Fold} pokerRange={blankRange} />
         </div>
-      {/if}
-    </div>
+      </div>
+    {/if}
   {:else}
     <p class="card self-start py-10 text-center muted">Pick one or more charts to start.</p>
   {/if}

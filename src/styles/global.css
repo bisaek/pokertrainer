@@ -223,20 +223,34 @@
     --bar: calc(8rem + 2px);
     --bar-gap: 1rem;
     --board-pad: calc(2rem + 2px);
+    /* The width of each column, with the gap between them in the chart's. */
+    --board-width: calc(
+      (var(--chart) - var(--bar) - var(--bar-gap) - var(--board-pad)) * 8 / 5 +
+        var(--board-pad)
+    );
+    --chart-width: calc(var(--chart) + 1.5rem);
+  }
+  /* Without the board there is only the action bar, which is held to the
+     width it has on a narrow screen. Without the chart its column is gone. */
+  .trainer-row-no-board {
+    --board-width: 34rem;
+  }
+  .trainer-row-no-chart {
+    --chart-width: 0px;
   }
   @variant lg {
     .page-fill .trainer-row {
       /* A width, not a max-width: an auto margin stops a flex item from
-         stretching, so it has to size itself. The last term is the gap
-         between the board and the chart. */
+         stretching, so it has to size itself. */
       margin-inline: auto;
-      width: min(
-        100%,
-        calc(
-          (var(--chart) - var(--bar) - var(--bar-gap) - var(--board-pad)) * 8 / 5 +
-            var(--board-pad) + var(--chart) + 1.5rem
-        )
-      );
+      width: min(100%, calc(var(--board-width) + var(--chart-width)));
+    }
+    .page-fill .trainer-row-no-board .table-frame > * {
+      width: min(100%, var(--board-width));
+    }
+    /* The bar on its own beside the chart sits level with its middle. */
+    .page-fill .trainer-row-no-board:not(.trainer-row-no-chart) .table-frame {
+      align-items: center;
     }
   }
   /* Holds a poker table with an action bar under it. On a wide training
