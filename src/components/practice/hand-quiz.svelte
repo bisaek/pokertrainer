@@ -37,11 +37,13 @@
   let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
+  // The chart with the mistake to review, if it is wanted.
+  const mistakeChart = $derived(
+    display.mistakeChart ? compareToWithMistakes : undefined
+  );
   // Whether the chart's column is drawn at all: it is when there is a
   // mistake to review, or when the greyed-out stand-in is wanted.
-  const showChart = $derived(
-    compareToWithMistakes !== undefined || display.idleChart
-  );
+  const showChart = $derived(mistakeChart !== undefined || display.idleChart);
 
   // Drawn greyed out while there is no mistake to review, so the chart keeps
   // its place on the page instead of appearing and disappearing.
@@ -154,19 +156,25 @@
              board there is nowhere else, so they are drawn here too. -->
         <section class="card flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p class="chip chip-active cursor-default" data-quiz-range>
-              {current.range.name}
-            </p>
+            {#if display.chartName}
+              <p class="chip chip-active cursor-default" data-quiz-range>
+                {current.range.name}
+              </p>
+            {/if}
             <div class="flex gap-2 {display.board ? 'lg:hidden' : ''}">
               <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
               <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
             </div>
-            <h2 class="text-2xl font-bold tracking-tight" data-quiz-hand>
-              {HandStrings[current.hand]}
-            </h2>
-            <span class="text-sm whitespace-nowrap muted">
-              <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
-            </span>
+            {#if display.handName}
+              <h2 class="text-2xl font-bold tracking-tight" data-quiz-hand>
+                {HandStrings[current.hand]}
+              </h2>
+            {/if}
+            {#if display.handsLeft}
+              <span class="text-sm whitespace-nowrap muted">
+                <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
+              </span>
+            {/if}
             <div class="ml-auto flex items-center gap-3">
               {#if compareToWithMistakes}
                 <p class="text-sm text-red-300">Not quite. Try again.</p>
@@ -183,7 +191,9 @@
                 onclick={() => check(action)}
               >
                 {action}
-                <span class="kbd" aria-hidden="true">{index + 1}</span>
+                {#if display.keyHints}
+                  <span class="kbd" aria-hidden="true">{index + 1}</span>
+                {/if}
               </button>
             {/each}
           </div>
@@ -191,12 +201,12 @@
       </div>
     </div>
 
-    {#if compareToWithMistakes}
+    {#if mistakeChart}
       <div class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none">
         <div class="range-grid">
           <Range
             selectedAction={Action.Fold}
-            pokerRange={compareToWithMistakes}
+            pokerRange={mistakeChart}
             compareTo={current.range}
           />
         </div>
