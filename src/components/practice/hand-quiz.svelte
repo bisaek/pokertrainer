@@ -33,6 +33,8 @@
   let cardSuits: string[] = $state(["C", "D"]);
   // Height of the row on a wide screen; the chart is a square of that size.
   let feedbackHeight = $state(0);
+  // Height of the action bar; the board takes the rest of the row above it.
+  let barHeight = $state(0);
 
   const current = $derived(questions[0]);
 
@@ -119,6 +121,7 @@
 <div
   class="trainer-row grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
   style:--chart="{feedbackHeight}px"
+  style:--bar="{barHeight}px"
   bind:clientHeight={feedbackHeight}
 >
   {#if current}
@@ -139,7 +142,7 @@
         <!-- The action bar. The board shows the hole cards on a wide screen;
              on a narrow one the table is too small for that, so they are
              drawn here too. -->
-        <section class="card flex flex-col gap-3">
+        <section class="card flex flex-col gap-3" bind:offsetHeight={barHeight}>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
             <p class="chip chip-active cursor-default" data-quiz-range>
               {current.range.name}

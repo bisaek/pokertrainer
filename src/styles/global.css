@@ -211,22 +211,27 @@
       width: min(100cqw, 100cqh);
     }
   }
-  /* A board beside a chart on a wide training screen. Both are as large as
-     the row is tall, so the row is held to just that much width and centred:
-     the pair stays together instead of drifting to the edges of the window.
-     The board's width is the one .table-frame works out below. */
+  /* A board beside a chart on a wide training screen. Both are as tall as the
+     row, so the row is held to just the width the two need and centred: the
+     pair stays together instead of drifting to the edges of the window.
+     --chart (the row's height) and --bar (the action bar's) are measured by
+     the trainer; 2rem + 2px is the padding and border of the card the table
+     sits in, and 1rem the gap between that card and the bar. */
   @variant lg {
     .page-fill .trainer-row {
+      --board: calc(
+        (var(--chart) - var(--bar) - 1rem - 2rem - 2px) * 8 / 5 + 2rem + 2px
+      );
       /* A width, not a max-width: an auto margin stops a flex item from
          stretching, so it has to size itself. The last term is the gap
          between the board and the chart. */
       margin-inline: auto;
-      width: min(100%, calc((var(--chart) - 11rem) * 8 / 5 + var(--chart) + 1.5rem));
+      width: min(100%, calc(var(--board) + var(--chart) + 1.5rem));
     }
   }
   /* Holds a poker table with an action bar under it. On a wide training
-     screen the frame is given a height, and the pair takes the width at which
-     the table (8:5, in a padded card) and a two-row bar just fit it. */
+     screen the pair takes the width at which the table (8:5, in a padded
+     card) and the bar fill the row's height exactly. */
   .table-frame {
     display: flex;
     justify-content: center;
@@ -237,12 +242,11 @@
   }
   @variant lg {
     .page-fill .table-frame {
-      container-type: size;
       min-height: 0;
     }
     .page-fill .table-frame > * {
       flex: none;
-      width: min(100%, calc((100cqh - 11rem) * 8 / 5));
+      width: min(100%, var(--board));
     }
   }
   .range-grid {
