@@ -202,8 +202,10 @@
   .cards {
     display: flex;
   }
+  /* Cards grow with the table rather than with its text, so they stay easy
+     to read on a big board; the em floor keeps them from vanishing on a phone. */
   .cards > * {
-    width: 2.1em;
+    width: max(2.1em, 6cqi);
     aspect-ratio: 5 / 7;
     border-radius: 0.25em;
     box-shadow: 0 0.15em 0.4em rgb(0 0 0 / 0.5);
@@ -215,7 +217,7 @@
     transform: rotate(8deg) translateX(-12%);
   }
   .cards-hero > * {
-    width: 3em;
+    width: max(3em, 9cqi);
   }
   .cards-hero img {
     background: #fff;
