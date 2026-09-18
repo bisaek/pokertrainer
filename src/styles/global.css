@@ -211,22 +211,37 @@
       width: min(100cqw, 100cqh);
     }
   }
-  /* A board beside a chart on a wide training screen. Both are as large as
-     the row is tall, so the row is held to just that much width and centred:
-     the pair stays together instead of drifting to the edges of the window.
-     The board's width is the one .table-frame works out below. */
+  /* A board beside a chart on a wide training screen. Both are as tall as the
+     row, so the row is held to just the width the two need and centred: the
+     pair stays together instead of drifting to the edges of the window.
+     The board's width is the one .table-frame works out below, from the
+     height that is left once the action bar and the gap above it are taken
+     off: two rows of text and buttons in a card, so the bar is a fixed height.
+     The table sits in a padded card of its own, which adds to its width and
+     height alike. */
+  .trainer-row {
+    --bar: calc(8rem + 2px);
+    --bar-gap: 1rem;
+    --board-pad: calc(2rem + 2px);
+  }
   @variant lg {
     .page-fill .trainer-row {
       /* A width, not a max-width: an auto margin stops a flex item from
          stretching, so it has to size itself. The last term is the gap
          between the board and the chart. */
       margin-inline: auto;
-      width: min(100%, calc((var(--chart) - 11rem) * 8 / 5 + var(--chart) + 1.5rem));
+      width: min(
+        100%,
+        calc(
+          (var(--chart) - var(--bar) - var(--bar-gap) - var(--board-pad)) * 8 / 5 +
+            var(--board-pad) + var(--chart) + 1.5rem
+        )
+      );
     }
   }
   /* Holds a poker table with an action bar under it. On a wide training
      screen the frame is given a height, and the pair takes the width at which
-     the table (8:5, in a padded card) and a two-row bar just fit it. */
+     the table (8:5, in a padded card) and the bar fill it exactly. */
   .table-frame {
     display: flex;
     justify-content: center;
@@ -242,7 +257,13 @@
     }
     .page-fill .table-frame > * {
       flex: none;
-      width: min(100%, calc((100cqh - 11rem) * 8 / 5));
+      width: min(
+        100%,
+        calc(
+          (100cqh - var(--bar) - var(--bar-gap) - var(--board-pad)) * 8 / 5 +
+            var(--board-pad)
+        )
+      );
     }
   }
   .range-grid {
@@ -252,9 +273,15 @@
     gap: 2px;
     aspect-ratio: 1;
     width: 100%;
-    padding: 6px;
-    border-radius: 1rem;
-    border: 1px solid var(--color-ink-700);
+    --range-grid-radius: 1rem;
+    --range-grid-inset: 6px;
+    --range-grid-border: 1px;
+    --range-cell-corner: calc(
+      var(--range-grid-radius) - var(--range-grid-inset) - var(--range-grid-border)
+    );
+    padding: var(--range-grid-inset);
+    border-radius: var(--range-grid-radius);
+    border: var(--range-grid-border) solid var(--color-ink-700);
     background: var(--color-ink-900);
     outline: 3px solid transparent;
     outline-offset: 3px;
@@ -286,6 +313,20 @@
     user-select: none;
     -webkit-user-select: none;
     transition: filter 100ms;
+  }
+  /* The four corner cells follow the chart's own corner: the outer radius
+     less the border and padding between them, so the curves are concentric. */
+  .range-grid > .range-cell:nth-child(1) {
+    border-top-left-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(13) {
+    border-top-right-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(157) {
+    border-bottom-left-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(169) {
+    border-bottom-right-radius: var(--range-cell-corner);
   }
   button.range-cell:hover {
     filter: brightness(1.15);
