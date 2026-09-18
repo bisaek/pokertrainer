@@ -6,17 +6,22 @@
     getButtonClass,
   } from "../../utils/range.svelte";
 
+  import type { Spot } from "../../utils/spot";
+  import PokerTable from "../table/poker-table.svelte";
   import Range from "./range.svelte";
 
   let {
     pokerRange = new PokerRange(),
     compareTo = undefined,
     isCorrect = undefined,
+    spot = undefined,
     children,
   }: {
     pokerRange: PokerRange;
     compareTo?: PokerRange;
     isCorrect?: boolean;
+    // The situation being rebuilt, drawn as a table above the controls.
+    spot?: Spot | null;
     children: Snippet;
   } = $props();
 
@@ -41,13 +46,16 @@
 <svelte:window onkeypress={keyPressed} />
 
 <!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_19rem]">
+<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_22rem]">
   <div class="mx-auto w-full max-w-[46rem]">
     <div class="range-grid {isCorrectClass()}">
       <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
   </div>
   <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
+    {#if spot}
+      <PokerTable {spot} />
+    {/if}
     <div class="flex flex-col gap-2">
       <span class="label">Paint with</span>
       <div class="grid grid-cols-2 gap-2">
