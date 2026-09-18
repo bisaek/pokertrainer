@@ -211,6 +211,27 @@
       width: min(100cqw, 100cqh);
     }
   }
+  /* Holds a poker table with an action bar under it. On a wide training
+     screen the frame is given a height, and the pair takes the width at which
+     the table (8:5, in a padded card) and a two-row bar just fit it. */
+  .table-frame {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .table-frame > * {
+    width: 100%;
+  }
+  @variant lg {
+    .page-fill .table-frame {
+      container-type: size;
+      min-height: 0;
+    }
+    .page-fill .table-frame > * {
+      flex: none;
+      width: min(100%, calc((100cqh - 11rem) * 8 / 5));
+    }
+  }
   .range-grid {
     container-type: inline-size;
     display: grid;
