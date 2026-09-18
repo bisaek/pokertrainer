@@ -252,9 +252,15 @@
     gap: 2px;
     aspect-ratio: 1;
     width: 100%;
-    padding: 6px;
-    border-radius: 1rem;
-    border: 1px solid var(--color-ink-700);
+    --range-grid-radius: 1rem;
+    --range-grid-inset: 6px;
+    --range-grid-border: 1px;
+    --range-cell-corner: calc(
+      var(--range-grid-radius) - var(--range-grid-inset) - var(--range-grid-border)
+    );
+    padding: var(--range-grid-inset);
+    border-radius: var(--range-grid-radius);
+    border: var(--range-grid-border) solid var(--color-ink-700);
     background: var(--color-ink-900);
     outline: 3px solid transparent;
     outline-offset: 3px;
@@ -286,6 +292,20 @@
     user-select: none;
     -webkit-user-select: none;
     transition: filter 100ms;
+  }
+  /* The four corner cells follow the chart's own corner: the outer radius
+     less the border and padding between them, so the curves are concentric. */
+  .range-grid > .range-cell:nth-child(1) {
+    border-top-left-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(13) {
+    border-top-right-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(157) {
+    border-bottom-left-radius: var(--range-cell-corner);
+  }
+  .range-grid > .range-cell:nth-child(169) {
+    border-bottom-right-radius: var(--range-cell-corner);
   }
   button.range-cell:hover {
     filter: brightness(1.15);
