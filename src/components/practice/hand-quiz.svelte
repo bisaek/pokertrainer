@@ -107,7 +107,8 @@
 
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The table and the chart of a mistake sit side by side so the
-     table keeps its place when a mistake appears. -->
+     table keeps its place when a mistake appears; the table's column is as
+     wide as the quiz card and the chart gets the rest. -->
 <div
   class="grid min-h-0 flex-1 items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
 >
@@ -155,7 +156,9 @@
   </section>
 
   {#if current}
-    <div class="grid min-h-0 gap-6 lg:h-full lg:grid-cols-2 lg:grid-rows-[minmax(0,1fr)]">
+    <div
+      class="grid min-h-0 gap-6 lg:h-full lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
+    >
       {#if current.range.spot}
         <div
           class="mx-auto w-full max-w-[34rem] self-start rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4"
@@ -172,7 +175,9 @@
       {#if compareToWithMistakes}
         <!-- The caption comes first: the frame takes the rest of the column's
              height, and the grid sits at the top of it. -->
-        <figure class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:max-w-none">
+        <figure
+          class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:col-start-2 lg:max-w-none"
+        >
           <figcaption class="text-center text-xs muted">
             The hand you missed is filled with your answer and outlined with the
             chart's.
