@@ -26,6 +26,8 @@
   } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
+  // Height of the row on a wide screen; the grid is a square of that size.
+  let rowHeight = $state(0);
 
   function keyPressed(e: KeyboardEvent) {
     // Typing in a field (like a range name) shouldn't switch the action.
@@ -45,14 +47,22 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<!-- select-none: dragging to paint cells shouldn't highlight text. -->
-<div class="grid items-start gap-6 select-none lg:grid-cols-[minmax(0,1fr)_22rem]">
-  <div class="mx-auto w-full max-w-[46rem]">
+<!-- select-none: dragging to paint cells shouldn't highlight text.
+     On a wide screen the row takes the height that is left on the page (see
+     .page-fill): the grid's column is as wide as the row is tall, so the grid
+     is a square that fills it, the sidebar sits right next to it and the pair
+     is centred. The sidebar scrolls on its own if it is what doesn't fit. -->
+<div
+  class="grid min-h-0 flex-1 gap-6 select-none lg:grid-cols-[min(var(--chart),60%)_minmax(22rem,30rem)] lg:grid-rows-[minmax(0,1fr)] lg:justify-center"
+  style:--chart="{rowHeight}px"
+  bind:clientHeight={rowHeight}
+>
+  <div class="range-frame mx-auto max-w-[46rem] lg:max-w-none">
     <div class="range-grid {isCorrectClass()}">
       <Range {pokerRange} {selectedAction} {compareTo} />
     </div>
   </div>
-  <aside class="card flex flex-col gap-5 lg:sticky lg:top-20">
+  <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">
     {#if spot}
       <PokerTable {spot} />
     {/if}

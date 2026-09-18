@@ -26,28 +26,31 @@
   }
 </script>
 
-<div class="page">
-  <header class="flex flex-col gap-2">
+<div class="page page-fill">
+  <header class="flex flex-col gap-1">
     <span class="eyebrow">Train</span>
-    <h1 class="page-title">Hand trainer</h1>
-    <p class="page-lead">
-      Pick the charts to practice, then choose the action for each hand. Wrong
-      answers come back until you get them right.
-    </p>
+    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <h1 class="page-title">Hand trainer</h1>
+      <p class="page-lead">
+        Pick the charts to practice, then choose the action for each hand. Wrong
+        answers come back until you get them right.
+      </p>
+    </div>
   </header>
 
-  <HandQuiz {ranges}>
-    <!-- The quiz restarts on its own when the ranges change. -->
-    <section class="card flex flex-col gap-4">
-      <h2 class="section-title">Charts</h2>
+  <section class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3">
+    <div class="min-w-0 flex-1 basis-[28rem]">
       <RangesSelecter
         changeRanges={(picked: PokerRange[]) => (selectedRanges = picked)}
         start={() => {}}
       />
-      <label class="flex flex-col gap-2 border-t border-ink-700 pt-4">
-        <span class="label">Or import a range file</span>
-        <input type="file" class="file-input" onchange={importRange} />
-      </label>
-    </section>
-  </HandQuiz>
+    </div>
+    <label class="btn btn-secondary ml-auto self-end">
+      Import a range file
+      <input type="file" class="sr-only" onchange={importRange} />
+    </label>
+  </section>
+
+  <!-- The quiz restarts on its own when the ranges change. -->
+  <HandQuiz {ranges} />
 </div>

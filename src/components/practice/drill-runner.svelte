@@ -145,33 +145,33 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="page">
-  <header class="flex flex-col gap-3">
-    <div>
+<div class="page page-fill">
+  <header class="flex flex-col gap-2">
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
       <button class="btn btn-ghost -ml-3" onclick={onback}>
         <span aria-hidden="true">←</span>
         {backLabel}
       </button>
-    </div>
-    <h1 class="page-title">{drill.name}</h1>
-    {#if !finished}
-      <div class="flex flex-col gap-2">
+      <h1 class="page-title">{drill.name}</h1>
+      {#if !finished}
         <p class="text-sm muted">
           Exercise {exerciseIndex + 1} of {drill.exercises.length}{exercise
             ? `: ${describeExercise(exercise)}`
             : ""}
         </p>
-        <div class="flex gap-1.5" aria-hidden="true">
-          {#each drill.exercises as _, index}
-            <div
-              class="h-1.5 flex-1 rounded-full {index < exerciseIndex
-                ? 'bg-accent-500'
-                : index === exerciseIndex
-                  ? 'bg-accent-500/50'
-                  : 'bg-ink-800'}"
-            ></div>
-          {/each}
-        </div>
+      {/if}
+    </div>
+    {#if !finished}
+      <div class="flex gap-1.5" aria-hidden="true">
+        {#each drill.exercises as _, index}
+          <div
+            class="h-1.5 flex-1 rounded-full {index < exerciseIndex
+              ? 'bg-accent-500'
+              : index === exerciseIndex
+                ? 'bg-accent-500/50'
+                : 'bg-ink-800'}"
+          ></div>
+        {/each}
       </div>
     {/if}
   </header>

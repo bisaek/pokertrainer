@@ -78,17 +78,33 @@
 
 <svelte:window onkeypress={keyPressed} />
 
-<div class="page">
-  <header class="flex flex-col gap-2 select-none">
+<div class="page page-fill">
+  <header class="flex flex-col gap-1 select-none">
     <span class="eyebrow">Range trainer</span>
-    <h1 class="page-title" data-chart-name>
-      {pokerRangesHaveNotFinished[0]?.name ?? "Pick a chart to practice"}
-    </h1>
-    <p class="page-lead">
-      Paint the chart from memory, then press Check to compare it with the
-      answer.
-    </p>
+    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <h1 class="page-title" data-chart-name>
+        {pokerRangesHaveNotFinished[0]?.name ?? "Pick a chart to practice"}
+      </h1>
+      <p class="page-lead">
+        Paint the chart from memory, then press Check to compare it with the
+        answer.
+      </p>
+    </div>
   </header>
+
+  <section class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3">
+    <div class="min-w-0 flex-1 basis-[28rem]">
+      <RangesSelecter
+        changeRanges={(ranges: PokerRange[]) =>
+          (pokerRangesToPracticeFromDrills = ranges)}
+        {start}
+      />
+    </div>
+    <label class="btn btn-secondary ml-auto self-end">
+      Import range files
+      <input type="file" class="sr-only" multiple onchange={importRange} />
+    </label>
+  </section>
 
   <RangeLayout
     {pokerRange}
@@ -111,21 +127,9 @@
       {/if}
     </div>
 
-    <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
-      <h2 class="section-title">Charts</h2>
-      <RangesSelecter
-        changeRanges={(ranges: PokerRange[]) =>
-          (pokerRangesToPracticeFromDrills = ranges)}
-        {start}
-      />
-    </div>
-
-    <div class="flex flex-col gap-2 border-t border-ink-700 pt-4">
-      <label class="flex flex-col gap-2">
-        <span class="label">Import range files</span>
-        <input type="file" class="file-input" multiple onchange={importRange} />
-      </label>
-      {#if pokerRangesToPractice.length > 0}
+    {#if pokerRangesToPractice.length > 0}
+      <div class="flex flex-col gap-2 border-t border-ink-700 pt-4">
+        <span class="label">Imported files</span>
         <ul class="flex flex-col gap-1 text-sm">
           {#each pokerRangesToPractice as range}
             <li>
@@ -140,7 +144,7 @@
             </li>
           {/each}
         </ul>
-      {/if}
-    </div>
+      </div>
+    {/if}
   </RangeLayout>
 </div>

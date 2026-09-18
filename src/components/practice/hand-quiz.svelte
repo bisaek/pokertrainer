@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack, type Snippet } from "svelte";
+  import { untrack } from "svelte";
   import {
     Action,
     getButtonClass,
@@ -16,7 +16,6 @@
     count = undefined,
     fixedQuestions = undefined,
     onfinish = undefined,
-    children,
   }: {
     ranges: PokerRange[];
     // How many hands to ask; all in-range hands when omitted.
@@ -25,13 +24,15 @@
     fixedQuestions?: Question[];
     // Called when every hand is answered; without it the quiz starts over.
     onfinish?: () => void;
-    children?: Snippet;
   } = $props();
 
   // Can hold 169 questions per range, so keep it raw and reassign on change.
   let questions: Question[] = $state.raw([]);
   let compareToWithMistakes: PokerRange | undefined = $state();
   let cardSuits: string[] = $state(["C", "D"]);
+  // Height of the row on a wide screen; the chart of a mistake is a square
+  // of that size (less its caption).
+  let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
 
@@ -107,74 +108,91 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div class="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-  <section class="card flex flex-col items-center gap-5 text-center lg:sticky lg:top-20">
-    {#if current}
-      <div class="flex w-full items-center justify-between text-sm">
-        <span class="muted">Hands left</span>
-        <span class="font-semibold tabular-nums">{questions.length}</span>
-      </div>
-      <p class="chip chip-active cursor-default" data-quiz-range>
-        {current.range.name}
-      </p>
-      <h2 class="text-5xl font-bold tracking-tight" data-quiz-hand>
-        {HandStrings[current.hand]}
-      </h2>
-      <div class="flex justify-center gap-3">
-        <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
-        <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
-      </div>
+<!-- On a wide screen the row takes the height that is left on the page (see
+     .page-fill). The board with the action bar under it takes the width it
+     needs to fit that height (.table-frame); the chart of a mistake gets a
+     column as wide as the row is tall (less the caption). -->
+<div
+  class="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
+  style:--chart="{Math.max(0, feedbackHeight - 28)}px"
+  bind:clientHeight={feedbackHeight}
+>
+  {#if current}
+    <div class="table-frame">
+      <div class="flex max-w-[34rem] flex-col gap-4 lg:max-w-none">
+        {#if current.range.spot}
+          <div class="rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4">
+            <PokerTable
+              spot={current.range.spot}
+              heroCards={[
+                HandStrings[current.hand].charAt(0) + cardSuits[0],
+                HandStrings[current.hand].charAt(1) + cardSuits[1],
+              ]}
+            />
+          </div>
+        {/if}
 
-      <div class="grid w-full grid-cols-2 gap-2">
-        {#each Object.values(Action) as action, index}
-          <button
-            class="btn btn-lg justify-between font-semibold hover:brightness-110 {getButtonClass(
-              action
-            )}"
-            onclick={() => check(action)}
-          >
-            {action}
-            <span class="kbd" aria-hidden="true">{index + 1}</span>
-          </button>
-        {/each}
+        <!-- The action bar. The board shows the hole cards on a wide screen;
+             on a narrow one the table is too small for that, so they are
+             drawn here too. -->
+        <section class="card flex flex-col gap-3">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p class="chip chip-active cursor-default" data-quiz-range>
+              {current.range.name}
+            </p>
+            <div class="flex gap-2 lg:hidden">
+              <Card rank={HandStrings[current.hand].charAt(0)} suit={cardSuits[0]} />
+              <Card rank={HandStrings[current.hand].charAt(1)} suit={cardSuits[1]} />
+            </div>
+            <h2 class="text-2xl font-bold tracking-tight" data-quiz-hand>
+              {HandStrings[current.hand]}
+            </h2>
+            <span class="text-sm whitespace-nowrap muted">
+              <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
+            </span>
+            {#if compareToWithMistakes}
+              <p class="ml-auto text-sm text-red-300">Not quite. Try again.</p>
+            {/if}
+          </div>
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {#each Object.values(Action) as action, index}
+              <button
+                class="btn btn-lg justify-between font-semibold hover:brightness-110 {getButtonClass(
+                  action
+                )}"
+                onclick={() => check(action)}
+              >
+                {action}
+                <span class="kbd" aria-hidden="true">{index + 1}</span>
+              </button>
+            {/each}
+          </div>
+        </section>
       </div>
-      {#if compareToWithMistakes}
-        <p class="text-sm text-red-300">
-          Not quite. Try again: the chart shows where you went wrong.
-        </p>
-      {/if}
-    {:else}
-      <p class="py-10 muted">Pick one or more charts to start.</p>
-    {/if}
-  </section>
+    </div>
 
-  <div class="flex flex-col gap-6">
-    {#if current?.range.spot}
-      <div class="mx-auto w-full max-w-[34rem] rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4">
-        <PokerTable
-          spot={current.range.spot}
-          heroCards={[
-            HandStrings[current.hand].charAt(0) + cardSuits[0],
-            HandStrings[current.hand].charAt(1) + cardSuits[1],
-          ]}
-        />
-      </div>
-    {/if}
-    {#if compareToWithMistakes && current}
-      <figure class="mx-auto flex w-full max-w-[40rem] flex-col gap-2">
-        <div class="range-grid">
-          <Range
-            selectedAction={Action.Fold}
-            pokerRange={compareToWithMistakes}
-            compareTo={current.range}
-          />
-        </div>
+    {#if compareToWithMistakes}
+      <!-- The caption comes first: the frame takes the rest of the column's
+           height, and the grid sits at the top of it. -->
+      <figure
+        class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:col-start-2 lg:max-w-none"
+      >
         <figcaption class="text-center text-xs muted">
           The hand you missed is filled with your answer and outlined with the
           chart's.
         </figcaption>
+        <div class="range-frame min-h-0 flex-1">
+          <div class="range-grid">
+            <Range
+              selectedAction={Action.Fold}
+              pokerRange={compareToWithMistakes}
+              compareTo={current.range}
+            />
+          </div>
+        </div>
       </figure>
     {/if}
-    {@render children?.()}
-  </div>
+  {:else}
+    <p class="card self-start py-10 text-center muted">Pick one or more charts to start.</p>
+  {/if}
 </div>

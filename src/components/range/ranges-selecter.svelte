@@ -63,5 +63,6 @@
 <RangeFilter
   items={availableRanges}
   bind:value={filter}
+  inline
   onchange={addSelectedRangesToRanges}
 />
