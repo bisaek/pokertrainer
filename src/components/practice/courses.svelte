@@ -12,6 +12,7 @@
     resolveLesson,
     type Course,
   } from "@utils/courses";
+  import { onUrlChange, readParams, writeParams } from "@utils/url-state";
 
   const PROGRESS_KEY = "pokertrainer.courses.v1";
   const gameLabels: Record<string, string> = { mtt: "Tournament", cash: "Cash" };
@@ -23,6 +24,8 @@
   let manifest: RangeInfo[] = $state.raw([]);
   let manifestReady: Promise<RangeInfo[]> = Promise.resolve([]);
   let progress: Progress = $state.raw({});
+  // The open course, lesson and whether practice is running live in the URL
+  // (?course=cash-100&lesson=position&practice=1) so a copied link opens the same view.
   let courseId: string | null = $state(null);
   let lessonIndex: number | null = $state(null);
   let practicing = $state(false);
@@ -69,7 +72,30 @@
       progress = {};
     }
     manifestReady = fetchManifest().then((json) => (manifest = json));
+    readUrl();
+    return onUrlChange(readUrl);
   });
+
+  function readUrl() {
+    const params = readParams();
+    const c = courses.find((item) => item.id === params.get("course")) ?? null;
+    const index = c ? c.lessons.findIndex((l) => l.id === params.get("lesson")) : -1;
+    courseId = c?.id ?? null;
+    lessonIndex = index === -1 ? null : index;
+    practicing = lessonIndex !== null && params.get("practice") === "1";
+    if (c && lessonIndex !== null) loadStats(c, lessonIndex);
+  }
+
+  function writeUrl() {
+    writeParams(
+      {
+        course: courseId,
+        lesson: course && lessonIndex !== null ? course.lessons[lessonIndex]?.id : null,
+        practice: practicing ? "1" : null,
+      },
+      "push"
+    );
+  }
 
   function saveProgress() {
     try {
@@ -110,6 +136,7 @@
     courseId = c?.id ?? null;
     lessonIndex = null;
     practicing = false;
+    writeUrl();
     window.scrollTo(0, 0);
   }
 
@@ -117,8 +144,14 @@
     courseId = c.id;
     lessonIndex = index;
     practicing = false;
+    writeUrl();
     window.scrollTo(0, 0);
     loadStats(c, index);
+  }
+
+  function setPracticing(value: boolean) {
+    practicing = value;
+    writeUrl();
   }
 
   async function loadStats(c: Course, index: number) {
@@ -178,7 +211,7 @@
   <DrillRunner
     {drill}
     backLabel="Back to lesson"
-    onback={() => (practicing = false)}
+    onback={() => setPracticing(false)}
     onfinish={() => markCompleted(course, lesson.id)}
     completeText="Lesson complete!"
     againLabel="Practice again"
@@ -265,7 +298,7 @@
             .join(", then ")}. Finishing marks the lesson as completed.
         </p>
         <div>
-          <button class="btn btn-primary btn-lg" onclick={() => (practicing = true)}
+          <button class="btn btn-primary btn-lg" onclick={() => setPracticing(true)}
             >Start practice</button
           >
         </div>

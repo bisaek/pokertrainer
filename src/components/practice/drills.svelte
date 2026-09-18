@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import DrillRunner from "./drill-runner.svelte";
   import { fetchManifest, type RangeInfo } from "@utils/manifest";
   import {
@@ -7,13 +8,23 @@
     resolveDrill,
     type Drill,
   } from "@utils/drills";
+  import {
+    numberParam,
+    onUrlChange,
+    readParams,
+    writeParams,
+  } from "@utils/url-state";
 
   const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
 
+  // The game, stack and open drill live in the URL (?game=cash&stack=100&drill=UTG+open)
+  // so a copied link opens the same drill.
+  const initial = readParams();
+
   let manifest: RangeInfo[] = $state.raw([]);
-  let selectedGame = $state("cash");
-  let selectedStack = $state(100);
-  let drill = $state<Drill | null>(null);
+  let selectedGame = $state(initial.get("game") ?? "cash");
+  let selectedStack = $state(numberParam(initial, "stack") ?? 100);
+  let drillName: string | null = $state(initial.get("drill"));
 
   const games = $derived([...new Set(manifest.map((range) => range.game))]);
   const stacks = $derived(
@@ -37,8 +48,14 @@
       }))
       .filter((category) => category.drills.length > 0)
   );
+  // A drill named in the URL that has no charts for this game and stack shows the list.
+  const drill: Drill | null = $derived(
+    categories
+      .flatMap((category) => category.drills)
+      .find((item) => item.name === drillName) ?? null
+  );
 
-  $effect(() => {
+  onMount(() => {
     fetchManifest().then((json) => {
       manifest = json;
       const game = json.some((range) => range.game === selectedGame)
@@ -46,7 +63,22 @@
         : (json[0]?.game ?? selectedGame);
       selectGame(game);
     });
+    return onUrlChange(readUrl);
   });
+
+  function readUrl() {
+    const params = readParams();
+    selectedGame = params.get("game") ?? selectedGame;
+    selectedStack = numberParam(params, "stack") ?? selectedStack;
+    drillName = params.get("drill");
+  }
+
+  function writeUrl(mode: "replace" | "push" = "replace") {
+    writeParams(
+      { game: selectedGame, stack: selectedStack, drill: drillName },
+      mode
+    );
+  }
 
   function selectGame(game: string) {
     selectedGame = game;
@@ -56,6 +88,17 @@
     if (available.length > 0 && !available.includes(selectedStack)) {
       selectedStack = Math.max(...available);
     }
+    writeUrl();
+  }
+
+  function selectStack(stack: number) {
+    selectedStack = stack;
+    writeUrl();
+  }
+
+  function openDrill(item: Drill | null) {
+    drillName = item?.name ?? null;
+    writeUrl("push");
   }
 </script>
 
@@ -63,7 +106,7 @@
   <DrillRunner
     {drill}
     backLabel="Back to drills"
-    onback={() => (drill = null)}
+    onback={() => openDrill(null)}
   />
 {:else}
   <div class="page">
@@ -93,7 +136,7 @@
         {#each stacks as stack}
           <button
             class="chip {stack === selectedStack ? 'chip-active' : ''}"
-            onclick={() => (selectedStack = stack)}
+            onclick={() => selectStack(stack)}
           >
             {stack}bb
           </button>
@@ -111,7 +154,7 @@
           {#each category.drills as item}
             <button
               class="card card-interactive flex flex-col gap-1.5"
-              onclick={() => (drill = item)}
+              onclick={() => openDrill(item)}
             >
               <span class="font-semibold text-ink-100">{item.name}</span>
               <span class="text-sm text-ink-300">{item.description}</span>
