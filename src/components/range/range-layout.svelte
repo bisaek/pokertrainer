@@ -8,6 +8,8 @@
 
   import type { Spot } from "../../utils/spot";
   import PokerTable from "../table/poker-table.svelte";
+  import DisplayOptions from "../table/display-options.svelte";
+  import { display } from "../../utils/display.svelte";
   import Range from "./range.svelte";
 
   let {
@@ -63,8 +65,11 @@
     </div>
   </div>
   <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">
-    {#if spot}
+    {#if spot && display.table}
       <PokerTable {spot} />
+    {/if}
+    {#if spot}
+      <DisplayOptions />
     {/if}
     <div class="flex flex-col gap-2">
       <span class="label">Paint with</span>

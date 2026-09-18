@@ -1,5 +1,6 @@
 <script lang="ts">
   import { seatsFor, type Spot } from "@utils/spot";
+  import { display } from "@utils/display.svelte";
 
   let {
     spot,
@@ -10,8 +11,12 @@
     heroCards?: [string, string];
   } = $props();
 
+  // Hiding the folded players drops their seats, not just their pill, but the
+  // places are still laid out for the full table so nobody moves.
   const seats = $derived(seatsFor(spot));
   const heroIndex = $derived(seats.findIndex((seat) => seat.role === "hero"));
+  const isShown = (seat: (typeof seats)[number]) =>
+    display.foldedSeats || seat.status !== "folded";
 
   // Seats sit on an ellipse with the hero at the bottom, then clockwise in the
   // order they act. Each ring is a radius in percent of the table's box.
@@ -60,11 +65,11 @@
         </div>
       {/if}
 
-      {#if seat.position === "BTN"}
+      {#if seat.position === "BTN" && isShown(seat)}
         <div class="dealer" style={place(index, 33, 30, 0.42)}>D</div>
       {/if}
 
-      {#if seat.chips}
+      {#if seat.chips && display.bets}
         <div
           class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
           style={place(index, 16, 8)}
@@ -76,15 +81,17 @@
         </div>
       {/if}
 
-      <div
-        class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
-        style={place(index, 41, 41)}
-      >
-        {seat.position}
-        {#if seat.role === "hero"}
-          <span class="you">you</span>
-        {/if}
-      </div>
+      {#if isShown(seat)}
+        <div
+          class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
+          style={place(index, 41, 41)}
+        >
+          {seat.position}
+          {#if seat.role === "hero"}
+            <span class="you">you</span>
+          {/if}
+        </div>
+      {/if}
     {/each}
   </div>
 </div>

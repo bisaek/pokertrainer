@@ -10,6 +10,8 @@
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
   import PokerTable from "@components/table/poker-table.svelte";
+  import DisplayOptions from "@components/table/display-options.svelte";
+  import { display } from "@utils/display.svelte";
   import Card from "./card.svelte";
 
   let {
@@ -124,7 +126,7 @@
   {#if current}
     <div class="table-frame">
       <div class="flex max-w-[34rem] flex-col gap-4 lg:max-w-none">
-        {#if current.range.spot}
+        {#if current.range.spot && display.table}
           <div class="rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4">
             <PokerTable
               spot={current.range.spot}
@@ -171,6 +173,9 @@
               </button>
             {/each}
           </div>
+          {#if current.range.spot}
+            <DisplayOptions />
+          {/if}
         </section>
       </div>
     </div>
