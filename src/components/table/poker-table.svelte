@@ -69,7 +69,7 @@
           class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
           style={place(index, 16, 8)}
         >
-          <span class="chip" aria-hidden="true"></span>
+          <span class="bet-chip" aria-hidden="true"></span>
           {#if seat.action}
             {seat.action.label}
           {/if}
@@ -135,7 +135,7 @@
       font-size: 0.75em;
       padding: 0.3em 0.5em;
     }
-    .bet:not(.bet-blind) .chip {
+    .bet:not(.bet-blind) .bet-chip {
       display: none;
     }
   }
@@ -262,7 +262,9 @@
     background: transparent;
     box-shadow: none;
   }
-  .chip {
+  /* Not .chip: that is the filter chip in global.css, whose padding would
+     stretch this one. */
+  .bet-chip {
     width: 1.15em;
     height: 1.15em;
     border-radius: 50%;
@@ -270,14 +272,14 @@
     background: currentColor;
     box-shadow: 0 0.1em 0 rgb(0 0 0 / 0.35);
   }
-  .bet-blind .chip {
+  .bet-blind .bet-chip {
     color: var(--color-ink-300);
     border-color: var(--color-ink-100);
   }
   /* The chip is the pill's color; its face lightens toward the dashed edge. */
-  .action-raise .chip,
-  .action-allin .chip,
-  .action-call .chip {
+  .action-raise .bet-chip,
+  .action-allin .bet-chip,
+  .action-call .bet-chip {
     background: color-mix(in oklab, currentColor 25%, var(--color-ink-950));
   }
 </style>
