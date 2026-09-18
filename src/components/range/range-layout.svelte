@@ -26,6 +26,8 @@
   } = $props();
 
   let selectedAction: Action = $state(Action.Fold);
+  // Height of the row on a wide screen; the grid is a square of that size.
+  let rowHeight = $state(0);
 
   function keyPressed(e: KeyboardEvent) {
     // Typing in a field (like a range name) shouldn't switch the action.
@@ -47,10 +49,13 @@
 
 <!-- select-none: dragging to paint cells shouldn't highlight text.
      On a wide screen the row takes the height that is left on the page (see
-     .page-fill), the grid grows to fit it and the sidebar scrolls on its own
-     if it is the one that doesn't fit. -->
+     .page-fill): the grid's column is as wide as the row is tall, so the grid
+     is a square that fills it, the sidebar sits right next to it and the pair
+     is centred. The sidebar scrolls on its own if it is what doesn't fit. -->
 <div
-  class="grid min-h-0 flex-1 gap-6 select-none lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[minmax(0,1fr)]"
+  class="grid min-h-0 flex-1 gap-6 select-none lg:grid-cols-[min(var(--chart),60%)_minmax(22rem,30rem)] lg:grid-rows-[minmax(0,1fr)] lg:justify-center"
+  style:--chart="{rowHeight}px"
+  bind:clientHeight={rowHeight}
 >
   <div class="range-frame mx-auto max-w-[46rem] lg:max-w-none">
     <div class="range-grid {isCorrectClass()}">
