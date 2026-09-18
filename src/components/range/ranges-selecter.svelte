@@ -9,6 +9,7 @@
     type RangeFilterValue,
     type RangeInfo,
   } from "@utils/manifest";
+  import { spotFromInfo } from "@utils/spot";
   import RangeFilter from "./range-filter.svelte";
 
   let {
@@ -41,7 +42,8 @@
       matching.map(async (range) => {
         try {
           return PokerRange.fromJSON(
-            (await fetchChart(rangeUrl(range))) as { range: Action[]; name: string }
+            (await fetchChart(rangeUrl(range))) as { range: Action[]; name: string },
+            spotFromInfo(range)
           );
         } catch (error) {
           console.error(error);

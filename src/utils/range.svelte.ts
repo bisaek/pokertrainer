@@ -1,13 +1,19 @@
+import { spotFromName, type Spot } from "./spot";
+
 class PokerRange {
   range: (Action | null)[];
   name: string;
+  // The situation the chart is for, when known; drawn as a table in the trainers.
+  spot: Spot | null;
 
   constructor(
     name: string = "My Range",
-    range: (Action | null)[] = Array(PokerRangeLength).fill(Action.Fold)
+    range: (Action | null)[] = Array(PokerRangeLength).fill(Action.Fold),
+    spot: Spot | null = null
   ) {
     this.range = $state(range);
     this.name = $state(name);
+    this.spot = spot;
   }
 
   changeActionAtVector(vector: number[], action: Action) {
@@ -28,8 +34,13 @@ class PokerRange {
     };
   }
 
-  static fromJSON(json: { range: Action[]; name: string }): PokerRange {
-    return new PokerRange(json.name, json.range);
+  // A chart loaded from a URL knows its spot exactly; an imported file has to
+  // rely on its name.
+  static fromJSON(
+    json: { range: Action[]; name: string },
+    spot: Spot | null = spotFromName(json.name)
+  ): PokerRange {
+    return new PokerRange(json.name, json.range, spot);
   }
 }
 function lineFromTwoHands(hand1: Hand, hand2: Hand): number[][] {
