@@ -115,9 +115,9 @@
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The board with the action bar under it takes the width it
      needs to fit that height (.table-frame); the chart gets a column as wide
-     as the row is tall. -->
+     as the row is tall, and the pair is centred together (.trainer-row). -->
 <div
-  class="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
+  class="trainer-row grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
   style:--chart="{feedbackHeight}px"
   bind:clientHeight={feedbackHeight}
 >

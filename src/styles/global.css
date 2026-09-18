@@ -211,6 +211,19 @@
       width: min(100cqw, 100cqh);
     }
   }
+  /* A board beside a chart on a wide training screen. Both are as large as
+     the row is tall, so the row is held to just that much width and centred:
+     the pair stays together instead of drifting to the edges of the window.
+     The board's width is the one .table-frame works out below. */
+  @variant lg {
+    .page-fill .trainer-row {
+      /* A width, not a max-width: an auto margin stops a flex item from
+         stretching, so it has to size itself. The last term is the gap
+         between the board and the chart. */
+      margin-inline: auto;
+      width: min(100%, calc((var(--chart) - 11rem) * 8 / 5 + var(--chart) + 1.5rem));
+    }
+  }
   /* Holds a poker table with an action bar under it. On a wide training
      screen the frame is given a height, and the pair takes the width at which
      the table (8:5, in a padded card) and a two-row bar just fit it. */
