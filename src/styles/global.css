@@ -314,26 +314,8 @@
     -webkit-user-select: none;
     transition: filter 100ms;
   }
-  /* Cells along an edge are square on the side that faces it, so the chart's
-     outline reads as a straight line. The four corner cells then follow the
-     chart's own corner: the outer radius less the border and padding between
-     them, so the curves are concentric. */
-  .range-grid > .range-cell:nth-child(-n + 13) {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-  .range-grid > .range-cell:nth-child(n + 157) {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  .range-grid > .range-cell:nth-child(13n + 1) {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-  .range-grid > .range-cell:nth-child(13n) {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
+  /* The four corner cells follow the chart's own corner: the outer radius
+     less the border and padding between them, so the curves are concentric. */
   .range-grid > .range-cell:nth-child(1) {
     border-top-left-radius: var(--range-cell-corner);
   }
