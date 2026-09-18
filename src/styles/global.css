@@ -68,11 +68,11 @@
   }
   /* A training screen. On a wide screen it fills the viewport under the navbar
      and nothing scrolls: the grid is sized by the room it has (.range-frame)
-     and a column that still doesn't fit scrolls on its own. It is wider than
-     other pages so a grid beside a table can still be large. On a narrow
+     and a column that still doesn't fit scrolls on its own. It uses the whole
+     width of the window so a grid and a table beside it can both be large. On a narrow
      screen the columns stack, so it flows and scrolls like any other page. */
   .page-fill {
-    @apply gap-4 sm:py-6 lg:max-w-[96rem];
+    @apply gap-4 sm:py-6 lg:max-w-none;
   }
   @variant lg {
     .page-fill {

@@ -30,6 +30,9 @@
   let questions: Question[] = $state.raw([]);
   let compareToWithMistakes: PokerRange | undefined = $state();
   let cardSuits: string[] = $state(["C", "D"]);
+  // Height of the area beside the quiz card; the chart of a mistake is a
+  // square of that size, and the table gets the width that is left.
+  let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
 
@@ -107,10 +110,10 @@
 
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The table and the chart of a mistake sit side by side so the
-     table keeps its place when a mistake appears; the table's column is as
-     wide as the quiz card and the chart gets the rest. -->
+     table keeps its place when a mistake appears: the chart's column is as
+     wide as the area is tall (less the caption), and the table gets the rest. -->
 <div
-  class="grid min-h-0 flex-1 items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
+  class="grid min-h-0 flex-1 items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
 >
   <section
     class="card flex max-h-full flex-col items-center gap-4 overflow-y-auto text-center"
@@ -157,11 +160,13 @@
 
   {#if current}
     <div
-      class="grid min-h-0 gap-6 lg:h-full lg:grid-cols-[22rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]"
+      class="grid min-h-0 gap-6 lg:h-full lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
+      style:--chart="{Math.max(0, feedbackHeight - 28)}px"
+      bind:clientHeight={feedbackHeight}
     >
       {#if current.range.spot}
         <div
-          class="mx-auto w-full max-w-[34rem] self-start rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4"
+          class="mx-auto w-full max-w-[34rem] self-start rounded-2xl border border-ink-700 bg-ink-900 p-3 sm:p-4 lg:max-w-[48rem]"
         >
           <PokerTable
             spot={current.range.spot}
