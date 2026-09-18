@@ -247,6 +247,12 @@
     outline-offset: 3px;
     transition: outline-color 150ms;
   }
+  /* The chart with nothing to review: greyed out and out of the way, so it
+     holds its place until a mistake fills it in. */
+  .range-grid-idle {
+    opacity: 0.45;
+    pointer-events: none;
+  }
   .range-grid-correct {
     outline-color: var(--color-emerald-400);
   }

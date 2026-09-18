@@ -5,6 +5,7 @@
     getButtonClass,
     HandStrings,
     PokerRange,
+    PokerRangeLength,
   } from "@utils/range.svelte";
   import { pickQuestions, shuffle, type Question } from "@utils/practice";
   import Range from "@components/range/range.svelte";
@@ -35,6 +36,10 @@
   let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
+
+  // Drawn greyed out while there is no mistake to review, so the chart keeps
+  // its place on the page instead of appearing and disappearing.
+  const blankRange = new PokerRange("", Array(PokerRangeLength).fill(null));
 
   $effect(() => {
     const quizRanges = ranges;
@@ -171,17 +176,25 @@
       </div>
     </div>
 
-    {#if compareToWithMistakes}
-      <!-- The caption comes first: the frame takes the rest of the column's
-           height, and the grid sits at the top of it. -->
-      <figure
-        class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:col-start-2 lg:max-w-none"
-      >
-        <figcaption class="text-center text-xs muted">
+    <!-- The caption comes first: the frame takes the rest of the column's
+         height, and the grid sits at the top of it. On a narrow screen the
+         column is a row of its own, so the greyed-out chart is left out
+         rather than pushing the board off the page. -->
+    <figure
+      class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:col-start-2 lg:max-w-none {compareToWithMistakes
+        ? ''
+        : 'max-lg:hidden'}"
+    >
+      <figcaption class="text-center text-xs muted">
+        {#if compareToWithMistakes}
           The hand you missed is filled with your answer and outlined with the
           chart's.
-        </figcaption>
-        <div class="range-frame min-h-0 flex-1">
+        {:else}
+          The chart shows up here when you miss a hand.
+        {/if}
+      </figcaption>
+      <div class="range-frame min-h-0 flex-1">
+        {#if compareToWithMistakes}
           <div class="range-grid">
             <Range
               selectedAction={Action.Fold}
@@ -189,9 +202,13 @@
               compareTo={current.range}
             />
           </div>
-        </div>
-      </figure>
-    {/if}
+        {:else}
+          <div class="range-grid range-grid-idle" aria-hidden="true">
+            <Range selectedAction={Action.Fold} pokerRange={blankRange} />
+          </div>
+        {/if}
+      </div>
+    </figure>
   {:else}
     <p class="card self-start py-10 text-center muted">Pick one or more charts to start.</p>
   {/if}
