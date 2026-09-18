@@ -31,8 +31,7 @@
   let questions: Question[] = $state.raw([]);
   let compareToWithMistakes: PokerRange | undefined = $state();
   let cardSuits: string[] = $state(["C", "D"]);
-  // Height of the row on a wide screen; the chart of a mistake is a square
-  // of that size (less its caption).
+  // Height of the row on a wide screen; the chart is a square of that size.
   let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
@@ -115,11 +114,11 @@
 
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The board with the action bar under it takes the width it
-     needs to fit that height (.table-frame); the chart of a mistake gets a
-     column as wide as the row is tall (less the caption). -->
+     needs to fit that height (.table-frame); the chart gets a column as wide
+     as the row is tall. -->
 <div
   class="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)] lg:grid-rows-[minmax(0,1fr)]"
-  style:--chart="{Math.max(0, feedbackHeight - 28)}px"
+  style:--chart="{feedbackHeight}px"
   bind:clientHeight={feedbackHeight}
 >
   {#if current}
@@ -176,39 +175,27 @@
       </div>
     </div>
 
-    <!-- The caption comes first: the frame takes the rest of the column's
-         height, and the grid sits at the top of it. On a narrow screen the
-         column is a row of its own, so the greyed-out chart is left out
-         rather than pushing the board off the page. -->
-    <figure
-      class="mx-auto flex min-h-0 w-full max-w-[40rem] flex-col gap-2 lg:col-start-2 lg:max-w-none {compareToWithMistakes
+    <!-- On a narrow screen the column is a row of its own, so the greyed-out
+         chart is left out rather than pushing the board off the page. -->
+    <div
+      class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none {compareToWithMistakes
         ? ''
         : 'max-lg:hidden'}"
     >
-      <figcaption class="text-center text-xs muted">
-        {#if compareToWithMistakes}
-          The hand you missed is filled with your answer and outlined with the
-          chart's.
-        {:else}
-          The chart shows up here when you miss a hand.
-        {/if}
-      </figcaption>
-      <div class="range-frame min-h-0 flex-1">
-        {#if compareToWithMistakes}
-          <div class="range-grid">
-            <Range
-              selectedAction={Action.Fold}
-              pokerRange={compareToWithMistakes}
-              compareTo={current.range}
-            />
-          </div>
-        {:else}
-          <div class="range-grid range-grid-idle" aria-hidden="true">
-            <Range selectedAction={Action.Fold} pokerRange={blankRange} />
-          </div>
-        {/if}
-      </div>
-    </figure>
+      {#if compareToWithMistakes}
+        <div class="range-grid">
+          <Range
+            selectedAction={Action.Fold}
+            pokerRange={compareToWithMistakes}
+            compareTo={current.range}
+          />
+        </div>
+      {:else}
+        <div class="range-grid range-grid-idle" aria-hidden="true">
+          <Range selectedAction={Action.Fold} pokerRange={blankRange} />
+        </div>
+      {/if}
+    </div>
   {:else}
     <p class="card self-start py-10 text-center muted">Pick one or more charts to start.</p>
   {/if}
