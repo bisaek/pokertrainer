@@ -377,6 +377,20 @@
     background-color: var(--color-ink-850);
     color: var(--color-ink-600);
   }
+  /* The kinds of hand on a blank chart: pairs, suited and offsuit. Strong
+     enough to tell apart through the greyed-out chart's opacity. */
+  .kind-pair {
+    background-color: color-mix(in oklab, var(--color-accent-500) 45%, var(--color-ink-850));
+    color: var(--color-ink-100);
+  }
+  .kind-suited {
+    background-color: color-mix(in oklab, #4f7bd9 45%, var(--color-ink-850));
+    color: var(--color-ink-100);
+  }
+  .kind-offsuit {
+    background-color: color-mix(in oklab, #8a6ac4 30%, var(--color-ink-850));
+    color: var(--color-ink-100);
+  }
   .action-option {
     @apply flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-[filter] hover:brightness-110;
   }

@@ -246,7 +246,11 @@
       >
         <div class="range-grid range-grid-idle" aria-hidden="true">
           {#if settings.idleChart}
-            <Range selectedAction={Action.Fold} pokerRange={blankRange} />
+            <Range
+              selectedAction={Action.Fold}
+              pokerRange={blankRange}
+              kinds={settings.idleKinds}
+            />
           {/if}
         </div>
       </div>
