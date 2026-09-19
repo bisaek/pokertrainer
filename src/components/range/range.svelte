@@ -15,11 +15,24 @@
     pokerRange = new PokerRange(),
     selectedAction = Action.Fold,
     compareTo = undefined,
+    marked = undefined,
+    kinds = false,
   }: {
     pokerRange: PokerRange;
     selectedAction: Action;
     compareTo?: PokerRange;
+    // A hand to point out, such as the one being asked about.
+    marked?: Hand;
+    // Tint the cells by kind: pairs on the diagonal, suited above it and
+    // offsuit below.
+    kinds?: boolean;
   } = $props();
+
+  function getKindClass(index: number): string {
+    if (!kinds) return "";
+    const [row, col] = handToVector(index);
+    return row === col ? "kind-pair" : col > row ? "kind-suited" : "kind-offsuit";
+  }
 
   let startHand: Hand | undefined = $state(undefined);
   let shiftDown: boolean = $state(false);
@@ -119,7 +132,9 @@
   <!-- svelte-ignore a11y_mouse_events_have_key_events -->
   <button
     class="range-cell {getHoverClass(index) ||
-      `${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)}`}"
+      `${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)}`} {getKindClass(
+      index
+    )} {marked === index ? 'range-cell-marked' : ''}"
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
     onmouseleave={(e) => toggleHand(e, index)}

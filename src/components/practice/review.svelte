@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import HandQuiz from "./hand-quiz.svelte";
+  import TrainerOptions from "./trainer-options.svelte";
   import Range from "@components/range/range.svelte";
   import RangeFilter from "@components/range/range-filter.svelte";
   import { Action, PokerRange } from "@utils/range.svelte";
@@ -275,6 +276,9 @@
       <h1 class="page-title">
         {training.kind === "hands" ? "Your mistakes" : "Charts you missed"}
       </h1>
+      <div class="ml-auto">
+        <TrainerOptions trainer="drill" />
+      </div>
     </header>
     {#if training.kind === "hands"}
       <HandQuiz
