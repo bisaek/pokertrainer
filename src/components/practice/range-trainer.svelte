@@ -1,9 +1,11 @@
 <script lang="ts">
   import { PokerRange } from "../../utils/range.svelte";
   import { blankRangeFor, isRangeCorrect } from "../../utils/practice";
+  import { settings } from "../../utils/settings.svelte";
 
   import RangeLayout from "../range/range-layout.svelte";
   import RangesSelecter from "../range/ranges-selecter.svelte";
+  import TrainerOptions from "./trainer-options.svelte";
 
   let { pokerRange = new PokerRange() }: { pokerRange: PokerRange } = $props();
 
@@ -11,8 +13,12 @@
 
   const pokerRangesToPractice: PokerRange[] = $state([]);
   let pokerRangesToPracticeFromDrills: PokerRange[] = $state([]);
-  let pokerRangesHaveNotFinished: PokerRange[] = $state([]);
+  // The charts still to rebuild this round. A chart leaves the queue once it
+  // has been rebuilt right as many times in a row as the options ask for.
+  let queue: { range: PokerRange; streak: number }[] = $state([]);
   let compareTo: PokerRange | undefined = $state(undefined);
+
+  const current = $derived(queue[0]?.range);
 
   function importRange(e: Event) {
     const files = (e?.target as HTMLInputElement)?.files;
@@ -33,35 +39,40 @@
   }
 
   function start() {
-    pokerRangesHaveNotFinished = [];
-    pokerRangesHaveNotFinished.push(
-      ...pokerRangesToPractice,
-      ...pokerRangesToPracticeFromDrills
-    );
-    pokerRangesHaveNotFinished.sort(() => Math.random() - 0.5);
-    pokerRangesHaveNotFinished = [...pokerRangesHaveNotFinished];
-    pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
+    queue = [...pokerRangesToPractice, ...pokerRangesToPracticeFromDrills]
+      .sort(() => Math.random() - 0.5)
+      .map((range) => ({ range, streak: 0 }));
+    compareTo = undefined;
+    isCorrect = undefined;
+    pokerRange = blankRangeFor(current);
   }
 
   function next() {
+    const [item, ...rest] = queue;
+    if (!item) return;
     if (isCorrect) {
-      pokerRangesHaveNotFinished.shift();
-    } else if (
-      pokerRangesHaveNotFinished[pokerRangesHaveNotFinished.length - 1] !==
-      compareTo
-    ) {
-      pokerRangesHaveNotFinished.push(pokerRangesHaveNotFinished[0]);
+      const streak = item.streak + 1;
+      queue =
+        streak >= settings.rangeStreak
+          ? rest
+          : [...rest, { range: item.range, streak }];
+    } else if (settings.rangeRepeat && rest.at(-1)?.range !== item.range) {
+      // Wrong: it comes back at the end, unless it is already there.
+      queue = [...rest, { range: item.range, streak: 0 }];
+    } else {
+      queue = rest;
     }
     compareTo = undefined;
     isCorrect = undefined;
-    if (pokerRangesHaveNotFinished.length === 0) {
+    if (queue.length === 0) {
       start();
+    } else {
+      pokerRange = blankRangeFor(current);
     }
-    pokerRange = blankRangeFor(pokerRangesHaveNotFinished[0]);
   }
 
   function check() {
-    compareTo = pokerRangesHaveNotFinished[0];
+    compareTo = current;
     isCorrect = compareTo ? isRangeCorrect(pokerRange, compareTo) : undefined;
   }
 
@@ -79,20 +90,36 @@
 <svelte:window onkeypress={keyPressed} />
 
 <div class="page page-fill">
-  <header class="flex flex-col gap-1 select-none">
-    <span class="eyebrow">Range trainer</span>
-    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <h1 class="page-title" data-chart-name>
-        {pokerRangesHaveNotFinished[0]?.name ?? "Pick a chart to practice"}
-      </h1>
-      <p class="page-lead">
-        Paint the chart from memory, then press Check to compare it with the
-        answer.
-      </p>
+  <!-- The options sit in the header, so they stay put when the picker is hidden. -->
+  <header class="flex items-start gap-4 select-none">
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <span class="eyebrow">Range trainer</span>
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <!-- With the name hidden the spot has to be read off the board; the
+             name is still given away with the answer. -->
+        <h1 class="page-title" data-chart-name>
+          {current
+            ? settings.chartName || compareTo
+              ? current.name
+              : "Rebuild the chart for this spot"
+            : "Pick a chart to practice"}
+        </h1>
+        <p class="page-lead">
+          Paint the chart from memory, then press Check to compare it with the
+          answer.
+        </p>
+      </div>
     </div>
+    <TrainerOptions trainer="range" />
   </header>
 
-  <section class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3">
+  <!-- The picker and the import button can be hidden in the options; they
+       are kept mounted so the selection isn't lost while out of sight. -->
+  <section
+    class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3 {settings.picker
+      ? ''
+      : 'hidden'}"
+  >
     <div class="min-w-0 flex-1 basis-[28rem]">
       <RangesSelecter
         changeRanges={(ranges: PokerRange[]) =>
@@ -106,16 +133,31 @@
     </label>
   </section>
 
+  <!-- The answer's outlines can be turned off in the options, for checking
+       without being shown the chart. -->
   <RangeLayout
     {pokerRange}
-    {compareTo}
+    compareTo={settings.rangeAnswer ? compareTo : undefined}
     {isCorrect}
-    spot={pokerRangesHaveNotFinished[0]?.spot}
+    spot={current?.spot}
   >
     <div class="flex flex-col gap-3">
+      {#if current && settings.progress}
+        <p class="text-sm muted" data-charts-left>
+          {queue.length}
+          {queue.length === 1 ? "chart" : "charts"} left
+          {#if settings.rangeStreak > 1}
+            · correct in a row: {queue[0].streak}/{settings.rangeStreak}
+          {/if}
+        </p>
+      {/if}
       {#if compareTo}
         <p class="text-sm font-medium {isCorrect ? 'text-emerald-300' : 'text-red-300'}">
-          {isCorrect ? "Correct!" : "Not quite. The outlines show the chart."}
+          {isCorrect
+            ? "Correct!"
+            : settings.rangeAnswer
+              ? "Not quite. The outlines show the chart."
+              : "Not quite."}
         </p>
         <button class="btn btn-primary w-full" onclick={next}>
           Next <span class="kbd" aria-hidden="true">Enter</span>
