@@ -109,8 +109,15 @@
     </div>
   </header>
 
-  <section class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3">
-    <div class="min-w-0 flex-1 basis-[28rem]">
+  <!-- The picker can be hidden in the options; its buttons stay, since the
+       options are opened from here. The picker is kept mounted so the
+       selection isn't lost while it is out of sight. -->
+  <section
+    class="flex flex-wrap items-start gap-x-6 gap-y-3 {settings.picker
+      ? 'card py-3 sm:py-3'
+      : 'justify-end'}"
+  >
+    <div class="min-w-0 flex-1 basis-[28rem] {settings.picker ? '' : 'hidden'}">
       <RangesSelecter
         changeRanges={(ranges: PokerRange[]) =>
           (pokerRangesToPracticeFromDrills = ranges)}

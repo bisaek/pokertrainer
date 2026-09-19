@@ -25,6 +25,9 @@ export const settings = $state({
   rangeAnswer: true,
 
   // What is drawn around the question.
+  // The chart picker at the top of the hand and range trainers. Hidden, it
+  // leaves more room for the training and keeps the chart's spot a secret.
+  picker: true,
   // The poker table.
   board: true,
   // The seats that folded before the hero acts, and their dealer button.

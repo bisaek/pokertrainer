@@ -69,8 +69,14 @@
     ],
   };
 
+  const page: Group = {
+    label: "Page",
+    toggles: [{ key: "picker", label: "Chart picker" }],
+  };
+
   const groups = $derived.by((): Group[] => {
-    if (trainer === "range") return [table, aroundChart];
+    if (trainer === "range") return [page, table, aroundChart];
+    if (trainer === "hand") return [page, table, aroundHand, chart];
     return [table, aroundHand, chart];
   });
 
