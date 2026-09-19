@@ -1,5 +1,6 @@
 <script lang="ts">
   import { seatsFor, type Spot } from "@utils/spot";
+  import { settings } from "@utils/settings.svelte";
 
   let {
     spot,
@@ -43,48 +44,52 @@
       {/if}
     </div>
 
+    <!-- A folded seat can be left off the table; the others keep their
+         places, so the table looks the same with or without it. -->
     {#each seats as seat, index}
-      {#if seat.status !== "folded"}
-        <div
-          class="cards {seat.role === 'hero' ? 'cards-hero' : ''}"
-          style={place(index, 30, 27)}
-        >
-          {#if seat.role === "hero" && heroCards}
-            {#each heroCards as card}
-              <img src="/poker-cards/{card}.svg" alt="" draggable="false" />
-            {/each}
-          {:else}
-            <div class="card-back"></div>
-            <div class="card-back"></div>
-          {/if}
-        </div>
-      {/if}
-
-      {#if seat.position === "BTN"}
-        <div class="dealer" style={place(index, 33, 30, 0.42)}>D</div>
-      {/if}
-
-      {#if seat.chips}
-        <div
-          class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
-          style={place(index, 16, 8)}
-        >
-          <span class="bet-chip" aria-hidden="true"></span>
-          {#if seat.action}
-            {seat.action.label}
-          {/if}
-        </div>
-      {/if}
-
-      <div
-        class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
-        style={place(index, 41, 41)}
-      >
-        {seat.position}
-        {#if seat.role === "hero"}
-          <span class="you">you</span>
+      {#if settings.foldedSeats || seat.status !== "folded"}
+        {#if seat.status !== "folded"}
+          <div
+            class="cards {seat.role === 'hero' ? 'cards-hero' : ''}"
+            style={place(index, 30, 27)}
+          >
+            {#if seat.role === "hero" && heroCards}
+              {#each heroCards as card}
+                <img src="/poker-cards/{card}.svg" alt="" draggable="false" />
+              {/each}
+            {:else}
+              <div class="card-back"></div>
+              <div class="card-back"></div>
+            {/if}
+          </div>
         {/if}
-      </div>
+
+        {#if seat.position === "BTN"}
+          <div class="dealer" style={place(index, 33, 30, 0.42)}>D</div>
+        {/if}
+
+        {#if seat.chips && settings.bets}
+          <div
+            class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
+            style={place(index, 16, 8)}
+          >
+            <span class="bet-chip" aria-hidden="true"></span>
+            {#if seat.action}
+              {seat.action.label}
+            {/if}
+          </div>
+        {/if}
+
+        <div
+          class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
+          style={place(index, 41, 41)}
+        >
+          {seat.position}
+          {#if seat.role === "hero"}
+            <span class="you">you</span>
+          {/if}
+        </div>
+      {/if}
     {/each}
   </div>
 </div>

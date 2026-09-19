@@ -2,6 +2,8 @@
   import { onDestroy, untrack } from "svelte";
   import RangeLayout from "@components/range/range-layout.svelte";
   import HandQuiz from "./hand-quiz.svelte";
+  import TrainerOptions from "./trainer-options.svelte";
+  import { settings } from "@utils/settings.svelte";
   import { Action, PokerRange } from "@utils/range.svelte";
   import { fetchChart } from "@utils/manifest";
   import { spotFromUrl } from "@utils/spot";
@@ -159,6 +161,9 @@
             ? `: ${describeExercise(exercise)}`
             : ""}
         </p>
+        <div class="ml-auto">
+          <TrainerOptions trainer="drill" />
+        </div>
       {/if}
     </div>
     {#if !finished}
@@ -220,16 +225,22 @@
         {#if queue[0]}
           <div class="flex flex-col gap-1">
             <span class="label">Rebuild this chart</span>
+            <!-- With the name hidden the spot has to be read off the board;
+                 the name is still given away with the answer. -->
             <h2 class="text-lg leading-snug font-semibold" data-chart-name>
-              {queue[0].range.name}
+              {settings.chartName || compareTo
+                ? queue[0].range.name
+                : "The chart for this spot"}
             </h2>
-            <p class="text-sm muted">
-              {queue.length}
-              {queue.length === 1 ? "chart" : "charts"} left
-              {#if exercise.timesInARow > 1}
-                · correct in a row: {queue[0].streak}/{exercise.timesInARow}
-              {/if}
-            </p>
+            {#if settings.progress}
+              <p class="text-sm muted">
+                {queue.length}
+                {queue.length === 1 ? "chart" : "charts"} left
+                {#if exercise.timesInARow > 1}
+                  · correct in a row: {queue[0].streak}/{exercise.timesInARow}
+                {/if}
+              </p>
+            {/if}
           </div>
         {/if}
         {#if compareTo}

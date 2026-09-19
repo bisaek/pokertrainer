@@ -1,7 +1,9 @@
 <script lang="ts">
   import { PokerRange } from "@utils/range.svelte";
   import RangesSelecter from "@components/range/ranges-selecter.svelte";
+  import { settings } from "@utils/settings.svelte";
   import HandQuiz from "./hand-quiz.svelte";
+  import TrainerOptions from "./trainer-options.svelte";
 
   let importedRange: PokerRange | undefined = $state();
   let selectedRanges: PokerRange[] = $state([]);
@@ -32,8 +34,8 @@
     <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
       <h1 class="page-title">Hand trainer</h1>
       <p class="page-lead">
-        Pick the charts to practice, then choose the action for each hand. Wrong
-        answers come back until you get them right.
+        Pick the charts to practice, then choose the action for each hand. The
+        options decide what happens to a wrong answer and what you see.
       </p>
     </div>
   </header>
@@ -45,12 +47,20 @@
         start={() => {}}
       />
     </div>
-    <label class="btn btn-secondary ml-auto self-end">
-      Import a range file
-      <input type="file" class="sr-only" onchange={importRange} />
-    </label>
+    <div class="ml-auto flex items-end gap-2 self-end">
+      <label class="btn btn-secondary">
+        Import a range file
+        <input type="file" class="sr-only" onchange={importRange} />
+      </label>
+      <TrainerOptions trainer="hand" />
+    </div>
   </section>
 
-  <!-- The quiz restarts on its own when the ranges change. -->
-  <HandQuiz {ranges} />
+  <!-- The quiz restarts on its own when the ranges or the round length change. -->
+  <HandQuiz
+    {ranges}
+    count={settings.handCount || undefined}
+    mistakes={settings.handMistakes}
+    repeatMistakes={settings.handRepeat}
+  />
 </div>

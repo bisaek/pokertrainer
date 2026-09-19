@@ -7,6 +7,7 @@
   } from "../../utils/range.svelte";
 
   import type { Spot } from "../../utils/spot";
+  import { settings } from "../../utils/settings.svelte";
   import PokerTable from "../table/poker-table.svelte";
   import Range from "./range.svelte";
 
@@ -63,7 +64,7 @@
     </div>
   </div>
   <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">
-    {#if spot}
+    {#if spot && settings.board}
       <PokerTable {spot} />
     {/if}
     <div class="flex flex-col gap-2">
@@ -77,7 +78,9 @@
             onclick={() => (selectedAction = action)}
           >
             {action}
-            <span class="kbd" aria-hidden="true">{index + 1}</span>
+            {#if settings.keyHints}
+              <span class="kbd" aria-hidden="true">{index + 1}</span>
+            {/if}
           </button>
         {/each}
       </div>
