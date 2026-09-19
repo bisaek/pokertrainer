@@ -135,14 +135,16 @@
      needs to fit that height (.table-frame); the chart gets a column as wide
      as the row is tall, and the pair is centred together (.trainer-row).
      Either part can be turned off in the options: the row then holds just
-     the width of what is left. -->
+     the width of what is left. The height isn't known until the script
+     runs, and a width worked out from 0 would squeeze the row to nothing,
+     so it is left off until then. -->
 <div
   class="trainer-row grid min-h-0 flex-1 gap-6 lg:grid-rows-[minmax(0,1fr)] {showChart
     ? 'lg:grid-cols-[minmax(0,1fr)_min(var(--chart),60%)]'
     : 'trainer-row-no-chart lg:grid-cols-[minmax(0,1fr)]'} {settings.board
     ? ''
     : 'trainer-row-no-board'}"
-  style:--chart="{feedbackHeight}px"
+  style:--chart={feedbackHeight ? `${feedbackHeight}px` : null}
   bind:clientHeight={feedbackHeight}
 >
   {#if current}
