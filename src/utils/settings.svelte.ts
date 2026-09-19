@@ -46,7 +46,7 @@ export const settings = $state({
   // The chart the hand is from, with the hand marked, beside the question in
   // the hand trainer: for learning a chart rather than testing it.
   answerChart: false,
-  // Outline the hand being asked about on the answer chart.
+  // Outline the hand being asked about on the answer or the waiting chart.
   markHand: false,
   // The grayed-out chart in the hand trainer while there is no mistake to
   // review. Its place is kept either way, so the board doesn't jump.

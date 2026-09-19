@@ -250,6 +250,7 @@
               selectedAction={Action.Fold}
               pokerRange={blankRange}
               kinds={settings.idleKinds}
+              marked={settings.markHand ? current.hand : undefined}
             />
           {/if}
         </div>
