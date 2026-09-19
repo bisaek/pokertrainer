@@ -48,8 +48,8 @@ export const settings = $state({
   answerChart: false,
   // Outline the hand being asked about on the answer chart.
   markHand: false,
-  // The greyed-out chart that holds the chart's place in the hand trainer
-  // while there is no mistake to review.
+  // The greyed-out chart in the hand trainer while there is no mistake to
+  // review. Its place is kept either way, so the board doesn't jump.
   idleChart: true,
   // The chart with the mistake marked on it after a wrong answer.
   mistakeChart: true,

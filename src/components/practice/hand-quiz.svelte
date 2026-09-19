@@ -47,11 +47,13 @@
   const current = $derived(questions[0]);
   // The chart with the mistake to review, if it is wanted.
   const mistakeChart = $derived(settings.mistakeChart ? mistake : undefined);
-  // Whether the chart's column is drawn at all: it is when there is a
-  // mistake to review, when the answer is wanted, or when the greyed-out
-  // stand-in is.
+  // Whether the chart's column is there at all. It is kept whenever a chart
+  // can ever show up in it, so the board doesn't jump when one does.
   const showChart = $derived(
-    mistakeChart !== undefined || settings.answerChart || settings.idleChart
+    mistakeChart !== undefined ||
+      settings.answerChart ||
+      settings.idleChart ||
+      settings.mistakeChart
   );
 
   // Drawn greyed out while there is no mistake to review, so the chart keeps
@@ -234,13 +236,18 @@
           />
         </div>
       </div>
-    {:else if settings.idleChart}
-      <!-- On a narrow screen the column is a row of its own, so the greyed-out
-           chart is left out rather than pushing the board off the page. -->
+    {:else if showChart}
+      <!-- The stand-in holds the chart's place: greyed out, or not drawn at
+           all if that isn't wanted. On a narrow screen the column is a row
+           of its own, so it is left out rather than pushing the board off
+           the page. -->
       <div
         class="range-frame mx-auto min-h-0 w-full max-w-[40rem] max-lg:hidden lg:col-start-2 lg:max-w-none"
       >
-        <div class="range-grid range-grid-idle" aria-hidden="true">
+        <div
+          class="range-grid {settings.idleChart ? 'range-grid-idle' : 'invisible'}"
+          aria-hidden="true"
+        >
           <Range selectedAction={Action.Fold} pokerRange={blankRange} />
         </div>
       </div>
