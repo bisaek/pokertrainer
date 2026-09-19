@@ -239,10 +239,12 @@
     {:else if showChart}
       <!-- The stand-in holds the chart's place: the grayed-out cells, or the
            empty box if they aren't wanted. On a narrow screen the column is
-           a row of its own, so it is left out rather than pushing the board
-           off the page. -->
+           a row of its own under the board, so the empty box is left out
+           there rather than pushing things down for nothing. -->
       <div
-        class="range-frame mx-auto min-h-0 w-full max-w-[40rem] max-lg:hidden lg:col-start-2 lg:max-w-none"
+        class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none {settings.idleChart
+          ? ''
+          : 'max-lg:hidden'}"
       >
         <div class="range-grid range-grid-idle" aria-hidden="true">
           {#if settings.idleChart}
