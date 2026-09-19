@@ -67,7 +67,7 @@
       { key: "answerChart", label: "The answer" },
       { key: "idleChart", label: "While waiting" },
       { key: "idleKinds", label: "Color pairs, suited and offsuit", needs: "idleChart" },
-      { key: "markHand", label: "Mark the hand", hint: "On the answer or waiting chart" },
+      { key: "markHand", label: "Mark the hand" },
       { key: "mistakeChart", label: "After a mistake" },
     ],
   };
