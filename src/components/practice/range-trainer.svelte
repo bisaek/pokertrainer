@@ -113,14 +113,14 @@
     <TrainerOptions trainer="range" />
   </header>
 
-  <!-- The picker can be hidden in the options; it is kept mounted so the
-       selection isn't lost while it is out of sight. -->
+  <!-- The picker and the import button can be hidden in the options; they
+       are kept mounted so the selection isn't lost while out of sight. -->
   <section
-    class="flex flex-wrap items-start gap-x-6 gap-y-3 {settings.picker
-      ? 'card py-3 sm:py-3'
-      : 'justify-end'}"
+    class="card flex flex-wrap items-start gap-x-6 gap-y-3 py-3 sm:py-3 {settings.picker
+      ? ''
+      : 'hidden'}"
   >
-    <div class="min-w-0 flex-1 basis-[28rem] {settings.picker ? '' : 'hidden'}">
+    <div class="min-w-0 flex-1 basis-[28rem]">
       <RangesSelecter
         changeRanges={(ranges: PokerRange[]) =>
           (pokerRangesToPracticeFromDrills = ranges)}
