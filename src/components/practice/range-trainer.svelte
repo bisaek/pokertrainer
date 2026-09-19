@@ -90,27 +90,30 @@
 <svelte:window onkeypress={keyPressed} />
 
 <div class="page page-fill">
-  <header class="flex flex-col gap-1 select-none">
-    <span class="eyebrow">Range trainer</span>
-    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <!-- With the name hidden the spot has to be read off the board; the
-           name is still given away with the answer. -->
-      <h1 class="page-title" data-chart-name>
-        {current
-          ? settings.chartName || compareTo
-            ? current.name
-            : "Rebuild the chart for this spot"
-          : "Pick a chart to practice"}
-      </h1>
-      <p class="page-lead">
-        Paint the chart from memory, then press Check to compare it with the
-        answer.
-      </p>
+  <!-- The options sit in the header, so they stay put when the picker is hidden. -->
+  <header class="flex items-start gap-4 select-none">
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <span class="eyebrow">Range trainer</span>
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <!-- With the name hidden the spot has to be read off the board; the
+             name is still given away with the answer. -->
+        <h1 class="page-title" data-chart-name>
+          {current
+            ? settings.chartName || compareTo
+              ? current.name
+              : "Rebuild the chart for this spot"
+            : "Pick a chart to practice"}
+        </h1>
+        <p class="page-lead">
+          Paint the chart from memory, then press Check to compare it with the
+          answer.
+        </p>
+      </div>
     </div>
+    <TrainerOptions trainer="range" />
   </header>
 
-  <!-- The picker can be hidden in the options; its buttons stay, since the
-       options are opened from here. The picker is kept mounted so the
+  <!-- The picker can be hidden in the options; it is kept mounted so the
        selection isn't lost while it is out of sight. -->
   <section
     class="flex flex-wrap items-start gap-x-6 gap-y-3 {settings.picker
@@ -124,13 +127,10 @@
         {start}
       />
     </div>
-    <div class="ml-auto flex items-end gap-2 self-end">
-      <label class="btn btn-secondary">
-        Import range files
-        <input type="file" class="sr-only" multiple onchange={importRange} />
-      </label>
-      <TrainerOptions trainer="range" />
-    </div>
+    <label class="btn btn-secondary ml-auto self-end">
+      Import range files
+      <input type="file" class="sr-only" multiple onchange={importRange} />
+    </label>
   </section>
 
   <!-- The answer's outlines can be turned off in the options, for checking

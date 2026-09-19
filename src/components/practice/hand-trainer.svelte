@@ -29,19 +29,22 @@
 </script>
 
 <div class="page page-fill">
-  <header class="flex flex-col gap-1">
-    <span class="eyebrow">Train</span>
-    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <h1 class="page-title">Hand trainer</h1>
-      <p class="page-lead">
-        Pick the charts to practice, then choose the action for each hand. The
-        options decide what happens to a wrong answer and what you see.
-      </p>
+  <!-- The options sit in the header, so they stay put when the picker is hidden. -->
+  <header class="flex items-start gap-4">
+    <div class="flex min-w-0 flex-1 flex-col gap-1">
+      <span class="eyebrow">Train</span>
+      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h1 class="page-title">Hand trainer</h1>
+        <p class="page-lead">
+          Pick the charts to practice, then choose the action for each hand. The
+          options decide what happens to a wrong answer and what you see.
+        </p>
+      </div>
     </div>
+    <TrainerOptions trainer="hand" />
   </header>
 
-  <!-- The picker can be hidden in the options; its buttons stay, since the
-       options are opened from here. The picker is kept mounted so the
+  <!-- The picker can be hidden in the options; it is kept mounted so the
        selection isn't lost while it is out of sight. -->
   <section
     class="flex flex-wrap items-start gap-x-6 gap-y-3 {settings.picker
@@ -54,13 +57,10 @@
         start={() => {}}
       />
     </div>
-    <div class="ml-auto flex items-end gap-2 self-end">
-      <label class="btn btn-secondary">
-        Import a range file
-        <input type="file" class="sr-only" onchange={importRange} />
-      </label>
-      <TrainerOptions trainer="hand" />
-    </div>
+    <label class="btn btn-secondary ml-auto self-end">
+      Import a range file
+      <input type="file" class="sr-only" onchange={importRange} />
+    </label>
   </section>
 
   <!-- The quiz restarts on its own when the ranges or the round length change. -->
