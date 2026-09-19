@@ -43,6 +43,9 @@ export const settings = $state({
   progress: true,
   // The key badges on the action buttons; the keys work either way.
   keyHints: true,
+  // The chart the hand is from, with the hand marked, beside the question in
+  // the hand trainer: for learning a chart rather than testing it.
+  answerChart: false,
   // The greyed-out chart that holds the chart's place in the hand trainer
   // while there is no mistake to review.
   idleChart: true,

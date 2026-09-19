@@ -348,6 +348,13 @@
   .range-cell-preview {
     box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.75);
   }
+  /* The hand being asked about, on the answer chart in the hand trainer. */
+  .range-cell-marked {
+    box-shadow:
+      inset 0 0 0 2px var(--color-ink-950),
+      inset 0 0 0 4px #fff;
+    filter: brightness(1.2);
+  }
 
   /* Actions: cells, buttons and dots share these colors. */
   .action-allin {

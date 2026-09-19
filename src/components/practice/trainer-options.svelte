@@ -64,6 +64,7 @@
   const chart: Group = {
     label: "Chart",
     toggles: [
+      { key: "answerChart", label: "The answer", hint: "With the hand marked" },
       { key: "idleChart", label: "While waiting" },
       { key: "mistakeChart", label: "After a mistake" },
     ],

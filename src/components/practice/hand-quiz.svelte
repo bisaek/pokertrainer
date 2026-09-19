@@ -48,8 +48,11 @@
   // The chart with the mistake to review, if it is wanted.
   const mistakeChart = $derived(settings.mistakeChart ? mistake : undefined);
   // Whether the chart's column is drawn at all: it is when there is a
-  // mistake to review, or when the greyed-out stand-in is wanted.
-  const showChart = $derived(mistakeChart !== undefined || settings.idleChart);
+  // mistake to review, when the answer is wanted, or when the greyed-out
+  // stand-in is.
+  const showChart = $derived(
+    mistakeChart !== undefined || settings.answerChart || settings.idleChart
+  );
 
   // Drawn greyed out while there is no mistake to review, so the chart keeps
   // its place on the page instead of appearing and disappearing.
@@ -218,6 +221,16 @@
             selectedAction={Action.Fold}
             pokerRange={mistakeChart.attempt}
             compareTo={mistakeChart.answer}
+          />
+        </div>
+      </div>
+    {:else if settings.answerChart}
+      <div class="range-frame mx-auto min-h-0 w-full max-w-[40rem] lg:col-start-2 lg:max-w-none">
+        <div class="range-grid">
+          <Range
+            selectedAction={Action.Fold}
+            pokerRange={current.range}
+            marked={current.hand}
           />
         </div>
       </div>
