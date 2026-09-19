@@ -237,18 +237,17 @@
         </div>
       </div>
     {:else if showChart}
-      <!-- The stand-in holds the chart's place: greyed out, or not drawn at
-           all if that isn't wanted. On a narrow screen the column is a row
-           of its own, so it is left out rather than pushing the board off
-           the page. -->
+      <!-- The stand-in holds the chart's place: the greyed-out cells, or the
+           empty box if they aren't wanted. On a narrow screen the column is
+           a row of its own, so it is left out rather than pushing the board
+           off the page. -->
       <div
         class="range-frame mx-auto min-h-0 w-full max-w-[40rem] max-lg:hidden lg:col-start-2 lg:max-w-none"
       >
-        <div
-          class="range-grid {settings.idleChart ? 'range-grid-idle' : 'invisible'}"
-          aria-hidden="true"
-        >
-          <Range selectedAction={Action.Fold} pokerRange={blankRange} />
+        <div class="range-grid range-grid-idle" aria-hidden="true">
+          {#if settings.idleChart}
+            <Range selectedAction={Action.Fold} pokerRange={blankRange} />
+          {/if}
         </div>
       </div>
     {/if}
