@@ -230,7 +230,7 @@
           <Range
             selectedAction={Action.Fold}
             pokerRange={current.range}
-            marked={current.hand}
+            marked={settings.markHand ? current.hand : undefined}
           />
         </div>
       </div>
