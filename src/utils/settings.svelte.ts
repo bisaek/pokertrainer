@@ -47,7 +47,7 @@ export const settings = $state({
   // the hand trainer: for learning a chart rather than testing it.
   answerChart: false,
   // Outline the hand being asked about on the answer chart.
-  markHand: true,
+  markHand: false,
   // The greyed-out chart that holds the chart's place in the hand trainer
   // while there is no mistake to review.
   idleChart: true,
