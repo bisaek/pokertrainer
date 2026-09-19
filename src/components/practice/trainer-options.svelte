@@ -67,7 +67,7 @@
       { key: "answerChart", label: "The answer" },
       { key: "markHand", label: "Mark the hand on it", needs: "answerChart" },
       { key: "idleChart", label: "While waiting" },
-      { key: "idleKinds", label: "Colour pairs, suited and offsuit", needs: "idleChart" },
+      { key: "idleKinds", label: "Color pairs, suited and offsuit", needs: "idleChart" },
       { key: "mistakeChart", label: "After a mistake" },
     ],
   };
@@ -157,7 +157,7 @@
               </button>
             {/each}
           </div>
-          <span class="text-xs muted">A shorter round favours hands at the edge of a region.</span>
+          <span class="text-xs muted">A shorter round favors hands at the edge of a region.</span>
         </div>
       </div>
     {:else if trainer === "range"}

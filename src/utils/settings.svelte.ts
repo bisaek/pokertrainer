@@ -13,7 +13,7 @@ export const settings = $state({
   // A hand answered wrong is asked again at the end of the round.
   handRepeat: true,
   // How many hands a round asks; 0 asks every hand in the charts. A shorter
-  // round favours hands at the edge of a region, where mistakes happen.
+  // round favors hands at the edge of a region, where mistakes happen.
   handCount: 0,
 
   // Range trainer.
@@ -48,7 +48,7 @@ export const settings = $state({
   answerChart: false,
   // Outline the hand being asked about on the answer chart.
   markHand: false,
-  // The greyed-out chart in the hand trainer while there is no mistake to
+  // The grayed-out chart in the hand trainer while there is no mistake to
   // review. Its place is kept either way, so the board doesn't jump.
   idleChart: true,
   // Tint the waiting chart's cells by kind: pairs, suited and offsuit hands.

@@ -52,7 +52,7 @@
      On a wide screen the row takes the height that is left on the page (see
      .page-fill): the grid's column is as wide as the row is tall, so the grid
      is a square that fills it, the sidebar sits right next to it and the pair
-     is centred. The sidebar scrolls on its own if it is what doesn't fit. -->
+     is centered. The sidebar scrolls on its own if it is what doesn't fit. -->
 <div
   class="grid min-h-0 flex-1 gap-6 select-none lg:grid-cols-[min(var(--chart),60%)_minmax(22rem,30rem)] lg:grid-rows-[minmax(0,1fr)] lg:justify-center"
   style:--chart="{rowHeight}px"

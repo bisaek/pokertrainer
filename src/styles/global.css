@@ -212,7 +212,7 @@
     }
   }
   /* A board beside a chart on a wide training screen. Both are as tall as the
-     row, so the row is held to just the width the two need and centred: the
+     row, so the row is held to just the width the two need and centered: the
      pair stays together instead of drifting to the edges of the window.
      The board's width is the one .table-frame works out below, from the
      height that is left once the action bar and the gap above it are taken
@@ -301,7 +301,7 @@
     outline-offset: 3px;
     transition: outline-color 150ms;
   }
-  /* The chart with nothing to review: greyed out and out of the way, so it
+  /* The chart with nothing to review: grayed out and out of the way, so it
      holds its place until a mistake fills it in. */
   .range-grid-idle {
     opacity: 0.45;
@@ -378,7 +378,7 @@
     color: var(--color-ink-600);
   }
   /* The kinds of hand on a blank chart: pairs, suited and offsuit. Strong
-     enough to tell apart through the greyed-out chart's opacity. */
+     enough to tell apart through the grayed-out chart's opacity. */
   .kind-pair {
     background-color: color-mix(in oklab, var(--color-accent-500) 45%, var(--color-ink-850));
     color: var(--color-ink-100);

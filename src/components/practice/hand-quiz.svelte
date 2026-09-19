@@ -56,7 +56,7 @@
       settings.mistakeChart
   );
 
-  // Drawn greyed out while there is no mistake to review, so the chart keeps
+  // Drawn grayed out while there is no mistake to review, so the chart keeps
   // its place on the page instead of appearing and disappearing.
   const blankRange = new PokerRange("", Array(PokerRangeLength).fill(null));
 
@@ -138,7 +138,7 @@
 <!-- On a wide screen the row takes the height that is left on the page (see
      .page-fill). The board with the action bar under it takes the width it
      needs to fit that height (.table-frame); the chart gets a column as wide
-     as the row is tall, and the pair is centred together (.trainer-row).
+     as the row is tall, and the pair is centered together (.trainer-row).
      Either part can be turned off in the options: the row then holds just
      the width of what is left. The height isn't known until the script
      runs, and a width worked out from 0 would squeeze the row to nothing,
@@ -237,7 +237,7 @@
         </div>
       </div>
     {:else if showChart}
-      <!-- The stand-in holds the chart's place: the greyed-out cells, or the
+      <!-- The stand-in holds the chart's place: the grayed-out cells, or the
            empty box if they aren't wanted. On a narrow screen the column is
            a row of its own, so it is left out rather than pushing the board
            off the page. -->
