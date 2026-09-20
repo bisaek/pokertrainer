@@ -6,13 +6,27 @@
   import { describeExercise } from "@utils/drills";
   import { ACTION_ORDER, actionShares, type ActionShare } from "@utils/chart-stats";
   import {
-    courses,
     lessonStack,
     lessonStatsUrls,
     resolveLesson,
     type Course,
   } from "@utils/courses";
   import { onUrlChange, readParams, writeParams } from "@utils/url-state";
+  import {
+    importCustomDrills,
+    loadCustomDrills,
+    type CustomDrill,
+  } from "@utils/custom-drills";
+  import {
+    downloadCourses,
+    fetchCourseFiles,
+    importCustomCourses,
+    loadCustomCourses,
+    parseCourseFile,
+    removeCustomCourse,
+    toCourse,
+    type CustomCourse,
+  } from "@utils/custom-courses";
 
   const PROGRESS_KEY = "pokertrainer.courses.v1";
   const gameLabels: Record<string, string> = { mtt: "Tournament", cash: "Cash" };
@@ -24,6 +38,12 @@
   let manifest: RangeInfo[] = $state.raw([]);
   let manifestReady: Promise<RangeInfo[]> = Promise.resolve([]);
   let progress: Progress = $state.raw({});
+  // The player's own courses, kept in this browser, shown after the built-in ones.
+  let customCourses: CustomCourse[] = $state.raw([]);
+  let customDrills: CustomDrill[] = $state.raw([]);
+  // The built-in courses: the files in public/courses.
+  let fileCourses: Course[] = $state.raw([]);
+  let uploadMessage: string | null = $state(null);
   // The open course, lesson and whether practice is running live in the URL
   // (?course=cash-100&lesson=position&practice=1) so a copied link opens the same view.
   let courseId: string | null = $state(null);
@@ -33,7 +53,15 @@
   let statsLoading = $state(false);
   let statsToken = 0;
 
-  const course = $derived(courses.find((c) => c.id === courseId) ?? null);
+  const builtIn = $derived(fileCourses);
+  // A course that has since become a file is shown once, as built in.
+  const ownCourses = $derived(
+    customCourses
+      .filter((item) => !fileCourses.some((course) => course.id === item.id))
+      .map((item) => toCourse(item, customDrills))
+  );
+  const allCourses = $derived([...builtIn, ...ownCourses]);
+  const course = $derived(allCourses.find((c) => c.id === courseId) ?? null);
   const lesson = $derived(
     course && lessonIndex !== null ? (course.lessons[lessonIndex] ?? null) : null
   );
@@ -71,14 +99,23 @@
     } catch {
       progress = {};
     }
+    customDrills = loadCustomDrills();
+    customCourses = loadCustomCourses();
     manifestReady = fetchManifest().then((json) => (manifest = json));
     readUrl();
+    // A link to a course from a file can only be followed once the files are in.
+    fetchCourseFiles()
+      .then((loaded) => {
+        fileCourses = loaded;
+        if (courseId === null) readUrl();
+      })
+      .catch((error) => console.error(error));
     return onUrlChange(readUrl);
   });
 
   function readUrl() {
     const params = readParams();
-    const c = courses.find((item) => item.id === params.get("course")) ?? null;
+    const c = allCourses.find((item) => item.id === params.get("course")) ?? null;
     const index = c ? c.lessons.findIndex((l) => l.id === params.get("lesson")) : -1;
     courseId = c?.id ?? null;
     lessonIndex = index === -1 ? null : index;
@@ -178,6 +215,55 @@
       stats = [];
     }
     statsLoading = false;
+  }
+
+  function deleteCourse(c: Course) {
+    if (!confirm(`Delete "${c.name}"?`)) return;
+    customCourses = removeCustomCourse(c.id);
+    const { [c.id]: _, ...rest } = progress;
+    progress = rest;
+    saveProgress();
+    if (courseId === c.id) openCourse(null);
+  }
+
+  function downloadCourse(c: Course) {
+    const saved = customCourses.find((item) => item.id === c.id);
+    if (saved) downloadCourses([saved], saved.name);
+  }
+
+  function downloadAll() {
+    downloadCourses(customCourses, "courses");
+  }
+
+  // A course file brings its drills along; they go in with the saved drills.
+  async function uploadFiles(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const files = [...(input.files ?? [])];
+    input.value = "";
+    if (files.length === 0) return;
+    let added = 0;
+    let replaced = 0;
+    let drillCount = 0;
+    const problems: string[] = [];
+    for (const file of files) {
+      try {
+        const parsed = parseCourseFile(await file.text());
+        const drills = importCustomDrills(parsed.drills);
+        customDrills = drills.drills;
+        drillCount += drills.added;
+        const result = importCustomCourses(parsed.courses);
+        customCourses = result.courses;
+        added += result.added;
+        replaced += result.replaced;
+      } catch (error) {
+        problems.push(`${file.name}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    const parts: string[] = [];
+    if (added > 0) parts.push(`Added ${added} ${added === 1 ? "course" : "courses"}.`);
+    if (replaced > 0) parts.push(`Replaced ${replaced} ${replaced === 1 ? "course" : "courses"} already saved.`);
+    if (drillCount > 0) parts.push(`${drillCount} ${drillCount === 1 ? "drill" : "drills"} came along and went in with your drills.`);
+    uploadMessage = [...parts, ...problems].join(" ");
   }
 
   function percentFor(row: StatsRow, action: string) {
@@ -360,6 +446,20 @@
       </div>
     </section>
 
+    {#if course.custom}
+      <div class="flex flex-col gap-2" data-course-actions>
+        <div class="flex flex-wrap gap-1">
+          <a href="/courses/new?edit={encodeURIComponent(course.id)}" class="btn btn-ghost">Edit</a>
+          <button class="btn btn-ghost" onclick={() => downloadCourse(course)}>Download</button>
+          <button class="btn btn-ghost" onclick={() => deleteCourse(course)}>Delete</button>
+        </div>
+        <p class="text-xs muted">
+          To make this a built-in course, download it and put the file in
+          <code>public/courses/</code>, like a chart file in <code>public/ranges/</code>.
+        </p>
+      </div>
+    {/if}
+
     <ol class="card divide-y divide-ink-800 overflow-hidden p-0">
       {#each course.lessons as item, index (item.id)}
         <li>
@@ -395,19 +495,66 @@
       </p>
     </header>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {#each courses as item (item.id)}
-        <button
-          class="card card-interactive flex flex-col gap-3"
-          onclick={() => openCourse(item)}
-        >
-          <span class="label">
-            {gameLabels[item.game] ?? item.game} · {item.lessons.length} lessons
-          </span>
-          <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
-          <span class="flex-1 text-sm text-ink-300">{item.description}</span>
-          {@render progressBar(completedIn(item), item.lessons.length)}
-        </button>
+      {#each builtIn as item (item.id)}
+        {@render courseCard(item)}
       {/each}
     </div>
+
+    <section class="flex flex-col gap-3" data-own-courses>
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <h2 class="section-title flex items-baseline gap-2">
+          Your courses
+          {#if ownCourses.length > 0}
+            <span class="text-sm font-normal muted">{ownCourses.length}</span>
+          {/if}
+        </h2>
+        <div class="ml-auto flex flex-wrap items-center gap-2">
+          <label class="btn btn-ghost">
+            Upload
+            <input
+              type="file"
+              accept=".json,application/json"
+              multiple
+              class="hidden"
+              onchange={uploadFiles}
+            />
+          </label>
+          <button class="btn btn-ghost" disabled={customCourses.length === 0} onclick={downloadAll}>
+            Download all
+          </button>
+          <a href="/courses/new" class="btn btn-secondary">+ Create a course</a>
+        </div>
+      </div>
+      {#if uploadMessage}
+        <p class="text-sm text-ink-300" data-upload-message>{uploadMessage}</p>
+      {/if}
+      {#if ownCourses.length === 0}
+        <p class="text-sm muted">
+          Write your own lessons, with your drills as the practice, or upload a course
+          file someone shared.
+        </p>
+      {:else}
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {#each ownCourses as item (item.id)}
+            {@render courseCard(item)}
+          {/each}
+        </div>
+      {/if}
+    </section>
   </div>
 {/if}
+
+{#snippet courseCard(item: Course)}
+  <button
+    class="card card-interactive flex flex-col gap-3"
+    onclick={() => openCourse(item)}
+  >
+    <span class="label">
+      {gameLabels[item.game] ?? item.game} · {item.stack}bb · {item.lessons.length}
+      {item.lessons.length === 1 ? "lesson" : "lessons"}
+    </span>
+    <span class="text-xl font-semibold text-ink-100" data-course-name>{item.name}</span>
+    <span class="flex-1 text-sm text-ink-300">{item.description}</span>
+    {@render progressBar(completedIn(item), item.lessons.length)}
+  </button>
+{/snippet}

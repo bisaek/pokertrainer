@@ -2,7 +2,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import Layout from "../layouts/Layout.astro";
-import { courses } from "../utils/courses";
 
 const rangesDir = join(process.cwd(), "public", "ranges");
 
@@ -20,7 +19,20 @@ function countCharts(dir: string): number {
 }
 
 const chartCount = countCharts(rangesDir);
-const lessonCount = courses.reduce((count, course) => count + course.lessons.length, 0);
+
+// The built-in courses are the files in public/courses.
+const coursesDir = join(process.cwd(), "public", "courses");
+const fileCourses = readdirSync(coursesDir)
+  .filter((name) => name.endsWith(".json"))
+  .flatMap((name) => {
+    const file = JSON.parse(readFileSync(join(coursesDir, name), "utf8"));
+    return (Array.isArray(file.courses) ? file.courses : [file]) as { lessons: unknown[] }[];
+  });
+const courseCount = fileCourses.length;
+const lessonCount = fileCourses.reduce(
+  (count, course) => count + course.lessons.length,
+  0
+);
 
 // A real chart for the hero picture: the cash-game button opening range.
 const heroChart = JSON.parse(
@@ -103,7 +115,7 @@ const steps = [
           <a href="/drills" class="btn btn-secondary btn-lg">Browse drills</a>
         </div>
         <p class="text-sm muted">
-          {chartCount} charts · {courses.length} courses · {lessonCount} lessons
+          {chartCount} charts · {courseCount} courses · {lessonCount} lessons
         </p>
       </div>
       <figure class="flex flex-col gap-3">

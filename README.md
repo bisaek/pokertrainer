@@ -41,6 +41,12 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## 📚 Adding a built-in course
+
+Make a course on `/courses/new`, open it and press **Download**. Put the file in
+`public/courses/` and it becomes a built-in course for everyone, the way a chart
+file in `public/ranges/` becomes a chart. The file carries the drills its lessons use.
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

@@ -1,0 +1,766 @@
+{
+  "kind": "pokertrainer-courses",
+  "version": 1,
+  "courses": [
+    {
+      "id": "short-stack",
+      "name": "Short-stack tournaments",
+      "description": "Playing 20bb and 12bb stacks, where all-ins become a big part of preflop play.",
+      "game": "mtt",
+      "stack": 20,
+      "lessons": [
+        {
+          "id": "20-opens-early",
+          "title": "Opening at 20bb: early position",
+          "body": [
+            "With 20bb, every open risks a big part of your stack if someone shoves. The table shows how each chart splits its hands between actions. Compare it with the 30bb charts if you took the tournament course."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-20-opens-early",
+                "name": "Opening at 20bb: early position",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "20-opens-late",
+          "title": "Opening at 20bb: late position",
+          "body": [
+            "The hijack, cutoff, button and small blind at 20bb."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "HJ",
+              "CO",
+              "BTN",
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-20-opens-late",
+                "name": "Opening at 20bb: late position",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-20-opens",
+          "title": "Review: opening at 20bb",
+          "body": [
+            "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+            "Rebuild two of the 20bb opening charts from memory, then answer hands from every seat that opens at this stack. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-review-20-opens",
+                "name": "Review: opening at 20bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 100
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "20-bb",
+          "title": "Big blind at 20bb",
+          "body": [
+            "The big blind facing an open from the button or the small blind, the most common spots at a short-handed or short-stacked table."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-20-bb",
+                "name": "Big blind at 20bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "20-open-shoves",
+          "title": "Facing an open shove at 20bb",
+          "body": [
+            "When a player opens all-in, you can only call or fold. The shover's range is wide when they're in late position, but calling risks your tournament."
+          ],
+          "stats": {
+            "types": [
+              "vs all-in"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-20-open-shoves",
+                "name": "Facing an open shove at 20bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ]
+                    },
+                    "timesInARow": 1
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "20-3bet-shoves",
+          "title": "Facing a 3-bet shove at 20bb",
+          "body": [
+            "You opened and got 3-bet all-in. This hand quiz covers every position."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-20-3bet-shoves",
+                "name": "Facing a 3-bet shove at 20bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet all-in"
+                      ]
+                    },
+                    "count": 80
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-20",
+          "title": "Review: the whole 20bb game",
+          "body": [
+            "Everything you have done at 20bb in one lesson, before the stacks get shorter and the charts change again.",
+            "Rebuild an early and a late opening chart, then answer hands from the opening, big blind and shove-facing charts at 20bb."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-review-20",
+                "name": "Review: the whole 20bb game",
+                "description": "",
+                "game": "mtt",
+                "stack": 20,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG+1",
+                        "CO"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI",
+                        "vs all-in",
+                        "vs 3-bet all-in"
+                      ]
+                    },
+                    "count": 120
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "12-opens-early",
+          "title": "Opening at 12bb: early position",
+          "body": [
+            "At 12bb these charts use a mix of small raises and all-ins. Look at the All in column in the table, and while you rebuild the charts, notice which hands shove and which raise."
+          ],
+          "stack": 12,
+          "stats": {
+            "types": [
+              "RFI"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-12-opens-early",
+                "name": "Opening at 12bb: early position",
+                "description": "",
+                "game": "mtt",
+                "stack": 12,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "12-opens-late",
+          "title": "Opening at 12bb: late position",
+          "body": [
+            "The hijack, cutoff and button at 12bb."
+          ],
+          "stack": 12,
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "HJ",
+              "CO",
+              "BTN"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-12-opens-late",
+                "name": "Opening at 12bb: late position",
+                "description": "",
+                "game": "mtt",
+                "stack": 12,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "12-bb-vs-shove",
+          "title": "Big blind facing a shove at 12bb",
+          "body": [
+            "The big blind already has 1bb in and the antes are in the pot, so it gets a good price to call a shove from late position."
+          ],
+          "stack": 12,
+          "stats": {
+            "types": [
+              "vs all-in"
+            ],
+            "positions": [
+              "BB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-12-bb-vs-shove",
+                "name": "Big blind facing a shove at 12bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 12,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "12-calling-shoves",
+          "title": "Calling shoves at 12bb",
+          "body": [
+            "Facing an open shove from every seat."
+          ],
+          "stack": 12,
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-12-calling-shoves",
+                "name": "Calling shoves at 12bb",
+                "description": "",
+                "game": "mtt",
+                "stack": 12,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs all-in"
+                      ]
+                    },
+                    "count": 80
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "short-final",
+          "title": "Final exam",
+          "body": [
+            "Two charts to rebuild from memory, then hands from the 12bb opening and shove-calling charts."
+          ],
+          "stack": 12,
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "short-stack-short-final",
+                "name": "Final exam",
+                "description": "",
+                "game": "mtt",
+                "stack": 12,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs all-in"
+                      ]
+                    },
+                    "count": 160
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drills": []
+}

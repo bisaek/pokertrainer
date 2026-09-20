@@ -1,0 +1,1078 @@
+{
+  "kind": "pokertrainer-courses",
+  "version": 1,
+  "courses": [
+    {
+      "id": "cash-100",
+      "name": "Cash game preflop",
+      "description": "From opening ranges to facing 4-bets, at 100bb stacks. Start here if you play cash games.",
+      "game": "cash",
+      "stack": 100,
+      "lessons": [
+        {
+          "id": "position",
+          "title": "Position and opening ranges",
+          "body": [
+            "Raise first in (RFI) means everyone before you folded and you are the first to put money in the pot. Every player still to act can wake up with a strong hand, and the players after you also act after you on every street after the flop.",
+            "So the earlier your seat, the tighter your opening range. The table shows how each chart splits its hands between actions. Compare UTG with the button.",
+            "Start with the two earliest seats."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-position",
+                "name": "Position and opening ranges",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "middle-opens",
+          "title": "Opening from the middle",
+          "body": [
+            "The lojack (LJ) and hijack (HJ) have fewer players left to act than UTG, so they open more hands.",
+            "While you rebuild these charts, notice which hands get added compared with the earlier seats."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "UTG+1",
+              "LJ",
+              "HJ"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-middle-opens",
+                "name": "Opening from the middle",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "late-opens",
+          "title": "Opening from late position",
+          "body": [
+            "From the cutoff (CO) only the button and the blinds are left, and from the button only the blinds. The button also acts last on every street after the flop.",
+            "That makes these the widest opening ranges at the table."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "HJ",
+              "CO",
+              "BTN"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-late-opens",
+                "name": "Opening from late position",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "small-blind",
+          "title": "The small blind",
+          "body": [
+            "When it folds to the small blind, only the big blind is left. But the small blind is out of position for the rest of the hand, so it doesn't simply raise everything it plays.",
+            "Look at the table: this chart limps (calls) as well as raising. Pay attention to which hands raise and which limp."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-small-blind",
+                "name": "The small blind",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-opens",
+          "title": "Review: opening ranges",
+          "body": [
+            "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+            "Rebuild four of the opening charts from memory, then answer hands from every seat that opens. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-review-opens",
+                "name": "Review: opening ranges",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "HJ",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 100
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bb-vs-late",
+          "title": "Big blind defense against late opens",
+          "body": [
+            "The big blind already has 1bb in the pot, so calling an open costs less than from any other seat, and nobody acts after you preflop.",
+            "Late-position players open wide, so the big blind can continue with many hands against them. The table shows how each chart splits its hands between actions. Compare the openers from UTG to the small blind."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-bb-vs-late",
+                "name": "Big blind defense against late opens",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bb-vs-early",
+          "title": "Big blind defense against early opens",
+          "body": [
+            "An open from an early seat comes from a much stronger range. A hand that defends against the button can be a fold against UTG.",
+            "Rebuild these charts and compare them with the ones from the last lesson."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-bb-vs-early",
+                "name": "Big blind defense against early opens",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "blind-vs-blind",
+          "title": "Blind vs blind",
+          "body": [
+            "When everyone folds to the small blind, only the blinds are left. As you saw earlier, the small blind both raises and limps.",
+            "This lesson covers the big blind's answer to each: facing a raise and facing a limp."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI",
+              "vs limp"
+            ],
+            "positions": [
+              "BB"
+            ],
+            "opponents": [
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-blind-vs-blind",
+                "name": "Blind vs blind",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI",
+                        "vs limp"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 2
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI",
+                        "vs limp"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI",
+                        "vs limp"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI",
+                        "vs limp"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-vs-open",
+          "title": "Facing an open on the button",
+          "body": [
+            "On the button you will play the rest of the hand in position. Against an open you can 3-bet, call, or fold.",
+            "Compare the charts against early and late openers: the later the opener, the wider their range and the more hands you continue with."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BTN"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-btn-vs-open",
+                "name": "Facing an open on the button",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "sb-vs-open",
+          "title": "Facing an open from the small blind",
+          "body": [
+            "The small blind is out of position against every opener, and the big blind can still act behind you.",
+            "The table shows how each chart splits its hands between actions. Compare how often the small blind 3-bets with how often it calls."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-sb-vs-open",
+                "name": "Facing an open from the small blind",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-defense",
+          "title": "Review: opening and defending",
+          "body": [
+            "Defense charts fade faster than opening charts, because there is a different one for every opener you can face.",
+            "Rebuild the big blind against an early open and against the button, then answer hands from everything so far: opens, limps and defense. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-review-defense",
+                "name": "Review: opening and defending",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI",
+                        "vs limp"
+                      ]
+                    },
+                    "count": 120
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-3bet-late",
+          "title": "When your late open gets 3-bet",
+          "body": [
+            "These charts only contain the hands you opened with. Hands you would have folded preflop are left empty in the grid, and the table's first column shows how many hands reach the spot.",
+            "Against a 3-bet you can 4-bet, call, or fold."
+          ],
+          "stats": {
+            "types": [
+              "vs 3-bet"
+            ],
+            "positions": [
+              "CO",
+              "BTN"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-vs-3bet-late",
+                "name": "When your late open gets 3-bet",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-3bet-early",
+          "title": "When your early open gets 3-bet",
+          "body": [
+            "An open from UTG is already a strong range, and fewer hands reach this spot. Compare the Fold column with the late-open charts from the last lesson.",
+            "There are many charts here, one per opponent, so this lesson is a hand quiz."
+          ],
+          "stats": {
+            "types": [
+              "vs 3-bet"
+            ],
+            "positions": [
+              "UTG"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-vs-3bet-early",
+                "name": "When your early open gets 3-bet",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-3bets",
+          "title": "Review: 3-bets and everything before them",
+          "body": [
+            "Facing a 3-bet is where the earlier charts matter most: what you can continue with depends on how wide you opened in the first place.",
+            "Rebuild the button against a big blind 3-bet, then answer hands drawn from the whole course so far."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-review-3bets",
+                "name": "Review: 3-bets and everything before them",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ],
+                      "opponents": [
+                        "BB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI",
+                        "vs limp",
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 120
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-4bet",
+          "title": "Facing a 4-bet",
+          "body": [
+            "You 3-bet and got 4-bet. Only a narrow part of your range is left, and the pot is already big.",
+            "This hand quiz mixes every position."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-vs-4bet",
+                "name": "Facing a 4-bet",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 4-bet"
+                      ]
+                    },
+                    "count": 80
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cash-final",
+          "title": "Final exam",
+          "body": [
+            "Three charts to rebuild from memory, then hands from every chart in this course: opens, facing an open, blind vs blind, and facing 3-bets."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "cash-100-cash-final",
+                "name": "Final exam",
+                "description": "",
+                "game": "cash",
+                "stack": 100,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI",
+                        "vs limp",
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 160
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drills": []
+}
