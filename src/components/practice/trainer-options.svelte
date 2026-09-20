@@ -1,14 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import {
+    aroundChartGroup,
+    aroundHandGroup,
+    chartGroup,
+    drillLocks,
     handCounts,
     loadSettings,
+    pageGroup,
     rangeStreaks,
     resetSettings,
     saveSettings,
     settings,
+    tableGroup,
     type MistakeMode,
     type SettingKey,
+    type ToggleGroup,
   } from "@utils/settings.svelte";
 
   let {
@@ -33,54 +40,10 @@
     if (open && event.key === "Escape") open = false;
   }
 
-  type Toggle = { key: SettingKey; label: string; hint?: string; needs?: SettingKey };
-  type Group = { label: string; toggles: Toggle[] };
-
-  const table: Group = {
-    label: "Table",
-    toggles: [
-      { key: "board", label: "Board" },
-      { key: "foldedSeats", label: "Folded players", needs: "board" },
-      { key: "bets", label: "Blinds and bets", needs: "board" },
-    ],
-  };
-  const aroundHand: Group = {
-    label: "Around the hand",
-    toggles: [
-      { key: "chartName", label: "Chart name" },
-      { key: "handName", label: "Hand name" },
-      { key: "progress", label: "Hands left" },
-      { key: "keyHints", label: "Key hints" },
-    ],
-  };
-  const aroundChart: Group = {
-    label: "Around the chart",
-    toggles: [
-      { key: "chartName", label: "Chart name", hint: "Shown after a check" },
-      { key: "progress", label: "Charts left" },
-      { key: "keyHints", label: "Key hints" },
-    ],
-  };
-  const chart: Group = {
-    label: "Chart",
-    toggles: [
-      { key: "answerChart", label: "The answer" },
-      { key: "idleChart", label: "While waiting" },
-      { key: "idleKinds", label: "Color pairs, suited and offsuit", needs: "idleChart" },
-      { key: "markHand", label: "Mark the hand" },
-      { key: "mistakeChart", label: "After a mistake" },
-    ],
-  };
-
-  const page: Group = {
-    label: "Page",
-    toggles: [{ key: "picker", label: "Chart picker" }],
-  };
-
-  const groups = $derived.by((): Group[] => {
-    if (trainer === "range") return [page, table, aroundChart];
-    if (trainer === "hand") return [page, table, aroundHand, chart];
-    return [table, aroundHand, chart];
+  const groups = $derived.by((): ToggleGroup[] => {
+    if (trainer === "range") return [pageGroup, tableGroup, aroundChartGroup];
+    if (trainer === "hand") return [pageGroup, tableGroup, aroundHandGroup, chartGroup];
+    return [tableGroup, aroundHandGroup, chartGroup];
   });
 
   const mistakeModes: { value: MistakeMode; label: string }[] = [
@@ -203,7 +166,8 @@
       <div class="flex flex-col gap-1.5">
         <span class="label">{group.label}</span>
         {#each group.toggles as toggle}
-          {@const off = toggle.needs !== undefined && !settings[toggle.needs]}
+          {@const locked = drillLocks.keys.includes(toggle.key)}
+          {@const off = locked || (toggle.needs !== undefined && !settings[toggle.needs])}
           <label
             class="flex items-center gap-2 text-sm whitespace-nowrap {off
               ? 'cursor-default opacity-40'
@@ -217,7 +181,9 @@
               onchange={(e) => setToggle(toggle.key, e.currentTarget.checked)}
             />
             {toggle.label}
-            {#if toggle.hint}
+            {#if locked}
+              <span class="text-xs muted">Set by the drill</span>
+            {:else if toggle.hint}
               <span class="text-xs muted">{toggle.hint}</span>
             {/if}
           </label>

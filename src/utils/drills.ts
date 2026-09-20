@@ -1,15 +1,28 @@
 import { positionOrder, rangeUrl, typeOrder, type RangeInfo } from "./manifest";
+import type { ExerciseSettings, MistakeMode } from "./settings.svelte";
 
-// Which ranges an exercise uses. Omitted positions or opponents mean all of them.
+// Which ranges an exercise uses. An omitted or empty list means all of them.
 export type RangeFilter = {
   types: string[];
   positions?: string[];
   opponents?: string[];
 };
 
+// An exercise's charts: those matching one filter, or any of a list of them,
+// so opens from every seat and the big blind's defense can share a quiz.
+export type ChartPick = RangeFilter | RangeFilter[];
+
+// What an exercise says about the trainer's options: values it sets, and
+// whether the player may change them meanwhile. Unset options are the player's.
+export type ExerciseRules = { settings?: ExerciseSettings };
+
+// How a hand quiz treats a wrong answer; unset means ask again, and once
+// more at the end.
+export type HandRules = { mistakes?: MistakeMode; repeatMistakes?: boolean };
+
 export type ExerciseTemplate =
-  | { kind: "range"; filter: RangeFilter; timesInARow: number }
-  | { kind: "hands"; filter: RangeFilter; count: number };
+  | ({ kind: "range"; filter: ChartPick; timesInARow: number } & ExerciseRules)
+  | ({ kind: "hands"; filter: ChartPick; count: number } & ExerciseRules & HandRules);
 
 export type DrillTemplate = {
   name: string;
@@ -20,8 +33,8 @@ export type DrillTemplate = {
 };
 
 export type DrillExercise =
-  | { kind: "range"; urls: string[]; timesInARow: number }
-  | { kind: "hands"; urls: string[]; count: number };
+  | ({ kind: "range"; urls: string[]; timesInARow: number } & ExerciseRules)
+  | ({ kind: "hands"; urls: string[]; count: number } & ExerciseRules & HandRules);
 
 export type Drill = {
   name: string;
@@ -233,11 +246,15 @@ export const drillCategories: { name: string; drills: DrillTemplate[] }[] = [
   },
 ];
 
-function matches(range: RangeInfo, filter: RangeFilter) {
+function matches(range: RangeInfo, pick: ChartPick): boolean {
+  if (Array.isArray(pick)) return pick.some((filter) => matches(range, filter));
+  const filter = pick;
   return (
-    filter.types.includes(range.type) &&
-    (!filter.positions || filter.positions.includes(range.position)) &&
-    (!filter.opponents || range.opponent === null || filter.opponents.includes(range.opponent))
+    (filter.types.length === 0 || filter.types.includes(range.type)) &&
+    (!filter.positions?.length || filter.positions.includes(range.position)) &&
+    (!filter.opponents?.length ||
+      range.opponent === null ||
+      filter.opponents.includes(range.opponent))
   );
 }
 
@@ -251,7 +268,7 @@ function compareRanges(a: RangeInfo, b: RangeInfo) {
 
 // URLs of the charts matching a filter for a game and stack, in table order.
 export function resolveUrls(
-  filter: RangeFilter,
+  filter: ChartPick,
   manifest: RangeInfo[],
   game: string,
   stack: number
@@ -276,8 +293,15 @@ export function resolveDrill(
     if (urls.length === 0) continue;
     exercises.push(
       exercise.kind === "range"
-        ? { kind: "range", urls, timesInARow: exercise.timesInARow }
-        : { kind: "hands", urls, count: exercise.count }
+        ? { kind: "range", urls, timesInARow: exercise.timesInARow, settings: exercise.settings }
+        : {
+            kind: "hands",
+            urls,
+            count: exercise.count,
+            settings: exercise.settings,
+            mistakes: exercise.mistakes,
+            repeatMistakes: exercise.repeatMistakes,
+          }
     );
   }
   const chartCount = new Set(exercises.flatMap((exercise) => exercise.urls)).size;
