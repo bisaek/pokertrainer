@@ -20,6 +20,7 @@
   } from "@utils/custom-drills";
   import {
     downloadCourses,
+    fetchCourseFiles,
     importCustomCourses,
     loadCustomCourses,
     parseCourseFile,
@@ -41,6 +42,8 @@
   // The player's own courses, kept in this browser, shown after the built-in ones.
   let customCourses: CustomCourse[] = $state.raw([]);
   let customDrills: CustomDrill[] = $state.raw([]);
+  // Courses from files in public/courses: built in, like the ones in courses.ts.
+  let fileCourses: Course[] = $state.raw([]);
   let uploadMessage: string | null = $state(null);
   // The open course, lesson and whether practice is running live in the URL
   // (?course=cash-100&lesson=position&practice=1) so a copied link opens the same view.
@@ -51,8 +54,14 @@
   let statsLoading = $state(false);
   let statsToken = 0;
 
-  const ownCourses = $derived(customCourses.map((item) => toCourse(item, customDrills)));
-  const allCourses = $derived([...courses, ...ownCourses]);
+  const builtIn = $derived([...courses, ...fileCourses]);
+  // A course that has since become a file is shown once, as built in.
+  const ownCourses = $derived(
+    customCourses
+      .filter((item) => !fileCourses.some((course) => course.id === item.id))
+      .map((item) => toCourse(item, customDrills))
+  );
+  const allCourses = $derived([...builtIn, ...ownCourses]);
   const course = $derived(allCourses.find((c) => c.id === courseId) ?? null);
   const lesson = $derived(
     course && lessonIndex !== null ? (course.lessons[lessonIndex] ?? null) : null
@@ -95,6 +104,13 @@
     customCourses = loadCustomCourses();
     manifestReady = fetchManifest().then((json) => (manifest = json));
     readUrl();
+    // A link to a course from a file can only be followed once the files are in.
+    fetchCourseFiles()
+      .then((loaded) => {
+        fileCourses = loaded;
+        if (courseId === null) readUrl();
+      })
+      .catch((error) => console.error(error));
     return onUrlChange(readUrl);
   });
 
@@ -432,10 +448,16 @@
     </section>
 
     {#if course.custom}
-      <div class="flex flex-wrap gap-1" data-course-actions>
-        <a href="/courses/new?edit={encodeURIComponent(course.id)}" class="btn btn-ghost">Edit</a>
-        <button class="btn btn-ghost" onclick={() => downloadCourse(course)}>Download</button>
-        <button class="btn btn-ghost" onclick={() => deleteCourse(course)}>Delete</button>
+      <div class="flex flex-col gap-2" data-course-actions>
+        <div class="flex flex-wrap gap-1">
+          <a href="/courses/new?edit={encodeURIComponent(course.id)}" class="btn btn-ghost">Edit</a>
+          <button class="btn btn-ghost" onclick={() => downloadCourse(course)}>Download</button>
+          <button class="btn btn-ghost" onclick={() => deleteCourse(course)}>Delete</button>
+        </div>
+        <p class="text-xs muted">
+          To make this a built-in course, download it and put the file in
+          <code>public/courses/</code>, like a chart file in <code>public/ranges/</code>.
+        </p>
       </div>
     {/if}
 
@@ -474,7 +496,7 @@
       </p>
     </header>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {#each courses as item (item.id)}
+      {#each builtIn as item (item.id)}
         {@render courseCard(item)}
       {/each}
     </div>

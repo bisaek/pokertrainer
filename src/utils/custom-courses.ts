@@ -122,15 +122,22 @@ export function serializeCourses(courses: CustomCourse[], drills: CustomDrill[])
   return JSON.stringify(file, null, 2);
 }
 
+export type CourseFileContents = { courses: CustomCourse[]; drills: CustomDrill[] };
+
 // Reads a course file back. Throws with a message fit to show when the file
 // isn't courses at all.
-export function parseCourseFile(text: string): { courses: CustomCourse[]; drills: CustomDrill[] } {
+export function parseCourseFile(text: string): CourseFileContents {
   let json: unknown;
   try {
     json = JSON.parse(text);
   } catch {
     throw new Error("This isn't a JSON file.");
   }
+  return courseFileOf(json);
+}
+
+// The courses and drills in a parsed course file; throws when it isn't one.
+export function courseFileOf(json: unknown): CourseFileContents {
   if (typeof json !== "object" || json === null) {
     throw new Error("This file doesn't hold courses from this site.");
   }
@@ -141,6 +148,25 @@ export function parseCourseFile(text: string): { courses: CustomCourse[]; drills
     throw new Error("This file doesn't hold courses from this site.");
   }
   return { courses, drills };
+}
+
+// The course files in public/courses, as built-in courses. A file that isn't
+// a course file is skipped with a note in the console.
+export async function fetchCourseFiles(): Promise<Course[]> {
+  const response = await fetch("/courses/index.json");
+  const files = (await response.json()) as unknown[];
+  const courses: Course[] = [];
+  for (const file of files) {
+    try {
+      const contents = courseFileOf(file);
+      for (const course of contents.courses) {
+        courses.push({ ...toCourse(course, contents.drills), custom: false });
+      }
+    } catch (error) {
+      console.error("A file in public/courses isn't a course file:", error);
+    }
+  }
+  return courses;
 }
 
 // Puts the courses from a file in with the saved ones. A course already saved
