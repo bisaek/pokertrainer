@@ -126,6 +126,26 @@
     {:else if trainer === "range"}
       <div class="flex flex-col gap-3">
         <span class="label">Range trainer</span>
+        <div class="flex flex-col gap-1.5">
+          <span class="text-sm">After a mistake</span>
+          <div class="flex gap-1.5" role="radiogroup" aria-label="After a mistake">
+            {#each mistakeModes as mode}
+              <button
+                class="chip {settings.rangeMistakes === mode.value ? 'chip-active' : ''}"
+                role="radio"
+                aria-checked={settings.rangeMistakes === mode.value}
+                onclick={() => set("rangeMistakes", mode.value)}
+              >
+                {mode.label}
+              </button>
+            {/each}
+          </div>
+          <span class="text-xs muted">
+            {settings.rangeMistakes === "retry"
+              ? "The same chart comes up again right away."
+              : "The next chart comes up."}
+          </span>
+        </div>
         <label class="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap">
           <input
             type="checkbox"
@@ -133,7 +153,7 @@
             checked={settings.rangeRepeat}
             onchange={(e) => set("rangeRepeat", e.currentTarget.checked)}
           />
-          Wrong charts also come back at the end
+          Wrong charts come back at the end
         </label>
         <div class="flex flex-col gap-1.5">
           <span class="text-sm">Correct in a row to finish a chart</span>
