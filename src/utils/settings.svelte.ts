@@ -2,8 +2,8 @@
 // choice holds across pages and visits.
 const STORAGE_KEY = "pokertrainer.settings";
 
-// What to do with a hand or chart answered wrong: ask it again right away, or
-// move on to the next one.
+// What to do with a hand answered wrong: keep asking it until it is right, or
+// move on to the next hand.
 export type MistakeMode = "retry" | "move-on";
 
 export const settings = $state({
@@ -17,8 +17,8 @@ export const settings = $state({
   handCount: 0,
 
   // Range trainer.
-  // What happens right after a wrong answer.
-  rangeMistakes: "retry" as MistakeMode,
+  // A chart rebuilt wrong is asked again right away.
+  rangeRetry: true,
   // A chart rebuilt wrong is asked again at the end of the round.
   rangeRepeat: true,
   // How many times in a row a chart has to be rebuilt right before it is done.
@@ -177,7 +177,6 @@ export function loadSettings() {
 function isValid(key: SettingKey, value: unknown): boolean {
   switch (key) {
     case "handMistakes":
-    case "rangeMistakes":
       return value === "retry" || value === "move-on";
     case "handCount":
       return handCounts.includes(value as number);

@@ -57,15 +57,13 @@
           ? rest
           : [...rest, { range: item.range, streak }];
     } else {
-      // Wrong: by default it is rebuilt again right away, like in a drill.
-      // With repeat on it also comes back at the end, unless already there.
-      const retry = settings.rangeMistakes === "retry";
-      const again = { range: item.range, streak: 0 };
+      // Wrong: with retry on it is rebuilt again right away, like in a
+      // drill; with repeat on it comes back at the end, unless already there.
       queue =
         settings.rangeRepeat && rest.at(-1)?.range !== item.range
           ? [...rest, { range: item.range, streak: 0 }]
           : rest;
-      if (retry) queue = [again, ...queue];
+      if (settings.rangeRetry) queue = [{ range: item.range, streak: 0 }, ...queue];
     }
     compareTo = undefined;
     isCorrect = undefined;
