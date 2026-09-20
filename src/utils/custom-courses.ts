@@ -1,15 +1,29 @@
 import { isCustomDrill, loadCustomDrills, type CustomDrill } from "./custom-drills";
 import type { Course } from "./courses";
 
-// A lesson the player wrote: some text, then one or more of their own drills
-// as the practice, one after another.
+// A lesson's practice is a drill: one saved under "Your drills", or one made
+// in the lesson itself, which lives in the course and isn't listed there.
+export type LessonPractice =
+  | { kind: "saved"; drillId: string }
+  | { kind: "own"; drill: CustomDrill };
+
+// A lesson the player wrote: some text, then one or more drills as the
+// practice, one after another.
 export type CustomLesson = {
   id: string;
   title: string;
   // Paragraphs.
   body: string[];
-  drillIds: string[];
+  practice: LessonPractice[];
 };
+
+// The drill a practice item stands for, if it still exists.
+export function practiceDrill(
+  item: LessonPractice,
+  drills: CustomDrill[]
+): CustomDrill | undefined {
+  return item.kind === "own" ? item.drill : drills.find((drill) => drill.id === item.drillId);
+}
 
 // A course the player put together on /courses/new. Its lessons use drills
 // for its game and stack, and it is kept in this browser.
@@ -71,15 +85,16 @@ export function toCourse(course: CustomCourse, drills: CustomDrill[]): Course {
       id: lesson.id,
       title: lesson.title,
       body: lesson.body,
-      exercises: lesson.drillIds
-        .map((id) => drills.find((drill) => drill.id === id))
+      exercises: lesson.practice
+        .map((item) => practiceDrill(item, drills))
         .filter((drill) => drill !== undefined)
         .flatMap((drill) => drill.exercises),
     })),
   };
 }
 
-// A course file carries the drills its lessons use, so it works on its own.
+// A course file carries the saved drills its lessons use, so it works on its
+// own; a lesson's own drills are already in the course.
 const FILE_KIND = "pokertrainer-courses";
 const FILE_VERSION = 1;
 
@@ -91,7 +106,13 @@ type CourseFile = {
 };
 
 export function serializeCourses(courses: CustomCourse[], drills: CustomDrill[]): string {
-  const ids = new Set(courses.flatMap((course) => course.lessons.flatMap((l) => l.drillIds)));
+  const ids = new Set(
+    courses.flatMap((course) =>
+      course.lessons.flatMap((lesson) =>
+        lesson.practice.flatMap((item) => (item.kind === "saved" ? [item.drillId] : []))
+      )
+    )
+  );
   const file: CourseFile = {
     kind: FILE_KIND,
     version: FILE_VERSION,
@@ -194,6 +215,16 @@ function isLesson(value: unknown): value is CustomLesson {
     typeof lesson.id === "string" &&
     typeof lesson.title === "string" &&
     isStrings(lesson.body) &&
-    isStrings(lesson.drillIds)
+    Array.isArray(lesson.practice) &&
+    lesson.practice.every(isPractice)
+  );
+}
+
+function isPractice(value: unknown): value is LessonPractice {
+  if (typeof value !== "object" || value === null) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    (item.kind === "saved" && typeof item.drillId === "string") ||
+    (item.kind === "own" && isCustomDrill(item.drill))
   );
 }

@@ -2,22 +2,36 @@
   import { onMount } from "svelte";
   import { fetchManifest, type RangeInfo } from "@utils/manifest";
   import { describeExercise, resolveDrill } from "@utils/drills";
-  import { loadCustomDrills, type CustomDrill } from "@utils/custom-drills";
+  import { loadCustomDrills, newDrillId, type CustomDrill } from "@utils/custom-drills";
   import {
     loadCustomCourses,
     newCourseId,
     saveCustomCourse,
     type CustomCourse,
     type CustomLesson,
+    type LessonPractice,
   } from "@utils/custom-courses";
+  import {
+    blankExercise,
+    blankPick,
+    draftOf,
+    exerciseErrors,
+    templateOf,
+    type ExerciseDraft,
+  } from "@utils/drill-draft";
   import { readParams } from "@utils/url-state";
+  import DrillExercises from "./drill-exercises.svelte";
 
-  // A form that makes a course out of the player's own drills: a game and
-  // stack, then lessons that each have some text and one or more drills as
-  // practice. Opening /courses/new?edit=<id> changes a saved course instead.
+  // A form that makes a course: a game and stack, then lessons that each have
+  // some text and one or more drills as practice. A lesson's drill is one
+  // saved under "Your drills", or one made right here, which stays in the
+  // course. Opening /courses/new?edit=<id> changes a saved course instead.
   const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
 
-  type LessonDraft = { id: string; title: string; text: string; drillIds: string[] };
+  type PracticeDraft =
+    | { kind: "saved"; drillId: string }
+    | { kind: "own"; id: string; name: string; exercises: ExerciseDraft[] };
+  type LessonDraft = { id: string; title: string; text: string; practice: PracticeDraft[] };
 
   let manifest: RangeInfo[] = $state.raw([]);
   let drills: CustomDrill[] = $state.raw([]);
@@ -50,7 +64,13 @@
     if (lessons.length === 0) list.push("Add at least one lesson.");
     lessons.forEach((lesson, index) => {
       if (lesson.title.trim() === "") list.push(`Lesson ${index + 1} needs a title.`);
-      if (lesson.drillIds.length === 0) list.push(`Lesson ${index + 1} needs a drill.`);
+      if (lesson.practice.length === 0) list.push(`Lesson ${index + 1} needs a drill.`);
+      lesson.practice.forEach((item, drillIndex) => {
+        if (item.kind !== "own") return;
+        for (const error of exerciseErrors(item.exercises, manifest, game, stack)) {
+          list.push(`Lesson ${index + 1}, drill ${drillIndex + 1}: ${error}`);
+        }
+      });
     });
     return list;
   });
@@ -67,7 +87,7 @@
       description = saved.description;
       game = saved.game;
       stack = saved.stack;
-      lessons = saved.lessons.map(draftOf);
+      lessons = saved.lessons.map(lessonDraftOf);
     } else {
       game = json.some((range) => range.game === game) ? game : (json[0]?.game ?? game);
       const stacks = json.filter((range) => range.game === game).map((range) => range.stack);
@@ -77,15 +97,39 @@
   });
 
   function blankLesson(): LessonDraft {
-    return { id: newCourseId(), title: "", text: "", drillIds: [] };
+    return { id: newCourseId(), title: "", text: "", practice: [] };
   }
 
-  function draftOf(lesson: CustomLesson): LessonDraft {
+  function lessonDraftOf(lesson: CustomLesson): LessonDraft {
     return {
       id: lesson.id,
       title: lesson.title,
       text: lesson.body.join("\n\n"),
-      drillIds: [...lesson.drillIds],
+      practice: lesson.practice.map((item) =>
+        item.kind === "saved"
+          ? { kind: "saved", drillId: item.drillId }
+          : {
+              kind: "own",
+              id: item.drill.id,
+              name: item.drill.name,
+              exercises: item.drill.exercises.map(draftOf),
+            }
+      ),
+    };
+  }
+
+  function practiceOf(item: PracticeDraft, lesson: LessonDraft, index: number): LessonPractice {
+    if (item.kind === "saved") return item;
+    return {
+      kind: "own",
+      drill: {
+        id: item.id,
+        name: item.name.trim() || `${lesson.title.trim() || "Lesson"} drill ${index + 1}`,
+        description: "",
+        game,
+        stack,
+        exercises: item.exercises.map(templateOf),
+      },
     };
   }
 
@@ -98,7 +142,9 @@
         .split(/\n\s*\n/)
         .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
         .filter((paragraph) => paragraph !== ""),
-      drillIds: lesson.drillIds.filter((id) => available.some((drill) => drill.id === id)),
+      practice: lesson.practice
+        .filter((item) => item.kind === "own" || available.some((drill) => drill.id === item.drillId))
+        .map((item, index) => practiceOf(item, lesson, index)),
     };
   }
 
@@ -127,9 +173,16 @@
     clearDrills();
   }
 
-  // Another game or stack has other drills, so the lessons' drills start over.
+  // Another game or stack has other drills and charts: saved drills leave the
+  // lessons, and a lesson's own drills lose their picks.
   function clearDrills() {
-    for (const lesson of lessons) lesson.drillIds = [];
+    for (const lesson of lessons) {
+      lesson.practice = lesson.practice.filter((item) => item.kind === "own");
+      for (const item of lesson.practice) {
+        if (item.kind !== "own") continue;
+        for (const exercise of item.exercises) exercise.picks = [blankPick()];
+      }
+    }
   }
 
   function addLesson() {
@@ -149,8 +202,18 @@
 
   function addDrill(lesson: LessonDraft, event: Event) {
     const select = event.currentTarget as HTMLSelectElement;
-    if (select.value) lesson.drillIds.push(select.value);
+    if (select.value) lesson.practice.push({ kind: "saved", drillId: select.value });
     select.value = "";
+  }
+
+  // A drill made in the lesson: it is kept in the course, not under "Your drills".
+  function addOwnDrill(lesson: LessonDraft) {
+    lesson.practice.push({
+      kind: "own",
+      id: newDrillId(),
+      name: "",
+      exercises: [blankExercise("range")],
+    });
   }
 
   function save() {
@@ -180,8 +243,8 @@
     <span class="eyebrow">Learn</span>
     <h1 class="page-title">{editId ? "Edit course" : "Create a course"}</h1>
     <p class="page-lead">
-      Write lessons and give each one of your drills as practice. The course is
-      kept in this browser and shows up under "Your courses".
+      Write lessons and give each a drill as practice: one of yours, or one made
+      for the lesson. The course is kept in this browser and shows up under "Your courses".
     </p>
   </header>
 
@@ -217,8 +280,9 @@
       </div>
       {#if available.length === 0}
         <p class="text-sm muted" data-no-drills>
-          You have no drills for {gameLabels[game] ?? game} {stack}bb yet.
-          <a href={newDrillUrl} class="link">Create a drill</a> first; the lessons pick from them.
+          You have no saved drills for {gameLabels[game] ?? game} {stack}bb. A lesson can
+          still make its own, or <a href={newDrillUrl} class="link">create a drill</a> to share
+          between lessons.
         </p>
       {/if}
     </section>
@@ -247,30 +311,51 @@
 
           <div class="flex flex-col gap-2">
             <span class="label">Practice</span>
-            {#if lesson.drillIds.length > 0}
-              <ol class="flex flex-col gap-1.5" data-lesson-drills>
-                {#each lesson.drillIds as id, drillIndex (id)}
-                  {@const drill = drillById(id)}
-                  <li class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-ink-700 bg-ink-850/60 px-3 py-2">
-                    <span class="text-sm font-medium">{drill?.name ?? "A deleted drill"}</span>
-                    {#if drill}
-                      <span class="text-xs muted">{describeDrill(drill)}</span>
-                    {/if}
-                    <div class="ml-auto flex items-center gap-1">
-                      <button class="btn btn-ghost py-1" onclick={() => move(lesson.drillIds, drillIndex, -1)} disabled={drillIndex === 0} aria-label="Move up">↑</button>
-                      <button class="btn btn-ghost py-1" onclick={() => move(lesson.drillIds, drillIndex, 1)} disabled={drillIndex === lesson.drillIds.length - 1} aria-label="Move down">↓</button>
-                      <button class="btn btn-ghost py-1" onclick={() => lesson.drillIds.splice(drillIndex, 1)}>Remove</button>
+            {#if lesson.practice.length > 0}
+              <ol class="flex flex-col gap-2" data-lesson-drills>
+                {#each lesson.practice as item, drillIndex (item.kind === "saved" ? item.drillId : item.id)}
+                  <li
+                    class="flex flex-col gap-3 rounded-xl border border-ink-700 bg-ink-850/60 px-3 py-2"
+                    data-practice={item.kind}
+                  >
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      {#if item.kind === "saved"}
+                        {@const drill = drillById(item.drillId)}
+                        <span class="text-sm font-medium">{drill?.name ?? "A deleted drill"}</span>
+                        {#if drill}
+                          <span class="text-xs muted">{describeDrill(drill)}</span>
+                        {/if}
+                      {:else}
+                        <input
+                          class="input max-w-xs"
+                          bind:value={item.name}
+                          placeholder="Name this drill"
+                          maxlength="60"
+                        />
+                        <span class="text-xs muted">Kept in this course</span>
+                      {/if}
+                      <div class="ml-auto flex items-center gap-1">
+                        <button class="btn btn-ghost py-1" onclick={() => move(lesson.practice, drillIndex, -1)} disabled={drillIndex === 0} aria-label="Move up">↑</button>
+                        <button class="btn btn-ghost py-1" onclick={() => move(lesson.practice, drillIndex, 1)} disabled={drillIndex === lesson.practice.length - 1} aria-label="Move down">↓</button>
+                        <button class="btn btn-ghost py-1" onclick={() => lesson.practice.splice(drillIndex, 1)}>Remove</button>
+                      </div>
                     </div>
+                    {#if item.kind === "own"}
+                      <DrillExercises {manifest} {game} {stack} bind:exercises={item.exercises} />
+                    {/if}
                   </li>
                 {/each}
               </ol>
             {/if}
-            <select class="input max-w-sm" onchange={(event) => addDrill(lesson, event)} disabled={available.length === 0}>
-              <option value="">{lesson.drillIds.length === 0 ? "Pick a drill…" : "Add another drill…"}</option>
-              {#each available as drill (drill.id)}
-                <option value={drill.id}>{drill.name}</option>
-              {/each}
-            </select>
+            <div class="flex flex-wrap items-center gap-2">
+              <select class="input max-w-sm" onchange={(event) => addDrill(lesson, event)} disabled={available.length === 0}>
+                <option value="">{lesson.practice.length === 0 ? "Pick a drill…" : "Add another drill…"}</option>
+                {#each available as drill (drill.id)}
+                  <option value={drill.id}>{drill.name}</option>
+                {/each}
+              </select>
+              <button class="btn btn-secondary" onclick={() => addOwnDrill(lesson)}>+ New drill</button>
+            </div>
           </div>
         </div>
       {/each}
