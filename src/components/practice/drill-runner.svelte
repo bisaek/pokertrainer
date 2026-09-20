@@ -3,7 +3,11 @@
   import RangeLayout from "@components/range/range-layout.svelte";
   import HandQuiz from "./hand-quiz.svelte";
   import TrainerOptions from "./trainer-options.svelte";
-  import { settings } from "@utils/settings.svelte";
+  import {
+    applyExerciseSettings,
+    clearExerciseSettings,
+    settings,
+  } from "@utils/settings.svelte";
   import { Action, PokerRange } from "@utils/range.svelte";
   import { fetchChart } from "@utils/manifest";
   import { spotFromUrl } from "@utils/spot";
@@ -53,8 +57,12 @@
     untrack(() => restart(current));
   });
 
-  // Ignore a load that finishes after leaving.
-  onDestroy(() => loadToken++);
+  // Ignore a load that finishes after leaving, and give the player their
+  // own options back.
+  onDestroy(() => {
+    loadToken++;
+    clearExerciseSettings();
+  });
 
   function restart(current: Drill = drill) {
     finished = false;
@@ -66,6 +74,7 @@
     exerciseIndex = index;
     loading = true;
     loadError = null;
+    applyExerciseSettings(current.exercises[index].settings ?? {});
     try {
       const ranges = await Promise.all(
         current.exercises[index].urls.map(async (url) =>
@@ -96,6 +105,7 @@
       loadExercise(drill, exerciseIndex + 1);
     } else {
       finished = true;
+      clearExerciseSettings();
       onfinish?.();
     }
   }
@@ -262,6 +272,8 @@
       <HandQuiz
         ranges={exerciseRanges}
         count={exercise.count}
+        mistakes={exercise.mistakes}
+        repeatMistakes={exercise.repeatMistakes}
         onfinish={finishExercise}
       />
     {/key}

@@ -1,4 +1,5 @@
 import type { ExerciseTemplate } from "./drills";
+import { settings } from "./settings.svelte";
 
 // A drill the player put together on /drills/new. It is made for one game and
 // stack, and kept in this browser.
@@ -74,10 +75,28 @@ function isExercise(value: unknown): value is ExerciseTemplate {
   const exercise = value as Record<string, unknown>;
   const picks = Array.isArray(exercise.filter) ? exercise.filter : [exercise.filter];
   if (picks.length === 0 || !picks.every(isFilter)) return false;
+  if (exercise.settings !== undefined && !isExerciseSettings(exercise.settings)) return false;
+  if (exercise.kind === "range") return typeof exercise.timesInARow === "number";
   return (
-    (exercise.kind === "range" && typeof exercise.timesInARow === "number") ||
-    (exercise.kind === "hands" && typeof exercise.count === "number")
+    exercise.kind === "hands" &&
+    typeof exercise.count === "number" &&
+    (exercise.mistakes === undefined ||
+      exercise.mistakes === "retry" ||
+      exercise.mistakes === "move-on") &&
+    (exercise.repeatMistakes === undefined || typeof exercise.repeatMistakes === "boolean")
   );
+}
+
+// Each entry names a setting and gives it a value of that setting's type.
+function isExerciseSettings(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  return Object.entries(value as Record<string, unknown>).every(([key, rule]) => {
+    if (!(key in settings) || typeof rule !== "object" || rule === null) return false;
+    const { value: setTo, locked } = rule as Record<string, unknown>;
+    return (
+      typeof setTo === typeof settings[key as keyof typeof settings] && typeof locked === "boolean"
+    );
+  });
 }
 
 function isFilter(value: unknown): boolean {

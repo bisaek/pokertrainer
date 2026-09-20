@@ -1,4 +1,5 @@
 import { positionOrder, rangeUrl, typeOrder, type RangeInfo } from "./manifest";
+import type { ExerciseSettings, MistakeMode } from "./settings.svelte";
 
 // Which ranges an exercise uses. An omitted or empty list means all of them.
 export type RangeFilter = {
@@ -11,9 +12,17 @@ export type RangeFilter = {
 // so opens from every seat and the big blind's defense can share a quiz.
 export type ChartPick = RangeFilter | RangeFilter[];
 
+// What an exercise says about the trainer's options: values it sets, and
+// whether the player may change them meanwhile. Unset options are the player's.
+export type ExerciseRules = { settings?: ExerciseSettings };
+
+// How a hand quiz treats a wrong answer; unset means ask again, and once
+// more at the end.
+export type HandRules = { mistakes?: MistakeMode; repeatMistakes?: boolean };
+
 export type ExerciseTemplate =
-  | { kind: "range"; filter: ChartPick; timesInARow: number }
-  | { kind: "hands"; filter: ChartPick; count: number };
+  | ({ kind: "range"; filter: ChartPick; timesInARow: number } & ExerciseRules)
+  | ({ kind: "hands"; filter: ChartPick; count: number } & ExerciseRules & HandRules);
 
 export type DrillTemplate = {
   name: string;
@@ -24,8 +33,8 @@ export type DrillTemplate = {
 };
 
 export type DrillExercise =
-  | { kind: "range"; urls: string[]; timesInARow: number }
-  | { kind: "hands"; urls: string[]; count: number };
+  | ({ kind: "range"; urls: string[]; timesInARow: number } & ExerciseRules)
+  | ({ kind: "hands"; urls: string[]; count: number } & ExerciseRules & HandRules);
 
 export type Drill = {
   name: string;
@@ -284,8 +293,15 @@ export function resolveDrill(
     if (urls.length === 0) continue;
     exercises.push(
       exercise.kind === "range"
-        ? { kind: "range", urls, timesInARow: exercise.timesInARow }
-        : { kind: "hands", urls, count: exercise.count }
+        ? { kind: "range", urls, timesInARow: exercise.timesInARow, settings: exercise.settings }
+        : {
+            kind: "hands",
+            urls,
+            count: exercise.count,
+            settings: exercise.settings,
+            mistakes: exercise.mistakes,
+            repeatMistakes: exercise.repeatMistakes,
+          }
     );
   }
   const chartCount = new Set(exercises.flatMap((exercise) => exercise.urls)).size;

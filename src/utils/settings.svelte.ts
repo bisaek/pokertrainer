@@ -63,6 +63,95 @@ export type SettingKey = keyof Settings;
 export const handCounts = [0, 20, 50, 100];
 export const rangeStreaks = [1, 2, 3];
 
+// The display toggles, grouped as the Options menu and the drill editor show them.
+export type Toggle = { key: SettingKey; label: string; hint?: string; needs?: SettingKey };
+export type ToggleGroup = { label: string; toggles: Toggle[] };
+
+export const tableGroup: ToggleGroup = {
+  label: "Table",
+  toggles: [
+    { key: "board", label: "Board" },
+    { key: "foldedSeats", label: "Folded players", needs: "board" },
+    { key: "bets", label: "Blinds and bets", needs: "board" },
+  ],
+};
+export const aroundHandGroup: ToggleGroup = {
+  label: "Around the hand",
+  toggles: [
+    { key: "chartName", label: "Chart name" },
+    { key: "handName", label: "Hand name" },
+    { key: "progress", label: "Hands left" },
+    { key: "keyHints", label: "Key hints" },
+  ],
+};
+export const aroundChartGroup: ToggleGroup = {
+  label: "Around the chart",
+  toggles: [
+    { key: "chartName", label: "Chart name", hint: "Shown after a check" },
+    { key: "progress", label: "Charts left" },
+    { key: "keyHints", label: "Key hints" },
+  ],
+};
+export const chartGroup: ToggleGroup = {
+  label: "Chart",
+  toggles: [
+    { key: "answerChart", label: "The answer" },
+    { key: "idleChart", label: "While waiting" },
+    { key: "idleKinds", label: "Color pairs, suited and offsuit", needs: "idleChart" },
+    { key: "markHand", label: "Mark the hand" },
+    { key: "mistakeChart", label: "After a mistake" },
+  ],
+};
+export const pageGroup: ToggleGroup = {
+  label: "Page",
+  toggles: [{ key: "picker", label: "Chart picker" }],
+};
+
+// The display groups a drill exercise of this kind draws on.
+export function exerciseGroups(kind: "range" | "hands"): ToggleGroup[] {
+  return kind === "range" ? [tableGroup, aroundChartGroup] : [tableGroup, aroundHandGroup, chartGroup];
+}
+
+// What a drill exercise says about the options: a value for each it sets,
+// and whether the player may change it while the exercise runs.
+export type ExerciseSettings = {
+  [K in SettingKey]?: { value: Settings[K]; locked: boolean };
+};
+
+// The options the running exercise has fixed; the Options menu greys them out.
+export const drillLocks: { keys: SettingKey[] } = $state({ keys: [] });
+
+// The player's own choices, kept aside while an exercise sets its own, and
+// the keys it set. Changes the player makes to those keys during the exercise
+// last only for the exercise.
+let stashed: Settings | null = null;
+let presetKeys: SettingKey[] = [];
+
+// Starts an exercise's rules: the player's choices come back first, so one
+// exercise's settings don't leak into the next.
+export function applyExerciseSettings(rules: ExerciseSettings) {
+  loadSettings();
+  if (stashed === null) stashed = $state.snapshot(settings);
+  Object.assign(settings, stashed);
+  presetKeys = [];
+  drillLocks.keys = [];
+  for (const key of Object.keys(rules) as SettingKey[]) {
+    const rule = rules[key];
+    if (!rule || !isValid(key, rule.value)) continue;
+    (settings as Record<SettingKey, unknown>)[key] = rule.value;
+    presetKeys.push(key);
+    if (rule.locked) drillLocks.keys.push(key);
+  }
+}
+
+// Ends the exercise's rules and puts the player's choices back.
+export function clearExerciseSettings() {
+  if (stashed !== null) Object.assign(settings, stashed);
+  stashed = null;
+  presetKeys = [];
+  drillLocks.keys = [];
+}
+
 let loaded = false;
 
 // Reads the saved choices. Called once the page is on screen: reading them
@@ -96,17 +185,37 @@ function isValid(key: SettingKey, value: unknown): boolean {
   }
 }
 
+// Writes the player's own choices: what an exercise set for them isn't theirs.
 export function saveSettings() {
+  const own = $state.snapshot(settings);
+  if (stashed !== null) {
+    for (const key of presetKeys) (own as Record<SettingKey, unknown>)[key] = stashed[key];
+    stashed = own;
+  }
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify($state.snapshot(settings)));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(own));
   } catch {
     // Storage is full or blocked; the choice lasts until the page is closed.
   }
 }
 
 export function resetSettings() {
+  const rules = stashed !== null ? currentRules() : null;
   Object.assign(settings, defaults);
+  if (rules) {
+    stashed = $state.snapshot(settings);
+    applyExerciseSettings(rules);
+  }
   saveSettings();
+}
+
+// The running exercise's rules, read back so they can be put on again.
+function currentRules(): ExerciseSettings {
+  const rules: Record<string, unknown> = {};
+  for (const key of presetKeys) {
+    rules[key] = { value: settings[key], locked: drillLocks.keys.includes(key) };
+  }
+  return rules as ExerciseSettings;
 }
 
 const defaults = $state.snapshot(settings);

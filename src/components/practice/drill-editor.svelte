@@ -19,6 +19,12 @@
     type CustomDrill,
   } from "@utils/custom-drills";
   import { readParams } from "@utils/url-state";
+  import {
+    exerciseGroups,
+    type ExerciseSettings,
+    type MistakeMode,
+    type SettingKey,
+  } from "@utils/settings.svelte";
 
   // A form that makes a drill out of the charts on this site: pick a game and
   // stack, then add exercises that each pick charts by position, situation and
@@ -34,7 +40,17 @@
     picks: PickDraft[];
     timesInARow: number;
     count: number;
+    mistakes: MistakeMode;
+    repeatMistakes: boolean;
+    // What the exercise says about the display options; an option not in
+    // here is the player's to set.
+    settings: ExerciseSettings;
   };
+
+  const mistakeModes: { value: MistakeMode; label: string }[] = [
+    { value: "retry", label: "Try again" },
+    { value: "move-on", label: "Move on" },
+  ];
 
   const streaks = [1, 2, 3];
 
@@ -123,7 +139,15 @@
   }
 
   function blankExercise(kind: "range" | "hands"): ExerciseDraft {
-    return { kind, picks: [blankPick()], timesInARow: 1, count: 30 };
+    return {
+      kind,
+      picks: [blankPick()],
+      timesInARow: 1,
+      count: 30,
+      mistakes: "retry",
+      repeatMistakes: true,
+      settings: {},
+    };
   }
 
   function draftOf(exercise: ExerciseTemplate): ExerciseDraft {
@@ -137,7 +161,47 @@
       })),
       timesInARow: exercise.kind === "range" ? exercise.timesInARow : 1,
       count: exercise.kind === "hands" ? exercise.count : 30,
+      mistakes: (exercise.kind === "hands" && exercise.mistakes) || "retry",
+      repeatMistakes: exercise.kind === "hands" ? (exercise.repeatMistakes ?? true) : true,
+      settings: structuredClone(exercise.settings ?? {}),
     };
+  }
+
+  // An option's rule for an exercise: unset, or on/off with a lock.
+  function ruleOf(exercise: ExerciseDraft, key: SettingKey) {
+    return exercise.settings[key] as { value: boolean; locked: boolean } | undefined;
+  }
+
+  function setRule(exercise: ExerciseDraft, key: SettingKey, value: boolean | null) {
+    if (value === null) {
+      delete exercise.settings[key];
+    } else {
+      (exercise.settings as Record<SettingKey, unknown>)[key] = {
+        value,
+        locked: ruleOf(exercise, key)?.locked ?? false,
+      };
+    }
+  }
+
+  function setLocked(exercise: ExerciseDraft, key: SettingKey, locked: boolean) {
+    const rule = ruleOf(exercise, key);
+    if (rule) rule.locked = locked;
+  }
+
+  // Only the options the exercise's kind shows are kept, so switching kinds
+  // doesn't save rules for options the player never saw.
+  function settingsOf(exercise: ExerciseDraft): ExerciseSettings | undefined {
+    const keys = exerciseGroups(exercise.kind).flatMap((group) =>
+      group.toggles.map((toggle) => toggle.key)
+    );
+    const kept = Object.fromEntries(
+      Object.entries(exercise.settings).filter(([key]) => keys.includes(key as SettingKey))
+    ) as ExerciseSettings;
+    return Object.keys(kept).length > 0 ? kept : undefined;
+  }
+
+  function ruleCount(exercise: ExerciseDraft): number {
+    return Object.keys(settingsOf(exercise) ?? {}).length;
   }
 
   function filterOfPick(pick: PickDraft): RangeFilter {
@@ -163,9 +227,17 @@
 
   function templateOf(exercise: ExerciseDraft): ExerciseTemplate {
     const filter = filterOf(exercise);
+    const settings = settingsOf(exercise);
     return exercise.kind === "range"
-      ? { kind: "range", filter, timesInARow: exercise.timesInARow }
-      : { kind: "hands", filter, count: clampCount(exercise.count) };
+      ? { kind: "range", filter, timesInARow: exercise.timesInARow, settings }
+      : {
+          kind: "hands",
+          filter,
+          count: clampCount(exercise.count),
+          mistakes: exercise.mistakes,
+          repeatMistakes: exercise.repeatMistakes,
+          settings,
+        };
   }
 
   function clampCount(count: number) {
@@ -199,7 +271,13 @@
     // these charts, then answer hands from them" is the usual shape.
     const last = exercises.at(-1);
     exercises.push(
-      last ? { ...blankExercise(kind), picks: copyPicks(last.picks) } : blankExercise(kind)
+      last
+        ? {
+            ...blankExercise(kind),
+            picks: copyPicks(last.picks),
+            settings: structuredClone($state.snapshot(last.settings)),
+          }
+        : blankExercise(kind)
     );
   }
 
@@ -427,6 +505,95 @@
               + Add more charts
             </button>
           </div>
+
+          <!-- What the trainer shows during this exercise. An option left as
+               the player's choice follows their Options menu; one set here
+               starts on or off, and locked, can't be changed in the menu. -->
+          <details class="flex flex-col gap-3" data-exercise-options>
+            <summary class="flex cursor-pointer items-center gap-2 select-none">
+              <span class="label">Options</span>
+              <span class="text-sm muted">
+                {#if ruleCount(exercise) === 0}
+                  all the player's choice
+                {:else}
+                  {ruleCount(exercise)} set
+                {/if}
+              </span>
+            </summary>
+            <div class="mt-3 flex flex-col gap-4">
+              {#if exercise.kind === "hands"}
+                <div class="flex flex-col gap-2">
+                  <span class="label">Rules</span>
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <span class="text-sm">After a mistake</span>
+                    <div class="flex gap-1.5" role="radiogroup" aria-label="After a mistake">
+                      {#each mistakeModes as mode}
+                        <button
+                          class="chip {exercise.mistakes === mode.value ? 'chip-active' : ''}"
+                          role="radio"
+                          aria-checked={exercise.mistakes === mode.value}
+                          onclick={() => (exercise.mistakes = mode.value)}>{mode.label}</button
+                        >
+                      {/each}
+                    </div>
+                  </div>
+                  <label class="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      class="accent-accent-500"
+                      bind:checked={exercise.repeatMistakes}
+                    />
+                    Wrong hands come back at the end
+                  </label>
+                </div>
+              {/if}
+              {#each exerciseGroups(exercise.kind) as group (group.label)}
+                <div class="flex flex-col gap-2">
+                  <span class="label">{group.label}</span>
+                  {#each group.toggles as toggle (toggle.key)}
+                    {@const rule = ruleOf(exercise, toggle.key)}
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5" data-option={toggle.key}>
+                      <span class="w-56 text-sm">{toggle.label}</span>
+                      <div class="flex gap-1.5" role="radiogroup" aria-label={toggle.label}>
+                        <button
+                          class="chip {rule === undefined ? 'chip-active' : ''}"
+                          role="radio"
+                          aria-checked={rule === undefined}
+                          onclick={() => setRule(exercise, toggle.key, null)}>Player's choice</button
+                        >
+                        <button
+                          class="chip {rule?.value === true ? 'chip-active' : ''}"
+                          role="radio"
+                          aria-checked={rule?.value === true}
+                          onclick={() => setRule(exercise, toggle.key, true)}>On</button
+                        >
+                        <button
+                          class="chip {rule?.value === false ? 'chip-active' : ''}"
+                          role="radio"
+                          aria-checked={rule?.value === false}
+                          onclick={() => setRule(exercise, toggle.key, false)}>Off</button
+                        >
+                      </div>
+                      <label
+                        class="flex items-center gap-2 text-sm whitespace-nowrap {rule
+                          ? 'cursor-pointer'
+                          : 'cursor-default opacity-40'}"
+                      >
+                        <input
+                          type="checkbox"
+                          class="accent-accent-500"
+                          checked={rule?.locked ?? false}
+                          disabled={rule === undefined}
+                          onchange={(e) => setLocked(exercise, toggle.key, e.currentTarget.checked)}
+                        />
+                        Locked
+                      </label>
+                    </div>
+                  {/each}
+                </div>
+              {/each}
+            </div>
+          </details>
         </div>
       {/each}
 
