@@ -16,6 +16,8 @@ const groups = [
 ];
 
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+// A page under a section, like /drills/new, lights up the section's link.
+const isActive = (link: string) => path === link || path.startsWith(`${link}/`);
 ---
 
 <header class="sticky top-0 z-40 h-nav border-b border-ink-800 bg-ink-950/85 backdrop-blur">
@@ -36,8 +38,8 @@ const path = Astro.url.pathname.replace(/\/$/, "") || "/";
               <li>
                 <a
                   href={item.link}
-                  class:list={["nav-link", { "nav-link-active": path === item.link }]}
-                  aria-current={path === item.link ? "page" : undefined}
+                  class:list={["nav-link", { "nav-link-active": isActive(item.link) }]}
+                  aria-current={isActive(item.link) ? "page" : undefined}
                 >
                   {item.name}
                 </a>

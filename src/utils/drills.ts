@@ -1,6 +1,6 @@
 import { positionOrder, rangeUrl, typeOrder, type RangeInfo } from "./manifest";
 
-// Which ranges an exercise uses. Omitted positions or opponents mean all of them.
+// Which ranges an exercise uses. An omitted or empty list means all of them.
 export type RangeFilter = {
   types: string[];
   positions?: string[];
@@ -235,9 +235,11 @@ export const drillCategories: { name: string; drills: DrillTemplate[] }[] = [
 
 function matches(range: RangeInfo, filter: RangeFilter) {
   return (
-    filter.types.includes(range.type) &&
-    (!filter.positions || filter.positions.includes(range.position)) &&
-    (!filter.opponents || range.opponent === null || filter.opponents.includes(range.opponent))
+    (filter.types.length === 0 || filter.types.includes(range.type)) &&
+    (!filter.positions?.length || filter.positions.includes(range.position)) &&
+    (!filter.opponents?.length ||
+      range.opponent === null ||
+      filter.opponents.includes(range.opponent))
   );
 }
 
