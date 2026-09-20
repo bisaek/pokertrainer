@@ -125,7 +125,7 @@ function store(drills: CustomDrill[]) {
 
 // Whatever is in storage came from an older version or a hand edit, so a
 // drill that doesn't have the right shape is left out rather than crashing.
-function isCustomDrill(value: unknown): value is CustomDrill {
+export function isCustomDrill(value: unknown): value is CustomDrill {
   if (typeof value !== "object" || value === null) return false;
   const drill = value as Record<string, unknown>;
   return (

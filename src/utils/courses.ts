@@ -27,6 +27,8 @@ export type Course = {
   game: string;
   stack: number;
   lessons: Lesson[];
+  // Made by the player on /courses/new, so it can be edited and deleted.
+  custom?: boolean;
 };
 
 export function lessonStack(course: Course, lesson: Lesson) {
