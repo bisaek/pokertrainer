@@ -6,7 +6,6 @@
   import { describeExercise } from "@utils/drills";
   import { ACTION_ORDER, actionShares, type ActionShare } from "@utils/chart-stats";
   import {
-    courses,
     lessonStack,
     lessonStatsUrls,
     resolveLesson,
@@ -42,7 +41,7 @@
   // The player's own courses, kept in this browser, shown after the built-in ones.
   let customCourses: CustomCourse[] = $state.raw([]);
   let customDrills: CustomDrill[] = $state.raw([]);
-  // Courses from files in public/courses: built in, like the ones in courses.ts.
+  // The built-in courses: the files in public/courses.
   let fileCourses: Course[] = $state.raw([]);
   let uploadMessage: string | null = $state(null);
   // The open course, lesson and whether practice is running live in the URL
@@ -54,7 +53,7 @@
   let statsLoading = $state(false);
   let statsToken = 0;
 
-  const builtIn = $derived([...courses, ...fileCourses]);
+  const builtIn = $derived(fileCourses);
   // A course that has since become a file is shown once, as built in.
   const ownCourses = $derived(
     customCourses

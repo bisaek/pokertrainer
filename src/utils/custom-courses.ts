@@ -1,5 +1,6 @@
-import { isCustomDrill, loadCustomDrills, type CustomDrill } from "./custom-drills";
+import { isCustomDrill, isFilter, loadCustomDrills, type CustomDrill } from "./custom-drills";
 import type { Course } from "./courses";
+import type { RangeFilter } from "./drills";
 
 // A lesson's practice is a drill: one saved under "Your drills", or one made
 // in the lesson itself, which lives in the course and isn't listed there.
@@ -15,6 +16,10 @@ export type CustomLesson = {
   // Paragraphs.
   body: string[];
   practice: LessonPractice[];
+  // A stack other than the course's, as in a short-stack course.
+  stack?: number;
+  // Charts summarized in a table under the text.
+  stats?: RangeFilter;
 };
 
 // The drill a practice item stands for, if it still exists.
@@ -85,6 +90,8 @@ export function toCourse(course: CustomCourse, drills: CustomDrill[]): Course {
       id: lesson.id,
       title: lesson.title,
       body: lesson.body,
+      stack: lesson.stack,
+      stats: lesson.stats,
       exercises: lesson.practice
         .map((item) => practiceDrill(item, drills))
         .filter((drill) => drill !== undefined)
@@ -242,7 +249,9 @@ function isLesson(value: unknown): value is CustomLesson {
     typeof lesson.title === "string" &&
     isStrings(lesson.body) &&
     Array.isArray(lesson.practice) &&
-    lesson.practice.every(isPractice)
+    lesson.practice.every(isPractice) &&
+    (lesson.stack === undefined || typeof lesson.stack === "number") &&
+    (lesson.stats === undefined || isFilter(lesson.stats))
   );
 }
 

@@ -1,0 +1,816 @@
+{
+  "kind": "pokertrainer-courses",
+  "version": 1,
+  "courses": [
+    {
+      "id": "mtt-30",
+      "name": "Tournament preflop",
+      "description": "Opening, defending and facing 3-bets and shoves with 30bb stacks, the middle stage of most tournaments.",
+      "game": "mtt",
+      "stack": 30,
+      "lessons": [
+        {
+          "id": "opens-early",
+          "title": "Opening from early position",
+          "body": [
+            "The basics are the same as in cash games: the earlier your seat, the more players can wake up with a strong hand behind you, so the tighter you open.",
+            "The table shows how each chart splits its hands between actions. Start with the three earliest seats."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-opens-early",
+                "name": "Opening from early position",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "count": 60
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "opens-late",
+          "title": "Opening from late position and the small blind",
+          "body": [
+            "From the hijack onwards the ranges get much wider. The small blind has only the big blind left, but plays the rest of the hand out of position."
+          ],
+          "stats": {
+            "types": [
+              "RFI"
+            ],
+            "positions": [
+              "HJ",
+              "CO",
+              "BTN",
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-opens-late",
+                "name": "Opening from late position and the small blind",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "HJ",
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-opens",
+          "title": "Review: opening ranges",
+          "body": [
+            "Nothing new here, and no table to read: rebuilding a chart after you have started to forget it is what moves it into long-term memory, so the course comes back to earlier material every few lessons.",
+            "Rebuild three of the 30bb opening charts from memory, then answer hands from every seat that opens. A chart or a hand you get wrong comes back immediately and again at the end, so whatever has faded most gets the most repetitions."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-review-opens",
+                "name": "Review: opening ranges",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "CO",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ]
+                    },
+                    "count": 100
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bb-vs-late",
+          "title": "Big blind defense against late opens",
+          "body": [
+            "In tournaments with antes, the pot is bigger before anyone acts, so the big blind gets an even better price to call than in a cash game.",
+            "The table shows how each chart splits its hands between actions. Compare how the big blind continues against each opener."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-bb-vs-late",
+                "name": "Big blind defense against late opens",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "bb-vs-early",
+          "title": "Big blind defense against early opens",
+          "body": [
+            "Early opens are stronger, so the big blind folds more of the same hands it defends against late opens."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BB"
+            ],
+            "opponents": [
+              "UTG",
+              "UTG+1",
+              "LJ",
+              "HJ"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-bb-vs-early",
+                "name": "Big blind defense against early opens",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "UTG+1",
+                        "LJ",
+                        "HJ"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-vs-open",
+          "title": "Facing an open on the button",
+          "body": [
+            "On the button you play in position after the flop. Against an open you can 3-bet, call, or fold."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "BTN"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-btn-vs-open",
+                "name": "Facing an open on the button",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "sb-vs-open",
+          "title": "Facing an open from the small blind",
+          "body": [
+            "The small blind is out of position with the big blind still to act. The table shows how each chart splits its hands between actions."
+          ],
+          "stats": {
+            "types": [
+              "vs RFI"
+            ],
+            "positions": [
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-sb-vs-open",
+                "name": "Facing an open from the small blind",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-defense",
+          "title": "Review: opening and defending",
+          "body": [
+            "The big blind defends very wide at 30bb with antes, and those charts are the ones that slip first.",
+            "Rebuild two of them, then answer hands from every opening and defense chart in the course so far."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-review-defense",
+                "name": "Review: opening and defending",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs RFI"
+                      ],
+                      "positions": [
+                        "BB"
+                      ],
+                      "opponents": [
+                        "UTG",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI"
+                      ]
+                    },
+                    "count": 120
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-3bet",
+          "title": "When your late open gets 3-bet",
+          "body": [
+            "These charts only contain the hands you opened with; the others are left empty. The first column of the table shows how many hands reach the spot."
+          ],
+          "stats": {
+            "types": [
+              "vs 3-bet"
+            ],
+            "positions": [
+              "CO",
+              "BTN",
+              "SB"
+            ]
+          },
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-vs-3bet",
+                "name": "When your late open gets 3-bet",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "count": 80
+                  },
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ],
+                      "positions": [
+                        "CO",
+                        "BTN",
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 40
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-3bet-shove",
+          "title": "Facing a 3-bet shove",
+          "body": [
+            "When someone 3-bets all-in, you can only call or fold. There's no more betting after this, so the only question is whether your hand is strong enough to call for your stack."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-vs-3bet-shove",
+                "name": "Facing a 3-bet shove",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet all-in"
+                      ]
+                    },
+                    "count": 80
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "vs-4bet-shove",
+          "title": "Facing a 4-bet shove",
+          "body": [
+            "You 3-bet and the opener moved all-in. Again it's call or fold, now against a range that was strong enough to open and then shove."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-vs-4bet-shove",
+                "name": "Facing a 4-bet shove",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 4-bet all-in"
+                      ]
+                    },
+                    "count": 80
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "review-shoves",
+          "title": "Review: facing shoves",
+          "body": [
+            "The charts for facing a shove only call or fold, which makes them easy to mix up with the spots where raising is still an option.",
+            "Rebuild the small blind's opening chart to keep it fresh, then answer hands from the 3-bet shove and 4-bet shove charts."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-review-shoves",
+                "name": "Review: facing shoves",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "SB"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "vs 3-bet all-in",
+                        "vs 4-bet all-in"
+                      ]
+                    },
+                    "count": 120
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "mtt-30-final",
+          "title": "Final exam",
+          "body": [
+            "Two charts to rebuild from memory, then hands from the opening, facing-an-open and 3-bet charts in this course."
+          ],
+          "practice": [
+            {
+              "kind": "own",
+              "drill": {
+                "id": "mtt-30-mtt-30-final",
+                "name": "Final exam",
+                "description": "",
+                "game": "mtt",
+                "stack": 30,
+                "exercises": [
+                  {
+                    "kind": "range",
+                    "filter": {
+                      "types": [
+                        "RFI"
+                      ],
+                      "positions": [
+                        "UTG",
+                        "BTN"
+                      ]
+                    },
+                    "timesInARow": 1
+                  },
+                  {
+                    "kind": "hands",
+                    "filter": {
+                      "types": [
+                        "RFI",
+                        "vs RFI",
+                        "vs 3-bet"
+                      ]
+                    },
+                    "count": 160
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "drills": []
+}

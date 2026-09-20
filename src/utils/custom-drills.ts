@@ -168,7 +168,7 @@ function isExerciseSettings(value: unknown): boolean {
   });
 }
 
-function isFilter(value: unknown): boolean {
+export function isFilter(value: unknown): boolean {
   if (typeof value !== "object" || value === null) return false;
   const filter = value as Record<string, unknown>;
   const isList = (list: unknown) =>

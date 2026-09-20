@@ -2,7 +2,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import Layout from "../layouts/Layout.astro";
-import { courses } from "../utils/courses";
 
 const rangesDir = join(process.cwd(), "public", "ranges");
 
@@ -21,7 +20,7 @@ function countCharts(dir: string): number {
 
 const chartCount = countCharts(rangesDir);
 
-// Courses from files in public/courses count with the ones in courses.ts.
+// The built-in courses are the files in public/courses.
 const coursesDir = join(process.cwd(), "public", "courses");
 const fileCourses = readdirSync(coursesDir)
   .filter((name) => name.endsWith(".json"))
@@ -29,8 +28,8 @@ const fileCourses = readdirSync(coursesDir)
     const file = JSON.parse(readFileSync(join(coursesDir, name), "utf8"));
     return (Array.isArray(file.courses) ? file.courses : [file]) as { lessons: unknown[] }[];
   });
-const courseCount = courses.length + fileCourses.length;
-const lessonCount = [...courses, ...fileCourses].reduce(
+const courseCount = fileCourses.length;
+const lessonCount = fileCourses.reduce(
   (count, course) => count + course.lessons.length,
   0
 );
