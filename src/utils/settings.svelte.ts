@@ -17,7 +17,8 @@ export const settings = $state({
   handCount: 0,
 
   // Range trainer.
-  // A chart rebuilt wrong is asked again at the end of the round.
+  // A chart rebuilt wrong is asked again right away; with this on it also
+  // comes back at the end of the round.
   rangeRepeat: true,
   // How many times in a row a chart has to be rebuilt right before it is done.
   rangeStreak: 1,

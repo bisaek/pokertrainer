@@ -56,11 +56,15 @@
         streak >= settings.rangeStreak
           ? rest
           : [...rest, { range: item.range, streak }];
-    } else if (settings.rangeRepeat && rest.at(-1)?.range !== item.range) {
-      // Wrong: it comes back at the end, unless it is already there.
-      queue = [...rest, { range: item.range, streak: 0 }];
     } else {
-      queue = rest;
+      // Wrong: rebuild it again right away, like a drill does. With the
+      // repeat option on it also comes back at the end, unless it is
+      // already there.
+      const again = { range: item.range, streak: 0 };
+      queue =
+        settings.rangeRepeat && rest.at(-1)?.range !== item.range
+          ? [again, ...rest, { range: item.range, streak: 0 }]
+          : [again, ...rest];
     }
     compareTo = undefined;
     isCorrect = undefined;

@@ -133,7 +133,7 @@
             checked={settings.rangeRepeat}
             onchange={(e) => set("rangeRepeat", e.currentTarget.checked)}
           />
-          Wrong charts come back at the end
+          Wrong charts also come back at the end
         </label>
         <div class="flex flex-col gap-1.5">
           <span class="text-sm">Correct in a row to finish a chart</span>
