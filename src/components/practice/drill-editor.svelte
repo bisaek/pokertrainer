@@ -6,7 +6,12 @@
     typeOrder,
     type RangeInfo,
   } from "@utils/manifest";
-  import { resolveUrls, type ExerciseTemplate, type RangeFilter } from "@utils/drills";
+  import {
+    resolveUrls,
+    type ChartPick,
+    type ExerciseTemplate,
+    type RangeFilter,
+  } from "@utils/drills";
   import {
     loadCustomDrills,
     newDrillId,
@@ -20,12 +25,13 @@
   // opponent. Opening /drills/new?edit=<id> changes a saved drill instead.
   const gameLabels: Record<string, string> = { mtt: "MTT", cash: "Cash" };
 
-  // Each exercise picks charts; an empty list means every one.
+  // A set of charts: an empty list means every one.
+  type PickDraft = { positions: string[]; types: string[]; opponents: string[] };
+  // Each exercise takes the charts of one or more picks, so opens from every
+  // seat and the big blind's defense can go in the same exercise.
   type ExerciseDraft = {
     kind: "range" | "hands";
-    positions: string[];
-    types: string[];
-    opponents: string[];
+    picks: PickDraft[];
     timesInARow: number;
     count: number;
   };
@@ -52,26 +58,31 @@
     manifest.filter((range) => range.game === game && range.stack === stack)
   );
 
-  // What each exercise can still choose from, and how many charts it has.
+  const types = $derived(typeOrder.filter((type) => charts.some((range) => range.type === type)));
+
+  // What each pick can still choose from, and how many charts it and its
+  // exercise have.
   const details = $derived(
-    exercises.map((exercise) => {
-      const forTypes = charts.filter(
-        (range) => exercise.types.length === 0 || exercise.types.includes(range.type)
-      );
-      const forPositions = forTypes.filter(
-        (range) => exercise.positions.length === 0 || exercise.positions.includes(range.position)
-      );
-      return {
-        types: typeOrder.filter((type) => charts.some((range) => range.type === type)),
-        positions: positionOrder.filter((position) =>
-          forTypes.some((range) => range.position === position)
-        ),
-        opponents: positionOrder.filter((position) =>
-          forPositions.some((range) => range.opponent === position)
-        ),
-        chartCount: resolveUrls(filterOf(exercise), manifest, game, stack).length,
-      };
-    })
+    exercises.map((exercise) => ({
+      chartCount: resolveUrls(filterOf(exercise), manifest, game, stack).length,
+      picks: exercise.picks.map((pick) => {
+        const forTypes = charts.filter(
+          (range) => pick.types.length === 0 || pick.types.includes(range.type)
+        );
+        const forPositions = forTypes.filter(
+          (range) => pick.positions.length === 0 || pick.positions.includes(range.position)
+        );
+        return {
+          positions: positionOrder.filter((position) =>
+            forTypes.some((range) => range.position === position)
+          ),
+          opponents: positionOrder.filter((position) =>
+            forPositions.some((range) => range.opponent === position)
+          ),
+          chartCount: resolveUrls(filterOfPick(pick), manifest, game, stack).length,
+        };
+      }),
+    }))
   );
 
   const errors = $derived.by(() => {
@@ -107,27 +118,47 @@
     loaded = true;
   });
 
+  function blankPick(): PickDraft {
+    return { positions: [], types: [], opponents: [] };
+  }
+
   function blankExercise(kind: "range" | "hands"): ExerciseDraft {
-    return { kind, positions: [], types: [], opponents: [], timesInARow: 1, count: 30 };
+    return { kind, picks: [blankPick()], timesInARow: 1, count: 30 };
   }
 
   function draftOf(exercise: ExerciseTemplate): ExerciseDraft {
+    const filters = Array.isArray(exercise.filter) ? exercise.filter : [exercise.filter];
     return {
       kind: exercise.kind,
-      positions: exercise.filter.positions ?? [],
-      types: exercise.filter.types,
-      opponents: exercise.filter.opponents ?? [],
+      picks: filters.map((filter) => ({
+        positions: filter.positions ?? [],
+        types: filter.types,
+        opponents: filter.opponents ?? [],
+      })),
       timesInARow: exercise.kind === "range" ? exercise.timesInARow : 1,
       count: exercise.kind === "hands" ? exercise.count : 30,
     };
   }
 
-  function filterOf(exercise: ExerciseDraft): RangeFilter {
+  function filterOfPick(pick: PickDraft): RangeFilter {
     return {
-      types: exercise.types,
-      positions: exercise.positions.length ? exercise.positions : undefined,
-      opponents: exercise.opponents.length ? exercise.opponents : undefined,
+      types: pick.types,
+      positions: pick.positions.length ? pick.positions : undefined,
+      opponents: pick.opponents.length ? pick.opponents : undefined,
     };
+  }
+
+  function filterOf(exercise: ExerciseDraft): ChartPick {
+    const filters = exercise.picks.map(filterOfPick);
+    return filters.length === 1 ? filters[0] : filters;
+  }
+
+  function copyPicks(picks: PickDraft[]): PickDraft[] {
+    return picks.map((pick) => ({
+      positions: [...pick.positions],
+      types: [...pick.types],
+      opponents: [...pick.opponents],
+    }));
   }
 
   function templateOf(exercise: ExerciseDraft): ExerciseTemplate {
@@ -156,11 +187,7 @@
 
   // Another game or stack has other charts, so the picks start over.
   function clearPicks() {
-    for (const exercise of exercises) {
-      exercise.positions = [];
-      exercise.types = [];
-      exercise.opponents = [];
-    }
+    for (const exercise of exercises) exercise.picks = [blankPick()];
   }
 
   function toggle(list: string[], item: string): string[] {
@@ -172,8 +199,16 @@
     // these charts, then answer hands from them" is the usual shape.
     const last = exercises.at(-1);
     exercises.push(
-      last ? { ...blankExercise(kind), positions: [...last.positions], types: [...last.types], opponents: [...last.opponents] } : blankExercise(kind)
+      last ? { ...blankExercise(kind), picks: copyPicks(last.picks) } : blankExercise(kind)
     );
+  }
+
+  function addPick(exercise: ExerciseDraft) {
+    exercise.picks.push(blankPick());
+  }
+
+  function removePick(exercise: ExerciseDraft, index: number) {
+    exercise.picks.splice(index, 1);
   }
 
   function removeExercise(index: number) {
@@ -316,52 +351,82 @@
             </label>
           {/if}
 
-          <div class="flex flex-col gap-1.5">
-            <span class="label">
-              Situation
-              {#if exercise.types.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
-            </span>
-            <div class="flex flex-wrap gap-1.5">
-              {#each detail.types as type}
-                <button
-                  class="chip {exercise.types.includes(type) ? 'chip-active' : ''}"
-                  onclick={() => (exercise.types = toggle(exercise.types, type))}>{type}</button
-                >
-              {/each}
-            </div>
-          </div>
+          <div class="flex flex-col gap-3">
+            <span class="label">Charts</span>
+            {#each exercise.picks as pick, pickIndex (pick)}
+              {@const pickDetail = detail.picks[pickIndex]}
+              <div
+                class="flex flex-col gap-3 rounded-xl border border-ink-700 bg-ink-850/60 p-3"
+                data-pick
+              >
+                {#if exercise.picks.length > 1}
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-ink-300">Charts {pickIndex + 1}</span>
+                    <span class="text-sm muted" data-pick-count>
+                      {pickDetail.chartCount}
+                      {pickDetail.chartCount === 1 ? "chart" : "charts"}
+                    </span>
+                    <button
+                      class="btn btn-ghost ml-auto py-1"
+                      onclick={() => removePick(exercise, pickIndex)}>Remove</button
+                    >
+                  </div>
+                {/if}
 
-          <div class="flex flex-col gap-1.5">
-            <span class="label">
-              Your position
-              {#if exercise.positions.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
-            </span>
-            <div class="flex flex-wrap gap-1.5">
-              {#each detail.positions as position}
-                <button
-                  class="chip {exercise.positions.includes(position) ? 'chip-active' : ''}"
-                  onclick={() => (exercise.positions = toggle(exercise.positions, position))}>{position}</button
-                >
-              {/each}
-            </div>
-          </div>
+                <div class="flex flex-col gap-1.5">
+                  <span class="label">
+                    Situation
+                    {#if pick.types.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
+                  </span>
+                  <div class="flex flex-wrap gap-1.5">
+                    {#each types as type}
+                      <button
+                        class="chip {pick.types.includes(type) ? 'chip-active' : ''}"
+                        onclick={() => (pick.types = toggle(pick.types, type))}>{type}</button
+                      >
+                    {/each}
+                  </div>
+                </div>
 
-          {#if detail.opponents.length > 0}
-            <div class="flex flex-col gap-1.5">
-              <span class="label">
-                Opponent
-                {#if exercise.opponents.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
-              </span>
-              <div class="flex flex-wrap gap-1.5">
-                {#each detail.opponents as opponent}
-                  <button
-                    class="chip {exercise.opponents.includes(opponent) ? 'chip-active' : ''}"
-                    onclick={() => (exercise.opponents = toggle(exercise.opponents, opponent))}>{opponent}</button
-                  >
-                {/each}
+                <div class="flex flex-col gap-1.5">
+                  <span class="label">
+                    Your position
+                    {#if pick.positions.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
+                  </span>
+                  <div class="flex flex-wrap gap-1.5">
+                    {#each pickDetail.positions as position}
+                      <button
+                        class="chip {pick.positions.includes(position) ? 'chip-active' : ''}"
+                        onclick={() => (pick.positions = toggle(pick.positions, position))}>{position}</button
+                      >
+                    {/each}
+                  </div>
+                </div>
+
+                {#if pickDetail.opponents.length > 0}
+                  <div class="flex flex-col gap-1.5">
+                    <span class="label">
+                      Opponent
+                      {#if pick.opponents.length === 0}<span class="font-normal tracking-normal normal-case text-ink-600">(all)</span>{/if}
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                      {#each pickDetail.opponents as opponent}
+                        <button
+                          class="chip {pick.opponents.includes(opponent) ? 'chip-active' : ''}"
+                          onclick={() => (pick.opponents = toggle(pick.opponents, opponent))}>{opponent}</button
+                        >
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
               </div>
-            </div>
-          {/if}
+            {/each}
+            <!-- A second set of charts is for a mix that one set can't say,
+                 like every open plus the big blind's defense. -->
+            <button class="btn btn-secondary self-start" onclick={() => addPick(exercise)}>
+              + Add more charts
+            </button>
+          </div>
         </div>
       {/each}
 

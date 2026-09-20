@@ -72,22 +72,24 @@ function isCustomDrill(value: unknown): value is CustomDrill {
 function isExercise(value: unknown): value is ExerciseTemplate {
   if (typeof value !== "object" || value === null) return false;
   const exercise = value as Record<string, unknown>;
-  const filter = exercise.filter as Record<string, unknown> | undefined;
-  const isList = (list: unknown) =>
-    list === undefined ||
-    (Array.isArray(list) && list.every((item) => typeof item === "string"));
-  if (
-    typeof filter !== "object" ||
-    filter === null ||
-    !Array.isArray(filter.types) ||
-    !isList(filter.types) ||
-    !isList(filter.positions) ||
-    !isList(filter.opponents)
-  ) {
-    return false;
-  }
+  const picks = Array.isArray(exercise.filter) ? exercise.filter : [exercise.filter];
+  if (picks.length === 0 || !picks.every(isFilter)) return false;
   return (
     (exercise.kind === "range" && typeof exercise.timesInARow === "number") ||
     (exercise.kind === "hands" && typeof exercise.count === "number")
+  );
+}
+
+function isFilter(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const filter = value as Record<string, unknown>;
+  const isList = (list: unknown) =>
+    list === undefined ||
+    (Array.isArray(list) && list.every((item) => typeof item === "string"));
+  return (
+    Array.isArray(filter.types) &&
+    isList(filter.types) &&
+    isList(filter.positions) &&
+    isList(filter.opponents)
   );
 }

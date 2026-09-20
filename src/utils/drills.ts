@@ -7,9 +7,13 @@ export type RangeFilter = {
   opponents?: string[];
 };
 
+// An exercise's charts: those matching one filter, or any of a list of them,
+// so opens from every seat and the big blind's defense can share a quiz.
+export type ChartPick = RangeFilter | RangeFilter[];
+
 export type ExerciseTemplate =
-  | { kind: "range"; filter: RangeFilter; timesInARow: number }
-  | { kind: "hands"; filter: RangeFilter; count: number };
+  | { kind: "range"; filter: ChartPick; timesInARow: number }
+  | { kind: "hands"; filter: ChartPick; count: number };
 
 export type DrillTemplate = {
   name: string;
@@ -233,7 +237,9 @@ export const drillCategories: { name: string; drills: DrillTemplate[] }[] = [
   },
 ];
 
-function matches(range: RangeInfo, filter: RangeFilter) {
+function matches(range: RangeInfo, pick: ChartPick): boolean {
+  if (Array.isArray(pick)) return pick.some((filter) => matches(range, filter));
+  const filter = pick;
   return (
     (filter.types.length === 0 || filter.types.includes(range.type)) &&
     (!filter.positions?.length || filter.positions.includes(range.position)) &&
@@ -253,7 +259,7 @@ function compareRanges(a: RangeInfo, b: RangeInfo) {
 
 // URLs of the charts matching a filter for a game and stack, in table order.
 export function resolveUrls(
-  filter: RangeFilter,
+  filter: ChartPick,
   manifest: RangeInfo[],
   game: string,
   stack: number
