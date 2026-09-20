@@ -40,6 +40,75 @@ export function removeCustomDrill(id: string): CustomDrill[] {
   return drills;
 }
 
+// A drill file: one or more drills, marked so a stray JSON file is told apart.
+const FILE_KIND = "pokertrainer-drills";
+const FILE_VERSION = 1;
+
+type DrillFile = { kind: typeof FILE_KIND; version: number; drills: CustomDrill[] };
+
+export function serializeDrills(drills: CustomDrill[]): string {
+  const file: DrillFile = { kind: FILE_KIND, version: FILE_VERSION, drills };
+  return JSON.stringify(file, null, 2);
+}
+
+// Reads a drill file back. A bare drill, or a bare list of them, is taken too.
+// Throws with a message fit to show when the file isn't drills at all.
+export function parseDrillFile(text: string): CustomDrill[] {
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error("This isn't a JSON file.");
+  }
+  const list = Array.isArray(json)
+    ? json
+    : typeof json === "object" && json !== null && "drills" in json
+      ? (json as { drills: unknown }).drills
+      : [json];
+  if (!Array.isArray(list) || list.length === 0 || !list.every(isCustomDrill)) {
+    throw new Error("This file doesn't hold drills from this site.");
+  }
+  return list;
+}
+
+// Puts the drills from a file in with the saved ones. A drill already saved
+// with the same id is replaced, so a drill downloaded and uploaded again
+// doesn't double up.
+export function importCustomDrills(imported: CustomDrill[]): {
+  drills: CustomDrill[];
+  added: number;
+  replaced: number;
+} {
+  const drills = loadCustomDrills();
+  let added = 0;
+  let replaced = 0;
+  for (const drill of imported) {
+    const index = drills.findIndex((item) => item.id === drill.id);
+    if (index === -1) {
+      drills.push(drill);
+      added++;
+    } else {
+      drills[index] = drill;
+      replaced++;
+    }
+  }
+  store(drills);
+  return { drills, added, replaced };
+}
+
+// Saves the drills as a file through the browser's download.
+export function downloadDrills(drills: CustomDrill[], name: string) {
+  const blob = new Blob([serializeDrills(drills)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${name.replace(/[\\/:*?"<>|]+/g, "-").trim() || "drills"}.json`;
+  document.body.appendChild(anchor); // Firefox wants it in the page.
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function newDrillId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
