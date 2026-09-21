@@ -130,6 +130,15 @@
           <input
             type="checkbox"
             class="accent-accent-500"
+            checked={settings.rangeRetry}
+            onchange={(e) => set("rangeRetry", e.currentTarget.checked)}
+          />
+          Wrong charts come up again right away
+        </label>
+        <label class="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap">
+          <input
+            type="checkbox"
+            class="accent-accent-500"
             checked={settings.rangeRepeat}
             onchange={(e) => set("rangeRepeat", e.currentTarget.checked)}
           />
