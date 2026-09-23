@@ -15,6 +15,11 @@ export const settings = $state({
   // How many hands a round asks; 0 asks every hand in the charts. A shorter
   // round favors hands at the edge of a region, where mistakes happen.
   handCount: 0,
+  // How many times in a row a hand has to be answered right before it is done.
+  handStreak: 1,
+  // The streak is only asked of a hand once it has been answered wrong; the
+  // rest are done after one right answer.
+  handStreakMissed: false,
 
   // Range trainer.
   // A chart rebuilt wrong is asked again right away.
@@ -23,6 +28,9 @@ export const settings = $state({
   rangeRepeat: true,
   // How many times in a row a chart has to be rebuilt right before it is done.
   rangeStreak: 1,
+  // The streak is only asked of a chart once it has been rebuilt wrong; the
+  // rest are done after one right rebuild.
+  rangeStreakMissed: false,
   // After a check, outline every cell with the chart's action.
   rangeAnswer: true,
 
@@ -63,7 +71,7 @@ export type Settings = typeof settings;
 export type SettingKey = keyof Settings;
 
 export const handCounts = [0, 20, 50, 100];
-export const rangeStreaks = [1, 2, 3];
+export const streaks = [1, 2, 3];
 
 // The display toggles, grouped as the Options menu and the drill editor show them.
 export type Toggle = { key: SettingKey; label: string; hint?: string; needs?: SettingKey };
@@ -180,8 +188,9 @@ function isValid(key: SettingKey, value: unknown): boolean {
       return value === "retry" || value === "move-on";
     case "handCount":
       return handCounts.includes(value as number);
+    case "handStreak":
     case "rangeStreak":
-      return rangeStreaks.includes(value as number);
+      return streaks.includes(value as number);
     default:
       return typeof value === typeof settings[key];
   }

@@ -14,11 +14,18 @@
   const pokerRangesToPractice: PokerRange[] = $state([]);
   let pokerRangesToPracticeFromDrills: PokerRange[] = $state([]);
   // The charts still to rebuild this round. A chart leaves the queue once it
-  // has been rebuilt right as many times in a row as the options ask for.
-  let queue: { range: PokerRange; streak: number }[] = $state([]);
+  // has been rebuilt right as many times in a row as the options ask for;
+  // `missed` marks one rebuilt wrong, for when only those need the streak.
+  type Item = { range: PokerRange; streak: number; missed: boolean };
+  let queue: Item[] = $state([]);
   let compareTo: PokerRange | undefined = $state(undefined);
 
   const current = $derived(queue[0]?.range);
+
+  // How many right rebuilds in a row the chart needs to be done.
+  function needed(item: Item) {
+    return settings.rangeStreakMissed && !item.missed ? 1 : settings.rangeStreak;
+  }
 
   function importRange(e: Event) {
     const files = (e?.target as HTMLInputElement)?.files;
@@ -41,7 +48,7 @@
   function start() {
     queue = [...pokerRangesToPractice, ...pokerRangesToPracticeFromDrills]
       .sort(() => Math.random() - 0.5)
-      .map((range) => ({ range, streak: 0 }));
+      .map((range) => ({ range, streak: 0, missed: false }));
     compareTo = undefined;
     isCorrect = undefined;
     pokerRange = blankRangeFor(current);
@@ -51,19 +58,21 @@
     const [item, ...rest] = queue;
     if (!item) return;
     if (isCorrect) {
+      // Not done yet: it comes back at the end for the next one in a row, or
+      // the streak goes on with the copy a wrong rebuild already put there.
       const streak = item.streak + 1;
-      queue =
-        streak >= settings.rangeStreak
-          ? rest
-          : [...rest, { range: item.range, streak }];
+      if (streak >= needed(item)) queue = rest;
+      else if (rest.some((other) => other.range === item.range))
+        queue = rest.map((other) => (other.range === item.range ? { ...other, streak } : other));
+      else queue = [...rest, { ...item, streak }];
     } else {
       // Wrong: with retry on it is rebuilt again right away, like in a
       // drill; with repeat on it comes back at the end, unless already there.
       queue =
         settings.rangeRepeat && rest.at(-1)?.range !== item.range
-          ? [...rest, { range: item.range, streak: 0 }]
+          ? [...rest, { range: item.range, streak: 0, missed: true }]
           : rest;
-      if (settings.rangeRetry) queue = [{ range: item.range, streak: 0 }, ...queue];
+      if (settings.rangeRetry) queue = [{ range: item.range, streak: 0, missed: true }, ...queue];
     }
     compareTo = undefined;
     isCorrect = undefined;
@@ -149,8 +158,8 @@
         <p class="text-sm muted" data-charts-left>
           {queue.length}
           {queue.length === 1 ? "chart" : "charts"} left
-          {#if settings.rangeStreak > 1}
-            · correct in a row: {queue[0].streak}/{settings.rangeStreak}
+          {#if needed(queue[0]) > 1}
+            · right in a row: {queue[0].streak}/{needed(queue[0])}
           {/if}
         </p>
       {/if}
