@@ -20,6 +20,8 @@
     onfinish = undefined,
     mistakes = "retry",
     repeatMistakes = true,
+    streak = 1,
+    streakMissed = false,
   }: {
     ranges: PokerRange[];
     // How many hands to ask; all in-range hands when omitted.
@@ -32,10 +34,19 @@
     mistakes?: MistakeMode;
     // A hand answered wrong is asked once more at the end.
     repeatMistakes?: boolean;
+    // How many times in a row a hand has to be answered right to be done.
+    streak?: number;
+    // Ask the streak only of hands answered wrong; the rest are done after
+    // one right answer.
+    streakMissed?: boolean;
   } = $props();
 
   // Can hold 169 questions per range, so keep it raw and reassign on change.
   let questions: Question[] = $state.raw([]);
+  // Right answers in a row so far, and the hands answered wrong, by question.
+  // Replaced rather than changed, like the questions.
+  let streaks: Map<Question, number> = $state.raw(new Map());
+  let missed: Set<Question> = $state.raw(new Set());
   // The last wrong answer: the chart with it painted in, and the chart it
   // should have matched. Kept apart from the current question, since the
   // quiz may have moved on to a hand from another chart.
@@ -45,6 +56,12 @@
   let feedbackHeight = $state(0);
 
   const current = $derived(questions[0]);
+  const currentNeeded = $derived(current ? needed(current) : 1);
+
+  // How many right answers in a row the hand needs to be done.
+  function needed(question: Question) {
+    return streakMissed && !missed.has(question) ? 1 : streak;
+  }
   // The chart with the mistake to review, if it is wanted.
   const mistakeChart = $derived(settings.mistakeChart ? mistake : undefined);
   // Whether the chart's column is there at all. It is kept whenever a chart
@@ -73,6 +90,8 @@
     fixed = fixedQuestions
   ) {
     questions = fixed ? shuffle([...fixed]) : pickQuestions(quizRanges, quizCount);
+    streaks = new Map();
+    missed = new Set();
     mistake = undefined;
     randomCardSuits();
   }
@@ -83,12 +102,20 @@
 
     if (question.range.range[question.hand] === action) {
       mistake = undefined;
-      questions = questions.slice(1);
+      const inARow = (streaks.get(question) ?? 0) + 1;
+      streaks = new Map(streaks).set(question, inARow);
+      // Not done yet: it comes back at the end for the next one in a row,
+      // unless a wrong answer already put it there.
+      const rest = questions.slice(1);
+      questions =
+        inARow >= needed(question) || rest.includes(question) ? rest : [...rest, question];
       randomCardSuits();
     } else {
       const attempt = new PokerRange("range", [...question.range.range]);
       attempt.range[question.hand] = action;
       mistake = { attempt, answer: question.range };
+      streaks = new Map(streaks).set(question, 0);
+      missed = new Set(missed).add(question);
       const rest = mistakes === "retry" ? questions : questions.slice(1);
       // Asked once more at the end, unless it is already there.
       questions =
@@ -189,6 +216,10 @@
             {#if settings.progress}
               <span class="text-sm whitespace-nowrap muted">
                 <span class="font-semibold text-ink-100 tabular-nums">{questions.length}</span> left
+                {#if currentNeeded > 1}
+                  · right in a row:
+                  <span class="tabular-nums">{streaks.get(current) ?? 0}/{currentNeeded}</span>
+                {/if}
               </span>
             {/if}
             {#if mistake}
