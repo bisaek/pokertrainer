@@ -89,7 +89,7 @@
     return action ? COMPARE_CLASS[action] : "";
   }
 
-  // Cells covered by a Shift line or Ctrl box while it's being dragged.
+  // Cells covered by a Shift line or Ctrl/Cmd box while it's being dragged.
   function getHoverClass(index: number): string {
     if (startHand === undefined) return "";
     const [row, col] = handToVector(index);
@@ -102,7 +102,8 @@
     if (Event.key === "Shift") {
       shiftDown = true;
     }
-    if (Event.key === "Control") {
+    // Cmd works too, since Ctrl+click is a right click on a Mac.
+    if (Event.key === "Control" || Event.key === "Meta") {
       ctrlDown = true;
     }
   }
@@ -112,10 +113,23 @@
       shiftDown = false;
       startHand = undefined;
     }
-    if (Event.key === "Control") {
+    if (Event.key === "Control" || Event.key === "Meta") {
       ctrlDown = false;
       startHand = undefined;
     }
+  }
+
+  // Keys let go while the window is in the background, like after Cmd+Tab,
+  // never send a keyup.
+  function blur() {
+    shiftDown = false;
+    ctrlDown = false;
+    startHand = undefined;
+  }
+
+  // Keep the right-click menu from opening on a Ctrl+click on a Mac.
+  function contextMenu(Event: MouseEvent) {
+    if (Event.ctrlKey) Event.preventDefault();
   }
 
   function mouseUp(Event: MouseEvent) {
@@ -127,7 +141,7 @@
   }
 </script>
 
-<svelte:window onkeydown={keyDown} onkeyup={keyUp} onmouseup={mouseUp} />
+<svelte:window onkeydown={keyDown} onkeyup={keyUp} onmouseup={mouseUp} onblur={blur} />
 {#each Array(PokerRangeLength) as _, index}
   <!-- svelte-ignore a11y_mouse_events_have_key_events -->
   <button
@@ -138,6 +152,7 @@
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
     onmouseleave={(e) => toggleHand(e, index)}
+    oncontextmenu={contextMenu}
     title={HandStrings[index]}
   >
     {HandStrings[index]}
