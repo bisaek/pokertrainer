@@ -85,7 +85,7 @@
         {/each}
       </div>
       <p class="text-xs muted">
-        Drag across cells to paint. Hold Shift for a line or Ctrl for a box.
+        Drag across cells to paint. Hold Shift for a line or Ctrl (Cmd on a Mac) for a box.
       </p>
     </div>
     {@render children?.()}
