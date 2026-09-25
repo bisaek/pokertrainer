@@ -24,21 +24,30 @@ export type ExerciseTemplate =
   | ({ kind: "range"; filter: ChartPick; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; filter: ChartPick; count: number } & ExerciseRules & HandRules);
 
-// How a drill runs its exercises. An exercise that answers hands from the
-// same charts as the one before it goes with it (see exerciseBlocks), so
-// "rebuild the UTG open, then answer hands from it" stays together.
-export type DrillOrder = {
-  // Play the blocks in a random order.
+// How a group plays its parts. Unset means in order, once, all of them, and
+// a mistake isn't played again.
+export type GroupRules = {
+  // Play its parts in a random order.
   shuffle?: boolean;
-  // A block with a mistake in it is done again at the end, until it is done
-  // without one.
+  // Play only this many of its parts, picked at random.
+  pick?: number;
+  // Go through it this many times, picking and shuffling anew each time.
+  repeat?: number;
+  // After a mistake anywhere in it, play it again at the end of the group
+  // it's in, or of the drill, until it's done without one.
   redoMistakes?: boolean;
 };
 
-export type DrillTemplate = DrillOrder & {
+// Exercises kept together, e.g. "rebuild the UTG open, then answer hands
+// from it". Groups can hold groups.
+export type GroupTemplate = { kind: "group"; name?: string; items: DrillItem[] } & GroupRules;
+
+export type DrillItem = ExerciseTemplate | GroupTemplate;
+
+export type DrillTemplate = {
   name: string;
   description: string;
-  exercises: ExerciseTemplate[];
+  exercises: DrillItem[];
   // Hide the drill when fewer charts exist, e.g. a review of a single chart.
   minCharts?: number;
 };
@@ -47,11 +56,18 @@ export type DrillExercise =
   | ({ kind: "range"; urls: string[]; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; urls: string[]; count: number } & ExerciseRules & HandRules);
 
-export type Drill = DrillOrder & {
+// A drill's groups with their exercises given by index into its exercises.
+export type DrillNode = { kind: "exercise"; index: number } | DrillGroup;
+export type DrillGroup = { kind: "group"; name?: string; items: DrillNode[] } & GroupRules;
+
+export type Drill = {
   name: string;
   description: string;
   chartCount: number;
+  // Every exercise, in the order they are written.
   exercises: DrillExercise[];
+  // How they are played.
+  items: DrillNode[];
 };
 
 const EARLY = ["UTG", "UTG+1", "UTG+2"];
@@ -291,7 +307,8 @@ export function resolveUrls(
 }
 
 // Turns a drill template into the ranges that exist for a game and stack.
-// Exercises without ranges are dropped, and the drill is null when nothing is left.
+// Exercises without ranges are dropped, and so are groups left empty; the
+// drill is null when nothing is left.
 export function resolveDrill(
   drill: DrillTemplate,
   manifest: RangeInfo[],
@@ -299,49 +316,33 @@ export function resolveDrill(
   stack: number
 ): Drill | null {
   const exercises: DrillExercise[] = [];
-  for (const exercise of drill.exercises) {
-    const urls = resolveUrls(exercise.filter, manifest, game, stack);
-    if (urls.length === 0) continue;
-    exercises.push(
-      exercise.kind === "range"
-        ? { kind: "range", urls, timesInARow: exercise.timesInARow, settings: exercise.settings }
-        : {
-            kind: "hands",
-            urls,
-            count: exercise.count,
-            settings: exercise.settings,
-            mistakes: exercise.mistakes,
-            repeatMistakes: exercise.repeatMistakes,
-          }
-    );
-  }
+  const resolve = (items: DrillItem[]): DrillNode[] =>
+    items.flatMap((item): DrillNode[] => {
+      if (item.kind === "group") {
+        const { items: inner, ...rest } = item;
+        const nodes = resolve(inner);
+        return nodes.length > 0 ? [{ ...rest, items: nodes }] : [];
+      }
+      const urls = resolveUrls(item.filter, manifest, game, stack);
+      if (urls.length === 0) return [];
+      exercises.push(
+        item.kind === "range"
+          ? { kind: "range", urls, timesInARow: item.timesInARow, settings: item.settings }
+          : {
+              kind: "hands",
+              urls,
+              count: item.count,
+              settings: item.settings,
+              mistakes: item.mistakes,
+              repeatMistakes: item.repeatMistakes,
+            }
+      );
+      return [{ kind: "exercise", index: exercises.length - 1 }];
+    });
+  const items = resolve(drill.exercises);
   const chartCount = new Set(exercises.flatMap((exercise) => exercise.urls)).size;
   if (exercises.length === 0 || chartCount < (drill.minCharts ?? 1)) return null;
-  return {
-    name: drill.name,
-    description: drill.description,
-    chartCount,
-    exercises,
-    shuffle: drill.shuffle,
-    redoMistakes: drill.redoMistakes,
-  };
-}
-
-// The drill's exercises split into blocks that are played, shuffled and done
-// again together: an exercise answering hands joins the one before it when
-// they share a chart. Each block is a list of indices into the exercises.
-export function exerciseBlocks(exercises: DrillExercise[]): number[][] {
-  const blocks: number[][] = [];
-  exercises.forEach((exercise, index) => {
-    const previous = exercises[index - 1];
-    const joins =
-      exercise.kind === "hands" &&
-      previous !== undefined &&
-      exercise.urls.some((url) => previous.urls.includes(url));
-    if (joins) blocks[blocks.length - 1].push(index);
-    else blocks.push([index]);
-  });
-  return blocks;
+  return { name: drill.name, description: drill.description, chartCount, exercises, items };
 }
 
 export function describeExercise(exercise: DrillExercise): string {

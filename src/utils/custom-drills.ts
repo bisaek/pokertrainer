@@ -1,15 +1,15 @@
-import type { DrillOrder, ExerciseTemplate } from "./drills";
+import type { DrillItem, ExerciseTemplate } from "./drills";
 import { settings } from "./settings.svelte";
 
 // A drill the player put together on /drills/new. It is made for one game and
 // stack, and kept in this browser.
-export type CustomDrill = DrillOrder & {
+export type CustomDrill = {
   id: string;
   name: string;
   description: string;
   game: string;
   stack: number;
-  exercises: ExerciseTemplate[];
+  exercises: DrillItem[];
 };
 
 const STORAGE_KEY = "pokertrainer.custom-drills.v1";
@@ -134,10 +134,25 @@ export function isCustomDrill(value: unknown): value is CustomDrill {
     typeof drill.description === "string" &&
     typeof drill.game === "string" &&
     typeof drill.stack === "number" &&
-    (drill.shuffle === undefined || typeof drill.shuffle === "boolean") &&
-    (drill.redoMistakes === undefined || typeof drill.redoMistakes === "boolean") &&
     Array.isArray(drill.exercises) &&
-    drill.exercises.every(isExercise)
+    drill.exercises.every(isItem)
+  );
+}
+
+function isItem(value: unknown): value is DrillItem {
+  if (typeof value !== "object" || value === null) return false;
+  const group = value as Record<string, unknown>;
+  if (group.kind !== "group") return isExercise(value);
+  const optional = (key: string, type: string) =>
+    group[key] === undefined || typeof group[key] === type;
+  return (
+    Array.isArray(group.items) &&
+    group.items.every(isItem) &&
+    optional("name", "string") &&
+    optional("shuffle", "boolean") &&
+    optional("redoMistakes", "boolean") &&
+    optional("pick", "number") &&
+    optional("repeat", "number")
   );
 }
 
