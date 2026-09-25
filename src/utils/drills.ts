@@ -24,7 +24,18 @@ export type ExerciseTemplate =
   | ({ kind: "range"; filter: ChartPick; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; filter: ChartPick; count: number } & ExerciseRules & HandRules);
 
-export type DrillTemplate = {
+// How a drill runs its exercises. An exercise that answers hands from the
+// same charts as the one before it goes with it (see exerciseBlocks), so
+// "rebuild the UTG open, then answer hands from it" stays together.
+export type DrillOrder = {
+  // Play the blocks in a random order.
+  shuffle?: boolean;
+  // A block with a mistake in it is done again at the end, until it is done
+  // without one.
+  redoMistakes?: boolean;
+};
+
+export type DrillTemplate = DrillOrder & {
   name: string;
   description: string;
   exercises: ExerciseTemplate[];
@@ -36,7 +47,7 @@ export type DrillExercise =
   | ({ kind: "range"; urls: string[]; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; urls: string[]; count: number } & ExerciseRules & HandRules);
 
-export type Drill = {
+export type Drill = DrillOrder & {
   name: string;
   description: string;
   chartCount: number;
@@ -306,7 +317,31 @@ export function resolveDrill(
   }
   const chartCount = new Set(exercises.flatMap((exercise) => exercise.urls)).size;
   if (exercises.length === 0 || chartCount < (drill.minCharts ?? 1)) return null;
-  return { name: drill.name, description: drill.description, chartCount, exercises };
+  return {
+    name: drill.name,
+    description: drill.description,
+    chartCount,
+    exercises,
+    shuffle: drill.shuffle,
+    redoMistakes: drill.redoMistakes,
+  };
+}
+
+// The drill's exercises split into blocks that are played, shuffled and done
+// again together: an exercise answering hands joins the one before it when
+// they share a chart. Each block is a list of indices into the exercises.
+export function exerciseBlocks(exercises: DrillExercise[]): number[][] {
+  const blocks: number[][] = [];
+  exercises.forEach((exercise, index) => {
+    const previous = exercises[index - 1];
+    const joins =
+      exercise.kind === "hands" &&
+      previous !== undefined &&
+      exercise.urls.some((url) => previous.urls.includes(url));
+    if (joins) blocks[blocks.length - 1].push(index);
+    else blocks.push([index]);
+  });
+  return blocks;
 }
 
 export function describeExercise(exercise: DrillExercise): string {

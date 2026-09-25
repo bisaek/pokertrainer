@@ -31,6 +31,8 @@
   let game = $state("cash");
   let stack = $state(100);
   let exercises: ExerciseDraft[] = $state([blankExercise("range")]);
+  let shuffle = $state(false);
+  let redoMistakes = $state(false);
   let showErrors = $state(false);
 
   const games = $derived([...new Set(manifest.map((range) => range.game))]);
@@ -57,6 +59,8 @@
       game = saved.game;
       stack = saved.stack;
       exercises = saved.exercises.map(draftOf);
+      shuffle = saved.shuffle ?? false;
+      redoMistakes = saved.redoMistakes ?? false;
     } else {
       // Start from the game and stack the drills page was showing.
       const wanted = params.get("game");
@@ -98,6 +102,8 @@
       game,
       stack,
       exercises: exercises.map(templateOf),
+      shuffle: shuffle || undefined,
+      redoMistakes: redoMistakes || undefined,
     };
     saveCustomDrill(drill);
     const params = new URLSearchParams({ game, stack: String(stack), custom: drill.id });
@@ -154,6 +160,27 @@
     <section class="flex flex-col gap-3">
       <h2 class="section-title">Exercises</h2>
       <DrillExercises {manifest} {game} {stack} bind:exercises />
+    </section>
+
+    <!-- An "Answer hands" exercise from the same charts as the exercise
+         before it goes with that one: they are shuffled and done again
+         together (see exerciseBlocks). -->
+    <section class="card flex flex-col gap-3" data-drill-order>
+      <span class="label">Order</span>
+      <label class="flex cursor-pointer items-start gap-2 text-sm">
+        <input type="checkbox" class="mt-0.5 accent-accent-500" bind:checked={shuffle} />
+        <span>
+          Exercises in a random order
+          <span class="block muted">Answering hands stays right after rebuilding the same charts.</span>
+        </span>
+      </label>
+      <label class="flex cursor-pointer items-start gap-2 text-sm">
+        <input type="checkbox" class="mt-0.5 accent-accent-500" bind:checked={redoMistakes} />
+        <span>
+          After a mistake, do those charts again at the end
+          <span class="block muted">Rebuilding and answering hands both come back, until they're done without a mistake.</span>
+        </span>
+      </label>
     </section>
 
     {#if showErrors && errors.length > 0}

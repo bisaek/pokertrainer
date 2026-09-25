@@ -11,8 +11,8 @@
   import { Action, PokerRange } from "@utils/range.svelte";
   import { fetchChart } from "@utils/manifest";
   import { spotFromUrl } from "@utils/spot";
-  import { blankRangeFor, isRangeCorrect } from "@utils/practice";
-  import { describeExercise, type Drill } from "@utils/drills";
+  import { blankRangeFor, isRangeCorrect, shuffle } from "@utils/practice";
+  import { describeExercise, exerciseBlocks, type Drill } from "@utils/drills";
 
   type DoneAction = { label: string; onclick: () => void; primary?: boolean };
 
@@ -36,6 +36,12 @@
     doneActions?: DoneAction[];
   } = $props();
 
+  // The blocks of exercises to play, in order (see exerciseBlocks). A block
+  // with a mistake in it is added again at the end when the drill says so.
+  let plan: number[][] = $state.raw([]);
+  let blockIndex = $state(0);
+  let inBlock = $state(0);
+  let blockMissed = false;
   let exerciseIndex = $state(0);
   let exerciseRanges: PokerRange[] = $state.raw([]);
   let loading = $state(true);
@@ -51,6 +57,11 @@
   let isCorrect: boolean | undefined = $state();
 
   const exercise = $derived(drill.exercises[exerciseIndex]);
+  // Where the player is among every exercise in the plan, for the progress bar.
+  const steps = $derived(plan.flat().length);
+  const step = $derived(
+    plan.slice(0, blockIndex).reduce((sum, block) => sum + block.length, 0) + inBlock
+  );
 
   $effect(() => {
     const current = drill;
@@ -66,7 +77,12 @@
 
   function restart(current: Drill = drill) {
     finished = false;
-    loadExercise(current, 0);
+    const blocks = exerciseBlocks(current.exercises);
+    plan = current.shuffle ? shuffle(blocks) : blocks;
+    blockIndex = 0;
+    inBlock = 0;
+    blockMissed = false;
+    loadExercise(current, plan[0][0]);
   }
 
   async function loadExercise(current: Drill, index: number) {
@@ -101,8 +117,18 @@
   }
 
   function finishExercise() {
-    if (exerciseIndex + 1 < drill.exercises.length) {
-      loadExercise(drill, exerciseIndex + 1);
+    const block = plan[blockIndex];
+    if (inBlock + 1 < block.length) {
+      inBlock++;
+      loadExercise(drill, block[inBlock]);
+      return;
+    }
+    if (drill.redoMistakes && blockMissed) plan = [...plan, block];
+    blockMissed = false;
+    if (blockIndex + 1 < plan.length) {
+      blockIndex++;
+      inBlock = 0;
+      loadExercise(drill, plan[blockIndex][0]);
     } else {
       finished = true;
       clearExerciseSettings();
@@ -126,6 +152,7 @@
           ? rest
           : [...rest, { range: item.range, streak }];
     } else {
+      blockMissed = true;
       // Wrong: rebuild it again right away, and once more at the end.
       const again = { range: item.range, streak: 0 };
       queue =
@@ -167,7 +194,7 @@
       <h1 class="page-title">{drill.name}</h1>
       {#if !finished}
         <p class="text-sm muted">
-          Exercise {exerciseIndex + 1} of {drill.exercises.length}{exercise
+          Exercise {step + 1} of {steps}{exercise
             ? `: ${describeExercise(exercise)}`
             : ""}
         </p>
@@ -178,11 +205,11 @@
     </div>
     {#if !finished}
       <div class="flex gap-1.5" aria-hidden="true">
-        {#each drill.exercises as _, index}
+        {#each { length: steps }, index}
           <div
-            class="h-1.5 flex-1 rounded-full {index < exerciseIndex
+            class="h-1.5 flex-1 rounded-full {index < step
               ? 'bg-accent-500'
-              : index === exerciseIndex
+              : index === step
                 ? 'bg-accent-500/50'
                 : 'bg-ink-800'}"
           ></div>
@@ -268,13 +295,16 @@
       </div>
     </RangeLayout>
   {:else}
-    {#key exerciseIndex}
+    <!-- Keyed by the step, since a block done again can ask the same
+         exercise twice in a row. -->
+    {#key step}
       <HandQuiz
         ranges={exerciseRanges}
         count={exercise.count}
         mistakes={exercise.mistakes}
         repeatMistakes={exercise.repeatMistakes}
         onfinish={finishExercise}
+        onmistake={() => (blockMissed = true)}
       />
     {/key}
   {/if}

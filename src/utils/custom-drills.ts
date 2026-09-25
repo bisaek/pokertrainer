@@ -1,9 +1,9 @@
-import type { ExerciseTemplate } from "./drills";
+import type { DrillOrder, ExerciseTemplate } from "./drills";
 import { settings } from "./settings.svelte";
 
 // A drill the player put together on /drills/new. It is made for one game and
 // stack, and kept in this browser.
-export type CustomDrill = {
+export type CustomDrill = DrillOrder & {
   id: string;
   name: string;
   description: string;
@@ -134,6 +134,8 @@ export function isCustomDrill(value: unknown): value is CustomDrill {
     typeof drill.description === "string" &&
     typeof drill.game === "string" &&
     typeof drill.stack === "number" &&
+    (drill.shuffle === undefined || typeof drill.shuffle === "boolean") &&
+    (drill.redoMistakes === undefined || typeof drill.redoMistakes === "boolean") &&
     Array.isArray(drill.exercises) &&
     drill.exercises.every(isExercise)
   );

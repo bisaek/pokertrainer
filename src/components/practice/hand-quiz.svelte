@@ -18,6 +18,7 @@
     count = undefined,
     fixedQuestions = undefined,
     onfinish = undefined,
+    onmistake = undefined,
     mistakes = "retry",
     repeatMistakes = true,
   }: {
@@ -28,6 +29,8 @@
     fixedQuestions?: Question[];
     // Called when every hand is answered; without it the quiz starts over.
     onfinish?: () => void;
+    // Called on every wrong answer.
+    onmistake?: () => void;
     // After a wrong answer: ask the same hand again, or go on to the next.
     mistakes?: MistakeMode;
     // A hand answered wrong is asked once more at the end.
@@ -96,6 +99,7 @@
           ? [...rest, question]
           : rest;
       if (mistakes === "move-on") randomCardSuits();
+      onmistake?.();
     }
     if (questions.length === 0) {
       if (onfinish) {
