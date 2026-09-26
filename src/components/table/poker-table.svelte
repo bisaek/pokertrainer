@@ -250,6 +250,8 @@
     /* Lift it to the middle of the capitals: the line box below them holds
        room for descenders, which centring would count. */
     translate: 0 -0.16em;
+    /* And the D down to the middle of the circle, for the same reason. */
+    padding-top: 0.1em;
     border-radius: 50%;
     background: #f3efe9;
     color: #1c1a17;
