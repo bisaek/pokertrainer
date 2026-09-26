@@ -36,6 +36,9 @@ export const settings = $state({
   foldedSeats: true,
   // The blinds and bets on the table.
   bets: true,
+  // Random player names in the seats instead of their positions, so the
+  // positions have to be read off the dealer button.
+  playerNames: false,
   // The name of the chart being trained; without it the spot has to be read
   // off the board. The range trainer still reveals it after a check.
   chartName: true,
@@ -75,6 +78,7 @@ export const tableGroup: ToggleGroup = {
     { key: "board", label: "Board" },
     { key: "foldedSeats", label: "Folded players", needs: "board" },
     { key: "bets", label: "Blinds and bets", needs: "board" },
+    { key: "playerNames", label: "Names instead of positions", needs: "board" },
   ],
 };
 export const aroundHandGroup: ToggleGroup = {

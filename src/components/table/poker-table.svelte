@@ -12,6 +12,26 @@
   } = $props();
 
   const seats = $derived(seatsFor(spot));
+
+  const names = [
+    "Alex", "Ben", "Chloe", "Dana", "Eli", "Finn", "Gus", "Hana", "Ivan", "Jade",
+    "Kai", "Leo", "Maya", "Nico", "Omar", "Pia", "Quinn", "Rosa", "Sam", "Tess",
+    "Uma", "Vic", "Wren", "Yuki", "Zoe",
+  ];
+
+  // A fresh cast for every hand: the cards change with the hand, the spot
+  // with the chart. Only drawn when the names setting is on, which is read
+  // after hydration, so the server's draw never shows.
+  const seatNames = $derived.by(() => {
+    void spot;
+    void heroCards;
+    const pool = [...names];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, seats.length);
+  });
   const heroIndex = $derived(seats.findIndex((seat) => seat.role === "hero"));
 
   // Seats sit on an ellipse with the hero at the bottom, then clockwise in the
@@ -88,7 +108,7 @@
               <path d="M9.3 8.2h1.6a3.8 3.8 0 0 1 0 7.6H9.3z" />
             </svg>
           {/if}
-          {seat.position}
+          {settings.playerNames ? seatNames[index] : seat.position}
           {#if seat.role === "hero"}
             <span class="you">you</span>
           {/if}
