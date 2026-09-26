@@ -151,6 +151,7 @@ function isItem(value: unknown): value is DrillItem {
     optional("name", "string") &&
     optional("shuffle", "boolean") &&
     optional("redoMistakes", "boolean") &&
+    optional("redoParts", "boolean") &&
     optional("pick", "number") &&
     optional("repeat", "number")
   );

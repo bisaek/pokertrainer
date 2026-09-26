@@ -30,6 +30,9 @@ function size(step: Step): number {
 export class DrillRun {
   // The groups the current exercise is in, the drill itself first.
   private stack: GroupRun[];
+  // The exercise being played, and whether a mistake was made in it.
+  private current: number | null = null;
+  private currentMissed = false;
 
   constructor(items: DrillNode[]) {
     this.stack = [start({ kind: "group", items })];
@@ -37,29 +40,39 @@ export class DrillRun {
 
   // The next exercise's index, or null when the drill is done.
   next(): number | null {
+    const top = this.stack[this.stack.length - 1];
+    if (top && this.current !== null && this.currentMissed) {
+      top.missed = true;
+      if (top.group.redoParts) top.queue.push({ kind: "exercise", index: this.current });
+    }
+    this.current = null;
+    this.currentMissed = false;
     while (this.stack.length > 0) {
       const run = this.stack[this.stack.length - 1];
       const step = run.queue.shift();
-      if (step?.kind === "exercise") return step.index;
+      if (step?.kind === "exercise") {
+        this.current = step.index;
+        return step.index;
+      }
       if (step) {
         this.stack.push(step);
         continue;
       }
       // The group is done. A mistake in it counts for the groups around it
-      // too, and brings it back at the end of the one it's in.
+      // too, and brings it back at the end of the one it's in if either
+      // group says so.
       this.stack.pop();
       const parent = this.stack[this.stack.length - 1];
       if (parent && run.missed) {
         parent.missed = true;
-        if (run.group.redoMistakes) parent.queue.push(start(run.group));
+        if (run.group.redoMistakes || parent.group.redoParts) parent.queue.push(start(run.group));
       }
     }
     return null;
   }
 
   mistake() {
-    const run = this.stack[this.stack.length - 1];
-    if (run) run.missed = true;
+    this.currentMissed = true;
   }
 
   // How many exercises are still to come after the current one, as things

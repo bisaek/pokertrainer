@@ -98,6 +98,7 @@
       group.shuffle ? "random order" : "in order",
       group.pick !== null ? `only ${group.pick} of ${group.items.length}` : "",
       group.repeat > 1 ? `${group.repeat} times` : "",
+      group.redoParts ? "wrong parts again at the end" : "",
       group.redoMistakes ? "again after a mistake" : "",
     ].filter((rule) => rule !== "");
     return `${count} ${count === 1 ? "exercise" : "exercises"} · ${rules.join(", ")}`;
@@ -173,10 +174,6 @@
               <input type="checkbox" class="accent-accent-500" bind:checked={item.shuffle} data-rule="shuffle" />
               Play its parts in a random order
             </label>
-            <label class="flex cursor-pointer items-center gap-2">
-              <input type="checkbox" class="accent-accent-500" bind:checked={item.redoMistakes} data-rule="redo" />
-              After a mistake in it, play it again at the end of {outer ? "the group it's in" : "the drill"}
-            </label>
             <div class="flex flex-wrap items-center gap-2">
               <label class="flex cursor-pointer items-center gap-2">
                 <input
@@ -214,6 +211,18 @@
               />
               {item.repeat === 1 ? "time" : "times"}
             </label>
+            <!-- On rows of their own: the two differ in what comes back and where. -->
+            <div class="flex basis-full flex-col gap-1.5">
+              <span class="muted">After a mistake</span>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="checkbox" class="accent-accent-500" bind:checked={item.redoParts} data-rule="redo-parts" />
+                Play the part it was in again at the end of this group
+              </label>
+              <label class="flex cursor-pointer items-center gap-2">
+                <input type="checkbox" class="accent-accent-500" bind:checked={item.redoMistakes} data-rule="redo" />
+                Play this whole group again at the end of {outer ? "the group it's in" : "the drill"}
+              </label>
+            </div>
           </div>
 
           <div class="border-l-2 border-accent-500/20 pl-3">

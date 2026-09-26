@@ -36,6 +36,9 @@ export type GroupRules = {
   // After a mistake anywhere in it, play it again at the end of the group
   // it's in, or of the drill, until it's done without one.
   redoMistakes?: boolean;
+  // After a mistake in one of its parts, play that part again at the end
+  // of this group, until it's done without one.
+  redoParts?: boolean;
 };
 
 // Exercises kept together, e.g. "rebuild the UTG open, then answer hands

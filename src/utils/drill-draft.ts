@@ -35,6 +35,7 @@ export type GroupDraft = {
   items: ItemDraft[];
   shuffle: boolean;
   redoMistakes: boolean;
+  redoParts: boolean;
   // How many of its parts to play; null plays them all.
   pick: number | null;
   repeat: number;
@@ -59,7 +60,16 @@ export function blankExercise(kind: "range" | "hands"): ExerciseDraft {
 }
 
 export function blankGroup(items: ItemDraft[] = []): GroupDraft {
-  return { kind: "group", name: "", items, shuffle: false, redoMistakes: false, pick: null, repeat: 1 };
+  return {
+    kind: "group",
+    name: "",
+    items,
+    shuffle: false,
+    redoMistakes: false,
+    redoParts: false,
+    pick: null,
+    repeat: 1,
+  };
 }
 
 export function draftOf(item: DrillItem): ItemDraft {
@@ -70,6 +80,7 @@ export function draftOf(item: DrillItem): ItemDraft {
     items: item.items.map(draftOf),
     shuffle: item.shuffle ?? false,
     redoMistakes: item.redoMistakes ?? false,
+    redoParts: item.redoParts ?? false,
     pick: item.pick ?? null,
     repeat: item.repeat ?? 1,
   };
@@ -138,6 +149,7 @@ export function templateOf(item: ItemDraft): DrillItem {
     items: item.items.map(templateOf),
     shuffle: item.shuffle || undefined,
     redoMistakes: item.redoMistakes || undefined,
+    redoParts: item.redoParts || undefined,
     pick: item.pick ?? undefined,
     repeat: item.repeat > 1 ? item.repeat : undefined,
   };
