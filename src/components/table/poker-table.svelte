@@ -64,10 +64,6 @@
           </div>
         {/if}
 
-        {#if seat.position === "BTN"}
-          <div class="dealer" style={place(index, 33, 30, 0.42)}>D</div>
-        {/if}
-
         {#if seat.chips && settings.bets}
           <div
             class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
@@ -84,6 +80,14 @@
           class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
           style={place(index, 41, 41)}
         >
+          {#if seat.position === "BTN"}
+            <!-- Drawn, not typed: a 12px letter snaps to whole pixels and
+                 lands off-centre by a different amount in each font. -->
+            <svg class="dealer" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="12" />
+              <path d="M9.3 8.2h1.6a3.8 3.8 0 0 1 0 7.6H9.3z" />
+            </svg>
+          {/if}
           {seat.position}
           {#if seat.role === "hero"}
             <span class="you">you</span>
@@ -161,7 +165,9 @@
     display: inline-flex;
     align-items: baseline;
     gap: 0.4em;
-    padding: 0.45em 0.8em;
+    /* More room on top than below: the line box already leaves room for
+       descenders under the capitals, so even padding would sit them high. */
+    padding: 0.57em 0.8em 0.33em;
     border-radius: 999px;
     border: 1px solid var(--color-ink-600);
     background: var(--color-ink-800);
@@ -238,17 +244,26 @@
       #2f4a8a;
   }
 
+  /* The button rides in the BTN seat's pill, left of the position. */
   .dealer {
-    display: grid;
-    place-items: center;
-    width: 1.5em;
-    height: 1.5em;
+    flex-shrink: 0;
+    align-self: center;
+    width: 1.2em;
+    height: 1.2em;
+    margin-left: -0.35em;
+    /* Lift it to the middle of the capitals: the line box below them holds
+       room for descenders, which centring would count. */
+    translate: 0 -0.13em;
     border-radius: 50%;
-    background: #f3efe9;
-    color: #1c1a17;
-    font-size: 0.85em;
-    font-weight: 800;
-    box-shadow: 0 0.15em 0.3em rgb(0 0 0 / 0.5);
+    box-shadow: 0 0.08em 0.16em rgb(0 0 0 / 0.5);
+  }
+  .dealer circle {
+    fill: #f3efe9;
+  }
+  .dealer path {
+    fill: none;
+    stroke: #1c1a17;
+    stroke-width: 2.4;
   }
 
   .bet {
