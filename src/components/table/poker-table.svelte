@@ -64,10 +64,6 @@
           </div>
         {/if}
 
-        {#if seat.position === "BTN"}
-          <div class="dealer" style={place(index, 33, 30, 0.42)}>D</div>
-        {/if}
-
         {#if seat.chips && settings.bets}
           <div
             class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
@@ -84,6 +80,9 @@
           class="seat seat-{seat.role} {seat.status === 'folded' ? 'seat-folded' : ''}"
           style={place(index, 41, 41)}
         >
+          {#if seat.position === "BTN"}
+            <span class="dealer" aria-hidden="true">D</span>
+          {/if}
           {seat.position}
           {#if seat.role === "hero"}
             <span class="you">you</span>
@@ -238,17 +237,20 @@
       #2f4a8a;
   }
 
+  /* The button rides in the BTN seat's pill, left of the position. */
   .dealer {
     display: grid;
     place-items: center;
+    align-self: center;
     width: 1.5em;
     height: 1.5em;
+    margin-left: -0.35em;
     border-radius: 50%;
     background: #f3efe9;
     color: #1c1a17;
-    font-size: 0.85em;
+    font-size: 0.8em;
     font-weight: 800;
-    box-shadow: 0 0.15em 0.3em rgb(0 0 0 / 0.5);
+    box-shadow: 0 0.1em 0.2em rgb(0 0 0 / 0.5);
   }
 
   .bet {
