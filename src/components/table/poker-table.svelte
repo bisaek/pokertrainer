@@ -245,6 +245,9 @@
     width: 1.5em;
     height: 1.5em;
     margin-left: -0.35em;
+    /* Lift it to the middle of the capitals: the line box below them holds
+       room for descenders, which centring would count. */
+    translate: 0 -0.16em;
     border-radius: 50%;
     background: #f3efe9;
     color: #1c1a17;
