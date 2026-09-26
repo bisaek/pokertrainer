@@ -81,7 +81,12 @@
           style={place(index, 41, 41)}
         >
           {#if seat.position === "BTN"}
-            <span class="dealer" aria-hidden="true">D</span>
+            <!-- Drawn, not typed: a 12px letter snaps to whole pixels and
+                 lands off-centre by a different amount in each font. -->
+            <svg class="dealer" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="12" />
+              <path d="M9.3 8.2h1.6a3.8 3.8 0 0 1 0 7.6H9.3z" />
+            </svg>
           {/if}
           {seat.position}
           {#if seat.role === "hero"}
@@ -241,23 +246,24 @@
 
   /* The button rides in the BTN seat's pill, left of the position. */
   .dealer {
-    display: grid;
-    place-items: center;
+    flex-shrink: 0;
     align-self: center;
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.2em;
+    height: 1.2em;
     margin-left: -0.35em;
     /* Lift it to the middle of the capitals: the line box below them holds
        room for descenders, which centring would count. */
-    translate: 0 -0.16em;
-    /* And the D down to the middle of the circle, for the same reason. */
-    padding-top: 0.1em;
+    translate: 0 -0.13em;
     border-radius: 50%;
-    background: #f3efe9;
-    color: #1c1a17;
-    font-size: 0.8em;
-    font-weight: 800;
-    box-shadow: 0 0.1em 0.2em rgb(0 0 0 / 0.5);
+    box-shadow: 0 0.08em 0.16em rgb(0 0 0 / 0.5);
+  }
+  .dealer circle {
+    fill: #f3efe9;
+  }
+  .dealer path {
+    fill: none;
+    stroke: #1c1a17;
+    stroke-width: 2.4;
   }
 
   .bet {
