@@ -5,22 +5,50 @@ import { shuffle } from "./practice";
 
 type Step = { kind: "exercise"; index: number } | GroupRun;
 
-// A group being played: its parts still to come, with the order and picks
-// already made, and whether a mistake was made in it so far.
-type GroupRun = { kind: "group"; group: DrillGroup; queue: Step[]; missed: boolean };
+// A group being played, or one round of a group played more than once:
+// its parts still to come, with the order and picks already made, and
+// whether a mistake was made in it so far. `redoParts` brings a part with a
+// mistake back at the end of this run, which for a repeated group is the end
+// of the round; `redoWhole` brings the group back in the one around it.
+type GroupRun = {
+  kind: "group";
+  group: DrillGroup;
+  name?: string;
+  redoParts: boolean;
+  redoWhole: boolean;
+  queue: Step[];
+  missed: boolean;
+};
 
 function start(group: DrillGroup): GroupRun {
-  const queue: Step[] = [];
-  for (let round = 0; round < Math.max(1, group.repeat ?? 1); round++) {
+  const round = (): GroupRun => {
     let items = group.shuffle ? shuffle([...group.items]) : group.items;
     if (group.pick !== undefined && group.pick < items.length) {
       // Picked at random, but still in order unless the group shuffles.
       const picked = new Set(shuffle([...items]).slice(0, Math.max(1, group.pick)));
       items = items.filter((item) => picked.has(item));
     }
-    queue.push(...items.map((item) => (item.kind === "group" ? start(item) : item)));
-  }
-  return { kind: "group", group, queue, missed: false };
+    return {
+      kind: "group",
+      group,
+      redoParts: group.redoParts ?? false,
+      redoWhole: false,
+      queue: items.map((item) => (item.kind === "group" ? start(item) : item)),
+      missed: false,
+    };
+  };
+  const rounds = Math.max(1, group.repeat ?? 1);
+  const whole = { name: group.name, redoWhole: group.redoMistakes ?? false };
+  if (rounds === 1) return { ...round(), ...whole };
+  // Each round is a run of its own inside the group's.
+  return {
+    kind: "group",
+    group,
+    ...whole,
+    redoParts: false,
+    queue: Array.from({ length: rounds }, round),
+    missed: false,
+  };
 }
 
 function size(step: Step): number {
@@ -43,7 +71,7 @@ export class DrillRun {
     const top = this.stack[this.stack.length - 1];
     if (top && this.current !== null && this.currentMissed) {
       top.missed = true;
-      if (top.group.redoParts) top.queue.push({ kind: "exercise", index: this.current });
+      if (top.redoParts) top.queue.push({ kind: "exercise", index: this.current });
     }
     this.current = null;
     this.currentMissed = false;
@@ -65,7 +93,7 @@ export class DrillRun {
       const parent = this.stack[this.stack.length - 1];
       if (parent && run.missed) {
         parent.missed = true;
-        if (run.group.redoMistakes || parent.group.redoParts) parent.queue.push(start(run.group));
+        if (run.redoWhole || parent.redoParts) parent.queue.push(start(run.group));
       }
     }
     return null;
@@ -83,6 +111,6 @@ export class DrillRun {
 
   // The names of the groups the current exercise is in, outermost first.
   names(): string[] {
-    return this.stack.flatMap((run) => (run.group.name ? [run.group.name] : []));
+    return this.stack.flatMap((run) => (run.name ? [run.name] : []));
   }
 }

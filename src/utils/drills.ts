@@ -37,7 +37,8 @@ export type GroupRules = {
   // it's in, or of the drill, until it's done without one.
   redoMistakes?: boolean;
   // After a mistake in one of its parts, play that part again at the end
-  // of this group, until it's done without one.
+  // of this group, or of the round when it is played more than once, until
+  // it's done without one.
   redoParts?: boolean;
 };
 

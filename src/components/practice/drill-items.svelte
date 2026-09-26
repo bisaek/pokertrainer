@@ -216,7 +216,9 @@
               <span class="muted">After a mistake</span>
               <label class="flex cursor-pointer items-center gap-2">
                 <input type="checkbox" class="accent-accent-500" bind:checked={item.redoParts} data-rule="redo-parts" />
-                Play the part it was in again at the end of this group
+                Play the part it was in again at the end of {item.repeat > 1
+                  ? "the round it was in"
+                  : "this group"}
               </label>
               <label class="flex cursor-pointer items-center gap-2">
                 <input type="checkbox" class="accent-accent-500" bind:checked={item.redoMistakes} data-rule="redo" />
