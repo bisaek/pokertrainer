@@ -160,7 +160,9 @@
     display: inline-flex;
     align-items: baseline;
     gap: 0.4em;
-    padding: 0.45em 0.8em;
+    /* More room on top than below: the line box already leaves room for
+       descenders under the capitals, so even padding would sit them high. */
+    padding: 0.57em 0.8em 0.33em;
     border-radius: 999px;
     border: 1px solid var(--color-ink-600);
     background: var(--color-ink-800);
