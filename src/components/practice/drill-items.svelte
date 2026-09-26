@@ -240,6 +240,7 @@
         {stack}
         {selected}
         {onselect}
+        {collapsed}
       >
         {@render controls()}
       </ExerciseCard>

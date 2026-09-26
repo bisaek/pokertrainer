@@ -197,6 +197,22 @@ export function groupByCharts(
   return result;
 }
 
+// A collapsed exercise in a few words, like "Rebuild once · UTG · RFI" or
+// "10 hands · BB · vs RFI · CO".
+export function describeDraft(exercise: ExerciseDraft): string {
+  const task =
+    exercise.kind === "hands"
+      ? `${exercise.count} ${exercise.count === 1 ? "hand" : "hands"}`
+      : `Rebuild ${
+          exercise.timesInARow === 1
+            ? "once"
+            : exercise.timesInARow === 2
+              ? "twice"
+              : `${exercise.timesInARow} times in a row`
+        }`;
+  return `${task} · ${pickName(exercise) || "all charts"}`;
+}
+
 // A group's name from its charts, like "UTG · RFI" or "BB · vs RFI · CO".
 function pickName(exercise: ExerciseDraft): string {
   return exercise.picks

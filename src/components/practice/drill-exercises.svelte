@@ -86,8 +86,9 @@
     anchor = item;
   }
 
-  function groups(list: ItemDraft[]): ItemDraft[] {
-    return list.flatMap((item) => (item.kind === "group" ? [item, ...groups(item.items)] : []));
+  // Every exercise and group, collapsed or not.
+  function everything(list: ItemDraft[]): ItemDraft[] {
+    return list.flatMap((item) => (item.kind === "group" ? [item, ...everything(item.items)] : [item]));
   }
 
   function selectAll() {
@@ -128,12 +129,12 @@
       >
       <button class="btn btn-ghost py-1" onclick={selectAll}>Select all</button>
     {/if}
-    {#if groups(exercises).length > 0}
+    {#if exercises.length > 0}
       <span class="ml-auto flex gap-1">
         <button
           class="btn btn-ghost py-1"
-          onclick={() => groups(exercises).forEach((group) => collapsed.add(group))}
-          >Collapse groups</button
+          onclick={() => everything(exercises).forEach((item) => collapsed.add(item))}
+          >Collapse all</button
         >
         <button class="btn btn-ghost py-1" onclick={() => collapsed.clear()}>Expand all</button>
       </span>
