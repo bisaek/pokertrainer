@@ -20,6 +20,7 @@
     outer,
     numbers,
     selected,
+    onselect,
     collapsed,
     manifest,
     game,
@@ -32,6 +33,7 @@
     // Each exercise's place among all of the drill's, from 1.
     numbers: Map<ExerciseDraft, number>;
     selected: SvelteSet<ItemDraft>;
+    onselect: (item: ItemDraft, on: boolean, range: boolean) => void;
     // Groups showing only their title row.
     collapsed: SvelteSet<ItemDraft>;
     manifest: RangeInfo[];
@@ -87,11 +89,6 @@
           }
         : blankExercise(kind)
     );
-  }
-
-  function setSelected(item: ItemDraft, on: boolean) {
-    if (on) selected.add(item);
-    else selected.delete(item);
   }
 
   // The rules and what's in a collapsed group, in a few words.
@@ -150,7 +147,7 @@
             class="accent-accent-500"
             aria-label="Select"
             checked={selected.has(item)}
-            onchange={(e) => setSelected(item, e.currentTarget.checked)}
+            onclick={(e) => onselect(item, e.currentTarget.checked, e.shiftKey)}
             data-select
           />
           <span class="font-semibold text-accent-300">Group</span>
@@ -225,6 +222,7 @@
               outer={{ items, index }}
               {numbers}
               {selected}
+              {onselect}
               {collapsed}
               {manifest}
               {game}
@@ -241,6 +239,7 @@
         {game}
         {stack}
         {selected}
+        {onselect}
       >
         {@render controls()}
       </ExerciseCard>

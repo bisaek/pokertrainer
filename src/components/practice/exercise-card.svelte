@@ -28,6 +28,7 @@
     game,
     stack,
     selected,
+    onselect,
     children,
   }: {
     exercise: ExerciseDraft;
@@ -37,6 +38,9 @@
     game: string;
     stack: number;
     selected: SvelteSet<ItemDraft>;
+    // Ticked or unticked; with shift held, everything from the last one
+    // ticked goes along.
+    onselect: (item: ItemDraft, on: boolean, range: boolean) => void;
     // The buttons at the end of the title row.
     children: Snippet;
   } = $props();
@@ -120,8 +124,7 @@
       class="accent-accent-500"
       aria-label="Select"
       checked={selected.has(exercise)}
-      onchange={(e) =>
-        e.currentTarget.checked ? selected.add(exercise) : selected.delete(exercise)}
+      onclick={(e) => onselect(exercise, e.currentTarget.checked, e.shiftKey)}
       data-select
     />
     <span class="font-semibold text-ink-100">Exercise {number}</span>

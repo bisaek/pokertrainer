@@ -27,6 +27,8 @@
 
   const selected = new SvelteSet<ItemDraft>();
   const collapsed = new SvelteSet<ItemDraft>();
+  // The item ticked or unticked last, where a shift-click range starts.
+  let anchor: ItemDraft | null = null;
 
   const numbers = $derived(
     new Map(exercisesIn(exercises).map((exercise, index) => [exercise, index + 1]))
@@ -61,6 +63,29 @@
     selected.clear();
   }
 
+  // Every item as it shows on the page: a group, then what's in it unless
+  // it is collapsed.
+  function shown(list: ItemDraft[]): ItemDraft[] {
+    return list.flatMap((item) =>
+      item.kind === "group" && !collapsed.has(item) ? [item, ...shown(item.items)] : [item]
+    );
+  }
+
+  // With shift held, everything shown from the last item ticked to this one
+  // is ticked or unticked with it, like in a file manager.
+  function select(item: ItemDraft, on: boolean, range: boolean) {
+    const list = shown(exercises);
+    const from = range && anchor ? list.indexOf(anchor) : -1;
+    const to = list.indexOf(item);
+    const picked =
+      from === -1 ? [item] : list.slice(Math.min(from, to), Math.max(from, to) + 1);
+    for (const each of picked) {
+      if (on) selected.add(each);
+      else selected.delete(each);
+    }
+    anchor = item;
+  }
+
   function groups(list: ItemDraft[]): ItemDraft[] {
     return list.flatMap((item) => (item.kind === "group" ? [item, ...groups(item.items)] : []));
   }
@@ -76,6 +101,7 @@
     outer={null}
     {numbers}
     {selected}
+    onselect={select}
     {collapsed}
     {manifest}
     {game}
