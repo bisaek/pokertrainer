@@ -89,9 +89,17 @@
             class="bet {seat.action ? `action-${seat.action.kind}` : 'bet-blind'}"
             style={place(index, 16, 8)}
           >
-            <span class="bet-chip" aria-hidden="true"></span>
             {#if seat.action}
+              <span class="bet-chip" aria-hidden="true"></span>
               {seat.action.label}
+            {:else}
+              <!-- The big blind is two small blinds, so it posts two chips. -->
+              <span class="bet-stack" aria-hidden="true">
+                <span class="bet-chip"></span>
+                {#if seat.position === "BB"}
+                  <span class="bet-chip"></span>
+                {/if}
+              </span>
             {/if}
           </div>
         {/if}
@@ -311,6 +319,17 @@
     border: 0.22em dashed #fff;
     background: currentColor;
     box-shadow: 0 0.1em 0 rgb(0 0 0 / 0.35);
+  }
+  /* The chips share one cell; each later one sits a little higher and in
+     front, so only the rim of the one below shows. */
+  .bet-stack {
+    display: grid;
+  }
+  .bet-stack .bet-chip {
+    grid-area: 1 / 1;
+  }
+  .bet-stack .bet-chip + .bet-chip {
+    translate: 0 -0.3em;
   }
   .bet-blind .bet-chip {
     color: var(--color-ink-300);
