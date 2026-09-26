@@ -13,6 +13,7 @@
   import { spotFromUrl } from "@utils/spot";
   import { blankRangeFor, isRangeCorrect } from "@utils/practice";
   import { describeExercise, type Drill } from "@utils/drills";
+  import { DrillRun } from "@utils/drill-run";
 
   type DoneAction = { label: string; onclick: () => void; primary?: boolean };
 
@@ -36,7 +37,14 @@
     doneActions?: DoneAction[];
   } = $props();
 
+  let run = new DrillRun([]);
   let exerciseIndex = $state(0);
+  // How many exercises came before this one, and how many there are in all
+  // so far; a mistake in a group that is played again adds to them.
+  let step = $state(0);
+  let steps = $state(0);
+  // The names of the groups the exercise is in.
+  let groupNames: string[] = $state([]);
   let exerciseRanges: PokerRange[] = $state.raw([]);
   let loading = $state(true);
   let loadError: string | null = $state(null);
@@ -66,7 +74,23 @@
 
   function restart(current: Drill = drill) {
     finished = false;
-    loadExercise(current, 0);
+    run = new DrillRun(current.items);
+    step = -1;
+    advance(current);
+  }
+
+  function advance(current: Drill = drill) {
+    const index = run.next();
+    if (index === null) {
+      finished = true;
+      clearExerciseSettings();
+      onfinish?.();
+      return;
+    }
+    step++;
+    steps = step + 1 + run.remaining();
+    groupNames = run.names();
+    loadExercise(current, index);
   }
 
   async function loadExercise(current: Drill, index: number) {
@@ -100,14 +124,8 @@
     }
   }
 
-  function finishExercise() {
-    if (exerciseIndex + 1 < drill.exercises.length) {
-      loadExercise(drill, exerciseIndex + 1);
-    } else {
-      finished = true;
-      clearExerciseSettings();
-      onfinish?.();
-    }
+  function mistake() {
+    run.mistake();
   }
 
   function check() {
@@ -126,6 +144,7 @@
           ? rest
           : [...rest, { range: item.range, streak }];
     } else {
+      mistake();
       // Wrong: rebuild it again right away, and once more at the end.
       const again = { range: item.range, streak: 0 };
       queue =
@@ -136,7 +155,7 @@
     compareTo = undefined;
     isCorrect = undefined;
     if (queue.length === 0) {
-      finishExercise();
+      advance();
     } else {
       pokerRange = blankRangeFor(queue[0].range);
     }
@@ -167,7 +186,8 @@
       <h1 class="page-title">{drill.name}</h1>
       {#if !finished}
         <p class="text-sm muted">
-          Exercise {exerciseIndex + 1} of {drill.exercises.length}{exercise
+          {#if groupNames.length > 0}<span class="text-ink-300" data-group-names>{groupNames.join(" · ")} ·</span>{/if}
+          Exercise {step + 1} of {steps}{exercise
             ? `: ${describeExercise(exercise)}`
             : ""}
         </p>
@@ -178,11 +198,11 @@
     </div>
     {#if !finished}
       <div class="flex gap-1.5" aria-hidden="true">
-        {#each drill.exercises as _, index}
+        {#each { length: steps }, index}
           <div
-            class="h-1.5 flex-1 rounded-full {index < exerciseIndex
+            class="h-1.5 flex-1 rounded-full {index < step
               ? 'bg-accent-500'
-              : index === exerciseIndex
+              : index === step
                 ? 'bg-accent-500/50'
                 : 'bg-ink-800'}"
           ></div>
@@ -268,13 +288,16 @@
       </div>
     </RangeLayout>
   {:else}
-    {#key exerciseIndex}
+    <!-- Keyed by the step, since a group played again can ask the same
+         exercise twice in a row. -->
+    {#key step}
       <HandQuiz
         ranges={exerciseRanges}
         count={exercise.count}
         mistakes={exercise.mistakes}
         repeatMistakes={exercise.repeatMistakes}
-        onfinish={finishExercise}
+        onfinish={() => advance()}
+        onmistake={mistake}
       />
     {/key}
   {/if}

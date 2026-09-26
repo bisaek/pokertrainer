@@ -24,10 +24,34 @@ export type ExerciseTemplate =
   | ({ kind: "range"; filter: ChartPick; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; filter: ChartPick; count: number } & ExerciseRules & HandRules);
 
+// How a group plays its parts. Unset means in order, once, all of them, and
+// a mistake isn't played again.
+export type GroupRules = {
+  // Play its parts in a random order.
+  shuffle?: boolean;
+  // Play only this many of its parts, picked at random.
+  pick?: number;
+  // Go through it this many times, picking and shuffling anew each time.
+  repeat?: number;
+  // After a mistake anywhere in it, play it again at the end of the group
+  // it's in, or of the drill, until it's done without one.
+  redoMistakes?: boolean;
+  // After a mistake in one of its parts, play that part again at the end
+  // of this group, or of the round when it is played more than once, until
+  // it's done without one.
+  redoParts?: boolean;
+};
+
+// Exercises kept together, e.g. "rebuild the UTG open, then answer hands
+// from it". Groups can hold groups.
+export type GroupTemplate = { kind: "group"; name?: string; items: DrillItem[] } & GroupRules;
+
+export type DrillItem = ExerciseTemplate | GroupTemplate;
+
 export type DrillTemplate = {
   name: string;
   description: string;
-  exercises: ExerciseTemplate[];
+  exercises: DrillItem[];
   // Hide the drill when fewer charts exist, e.g. a review of a single chart.
   minCharts?: number;
 };
@@ -36,11 +60,18 @@ export type DrillExercise =
   | ({ kind: "range"; urls: string[]; timesInARow: number } & ExerciseRules)
   | ({ kind: "hands"; urls: string[]; count: number } & ExerciseRules & HandRules);
 
+// A drill's groups with their exercises given by index into its exercises.
+export type DrillNode = { kind: "exercise"; index: number } | DrillGroup;
+export type DrillGroup = { kind: "group"; name?: string; items: DrillNode[] } & GroupRules;
+
 export type Drill = {
   name: string;
   description: string;
   chartCount: number;
+  // Every exercise, in the order they are written.
   exercises: DrillExercise[];
+  // How they are played.
+  items: DrillNode[];
 };
 
 const EARLY = ["UTG", "UTG+1", "UTG+2"];
@@ -280,7 +311,8 @@ export function resolveUrls(
 }
 
 // Turns a drill template into the ranges that exist for a game and stack.
-// Exercises without ranges are dropped, and the drill is null when nothing is left.
+// Exercises without ranges are dropped, and so are groups left empty; the
+// drill is null when nothing is left.
 export function resolveDrill(
   drill: DrillTemplate,
   manifest: RangeInfo[],
@@ -288,25 +320,33 @@ export function resolveDrill(
   stack: number
 ): Drill | null {
   const exercises: DrillExercise[] = [];
-  for (const exercise of drill.exercises) {
-    const urls = resolveUrls(exercise.filter, manifest, game, stack);
-    if (urls.length === 0) continue;
-    exercises.push(
-      exercise.kind === "range"
-        ? { kind: "range", urls, timesInARow: exercise.timesInARow, settings: exercise.settings }
-        : {
-            kind: "hands",
-            urls,
-            count: exercise.count,
-            settings: exercise.settings,
-            mistakes: exercise.mistakes,
-            repeatMistakes: exercise.repeatMistakes,
-          }
-    );
-  }
+  const resolve = (items: DrillItem[]): DrillNode[] =>
+    items.flatMap((item): DrillNode[] => {
+      if (item.kind === "group") {
+        const { items: inner, ...rest } = item;
+        const nodes = resolve(inner);
+        return nodes.length > 0 ? [{ ...rest, items: nodes }] : [];
+      }
+      const urls = resolveUrls(item.filter, manifest, game, stack);
+      if (urls.length === 0) return [];
+      exercises.push(
+        item.kind === "range"
+          ? { kind: "range", urls, timesInARow: item.timesInARow, settings: item.settings }
+          : {
+              kind: "hands",
+              urls,
+              count: item.count,
+              settings: item.settings,
+              mistakes: item.mistakes,
+              repeatMistakes: item.repeatMistakes,
+            }
+      );
+      return [{ kind: "exercise", index: exercises.length - 1 }];
+    });
+  const items = resolve(drill.exercises);
   const chartCount = new Set(exercises.flatMap((exercise) => exercise.urls)).size;
   if (exercises.length === 0 || chartCount < (drill.minCharts ?? 1)) return null;
-  return { name: drill.name, description: drill.description, chartCount, exercises };
+  return { name: drill.name, description: drill.description, chartCount, exercises, items };
 }
 
 export function describeExercise(exercise: DrillExercise): string {

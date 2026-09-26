@@ -13,7 +13,8 @@
     draftOf,
     exerciseErrors,
     templateOf,
-    type ExerciseDraft,
+    exercisesIn,
+    type ItemDraft,
   } from "@utils/drill-draft";
   import { readParams } from "@utils/url-state";
   import DrillExercises from "./drill-exercises.svelte";
@@ -30,7 +31,7 @@
   let description = $state("");
   let game = $state("cash");
   let stack = $state(100);
-  let exercises: ExerciseDraft[] = $state([blankExercise("range")]);
+  let exercises: ItemDraft[] = $state([blankExercise("range")]);
   let showErrors = $state(false);
 
   const games = $derived([...new Set(manifest.map((range) => range.game))]);
@@ -83,7 +84,7 @@
 
   // Another game or stack has other charts, so the picks start over.
   function clearPicks() {
-    for (const exercise of exercises) exercise.picks = [blankPick()];
+    for (const exercise of exercisesIn(exercises)) exercise.picks = [blankPick()];
   }
 
   function save() {

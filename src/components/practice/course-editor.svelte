@@ -17,7 +17,8 @@
     draftOf,
     exerciseErrors,
     templateOf,
-    type ExerciseDraft,
+    exercisesIn,
+    type ItemDraft,
   } from "@utils/drill-draft";
   import { readParams } from "@utils/url-state";
   import DrillExercises from "./drill-exercises.svelte";
@@ -30,7 +31,7 @@
 
   type PracticeDraft =
     | { kind: "saved"; drillId: string }
-    | { kind: "own"; id: string; name: string; exercises: ExerciseDraft[] };
+    | { kind: "own"; id: string; name: string; exercises: ItemDraft[] };
   type LessonDraft = { id: string; title: string; text: string; practice: PracticeDraft[] };
 
   let manifest: RangeInfo[] = $state.raw([]);
@@ -180,7 +181,7 @@
       lesson.practice = lesson.practice.filter((item) => item.kind === "own");
       for (const item of lesson.practice) {
         if (item.kind !== "own") continue;
-        for (const exercise of item.exercises) exercise.picks = [blankPick()];
+        for (const exercise of exercisesIn(item.exercises)) exercise.picks = [blankPick()];
       }
     }
   }

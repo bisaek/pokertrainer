@@ -4,7 +4,7 @@ import {
   resolveDrill,
   resolveUrls,
   type Drill,
-  type ExerciseTemplate,
+  type DrillItem,
   type RangeFilter,
 } from "./drills";
 import type { RangeInfo } from "./manifest";
@@ -19,7 +19,7 @@ export type Lesson = {
   body: string[];
   // Charts summarized in a table under the text.
   stats?: RangeFilter;
-  exercises: ExerciseTemplate[];
+  exercises: DrillItem[];
 };
 
 export type Course = {
