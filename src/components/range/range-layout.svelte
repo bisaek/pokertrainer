@@ -7,6 +7,7 @@
   } from "../../utils/range.svelte";
 
   import type { Spot } from "../../utils/spot";
+  import { gtoWizardUrl } from "../../utils/gto-wizard";
   import { settings } from "../../utils/settings.svelte";
   import PokerTable from "../table/poker-table.svelte";
   import Range from "./range.svelte";
@@ -29,6 +30,11 @@
   let selectedAction: Action = $state(Action.Fold);
   // Height of the row on a wide screen; the grid is a square of that size.
   let rowHeight = $state(0);
+  // Only offered once the spot is out in the open: on the table, or after a
+  // check, which gives the chart away anyway.
+  const solutionUrl = $derived(
+    spot && (settings.board || compareTo) ? gtoWizardUrl(spot) : null
+  );
 
   function keyPressed(e: KeyboardEvent) {
     // Typing in a field (like a range name) shouldn't switch the action.
@@ -66,6 +72,11 @@
   <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">
     {#if spot && settings.board}
       <PokerTable {spot} />
+    {/if}
+    {#if solutionUrl}
+      <a class="link -mt-2 self-start text-sm" href={solutionUrl} target="_blank" rel="noopener">
+        Open this spot on GTO Wizard ↗
+      </a>
     {/if}
     <div class="flex flex-col gap-2">
       <span class="label">Paint with</span>
