@@ -43,7 +43,8 @@ export async function fetchManifest(): Promise<RangeInfo[]> {
 
 // Whether this host wants "+" in a path escaped. Vercel answers 404 for a folder
 // like "vs UTG+1" but serves "vs UTG%2B1"; the dev server does the opposite.
-let escapePlus = false;
+// Start from the likely answer so production doesn't log a 404 on the first chart.
+let escapePlus = import.meta.env.PROD;
 
 // Loads a chart file, trying both spellings of "+" and remembering which one this
 // host accepts, so only the first chart pays for a wrong guess.
