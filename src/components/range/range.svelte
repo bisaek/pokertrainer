@@ -17,6 +17,7 @@
     compareTo = undefined,
     marked = undefined,
     kinds = false,
+    lockEmpty = false,
   }: {
     pokerRange: PokerRange;
     selectedAction: Action;
@@ -26,7 +27,19 @@
     // Tint the cells by kind: pairs on the diagonal, suited above it and
     // offsuit below.
     kinds?: boolean;
+    // Keep hands outside the range (null) empty, so a blank chart in the
+    // trainers can only be painted where the answer has an action.
+    lockEmpty?: boolean;
   } = $props();
+
+  function isLocked(index: number): boolean {
+    return lockEmpty && pokerRange.range[index] === null;
+  }
+
+  // The cells of a line or box that can be painted.
+  function paintable(vectors: number[][]): number[][] {
+    return vectors.filter(([row, col]) => !isLocked(row * 13 + col));
+  }
 
   function getKindClass(index: number): string {
     if (!kinds) return "";
@@ -64,20 +77,21 @@
       box = boxFromTwoHands(startHand, index);
     } else {
       if (event.buttons !== 1) return; // Only proceed if left mouse button is pressed
+      if (isLocked(index)) return;
       pokerRange.range[index] = selectedAction;
     }
   }
 
   function createLine() {
     if (startHand !== undefined) {
-      pokerRange.changeActionAtVectors(line, selectedAction);
+      pokerRange.changeActionAtVectors(paintable(line), selectedAction);
       startHand = undefined;
     }
   }
 
   function createBox() {
     if (startHand !== undefined) {
-      pokerRange.changeActionAtVectors(box, selectedAction);
+      pokerRange.changeActionAtVectors(paintable(box), selectedAction);
       startHand = undefined;
     }
   }
@@ -91,7 +105,7 @@
 
   // Cells covered by a Shift line or Ctrl/Cmd box while it's being dragged.
   function getHoverClass(index: number): string {
-    if (startHand === undefined) return "";
+    if (startHand === undefined || isLocked(index)) return "";
     const [row, col] = handToVector(index);
     const inLine = shiftDown && line.some((vec) => vec[0] === row && vec[1] === col);
     const inBox = ctrlDown && box.some((vec) => vec[0] === row && vec[1] === col);
@@ -148,7 +162,7 @@
     class="range-cell {getHoverClass(index) ||
       `${getButtonClass(pokerRange.range[index])} ${getCompareClass(index)}`} {getKindClass(
       index
-    )} {marked === index ? 'range-cell-marked' : ''}"
+    )} {marked === index ? 'range-cell-marked' : ''} {isLocked(index) ? 'range-cell-locked' : ''}"
     onmouseover={(e) => toggleHand(e, index)}
     onmousedown={(e) => toggleHand(e, index)}
     onmouseleave={(e) => toggleHand(e, index)}

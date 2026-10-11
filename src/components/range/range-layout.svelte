@@ -16,6 +16,7 @@
     compareTo = undefined,
     isCorrect = undefined,
     spot = undefined,
+    lockEmpty = false,
     children,
   }: {
     pokerRange: PokerRange;
@@ -23,6 +24,8 @@
     isCorrect?: boolean;
     // The situation being rebuilt, drawn as a table above the controls.
     spot?: Spot | null;
+    // Hands outside the range can't be painted; see Range.
+    lockEmpty?: boolean;
     children: Snippet;
   } = $props();
 
@@ -60,7 +63,7 @@
 >
   <div class="range-frame mx-auto max-w-[46rem] lg:max-w-none">
     <div class="range-grid {isCorrectClass()}">
-      <Range {pokerRange} {selectedAction} {compareTo} />
+      <Range {pokerRange} {selectedAction} {compareTo} {lockEmpty} />
     </div>
   </div>
   <aside class="card flex min-h-0 flex-col gap-5 lg:max-h-full lg:self-start lg:overflow-y-auto">

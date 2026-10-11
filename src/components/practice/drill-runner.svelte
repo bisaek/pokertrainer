@@ -250,7 +250,7 @@
   {:else if loading || !exercise}
     <p class="py-12 text-center muted">Loading…</p>
   {:else if exercise.kind === "range"}
-    <RangeLayout {pokerRange} {compareTo} {isCorrect} spot={queue[0]?.range.spot}>
+    <RangeLayout {pokerRange} {compareTo} {isCorrect} spot={queue[0]?.range.spot} lockEmpty>
       <div class="flex flex-col gap-3 border-t border-ink-700 pt-4">
         {#if queue[0]}
           <div class="flex flex-col gap-1">
