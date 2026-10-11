@@ -345,6 +345,13 @@
   button.range-cell:hover {
     filter: brightness(1.15);
   }
+  /* A hand outside the range on a chart being rebuilt; it can't be painted. */
+  button.range-cell-locked {
+    cursor: not-allowed;
+  }
+  button.range-cell-locked:hover {
+    filter: none;
+  }
   .range-cell-preview {
     box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.75);
   }

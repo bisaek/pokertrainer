@@ -143,6 +143,7 @@
     compareTo={settings.rangeAnswer ? compareTo : undefined}
     {isCorrect}
     spot={current?.spot}
+    lockEmpty
   >
     <div class="flex flex-col gap-3">
       {#if current && settings.progress}
