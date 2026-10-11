@@ -34,6 +34,20 @@ export function saveCustomDrill(drill: CustomDrill): CustomDrill[] {
   return drills;
 }
 
+// Saves a copy of the drill under a new id, right after the original, so it
+// can be changed without touching the drill it came from.
+export function duplicateCustomDrill(drill: CustomDrill): CustomDrill[] {
+  const drills = loadCustomDrills();
+  const names = new Set(drills.map((item) => item.name));
+  let name = `${drill.name} (copy)`;
+  for (let n = 2; names.has(name); n++) name = `${drill.name} (copy ${n})`;
+  const copy: CustomDrill = { ...structuredClone(drill), id: newDrillId(), name };
+  const index = drills.findIndex((item) => item.id === drill.id);
+  drills.splice(index === -1 ? drills.length : index + 1, 0, copy);
+  store(drills);
+  return drills;
+}
+
 export function removeCustomDrill(id: string): CustomDrill[] {
   const drills = loadCustomDrills().filter((item) => item.id !== id);
   store(drills);

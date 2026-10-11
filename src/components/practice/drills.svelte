@@ -10,6 +10,7 @@
   } from "@utils/drills";
   import {
     downloadDrills,
+    duplicateCustomDrill,
     importCustomDrills,
     loadCustomDrills,
     parseDrillFile,
@@ -134,6 +135,10 @@
     drillName = null;
     customId = id;
     writeUrl("push");
+  }
+
+  function duplicateOwnDrill(item: CustomDrill) {
+    customDrills = duplicateCustomDrill(item);
   }
 
   function deleteOwnDrill(item: CustomDrill) {
@@ -283,6 +288,7 @@
               </button>
               <div class="flex gap-1 px-2 pb-2">
                 <a href="/drills/new?edit={encodeURIComponent(own.id)}" class="btn btn-ghost py-1">Edit</a>
+                <button class="btn btn-ghost py-1" onclick={() => duplicateOwnDrill(saved)}>Duplicate</button>
                 <button class="btn btn-ghost py-1" onclick={() => downloadOne(saved)}>Download</button>
                 <button class="btn btn-ghost py-1" onclick={() => deleteOwnDrill(saved)}>Delete</button>
               </div>
