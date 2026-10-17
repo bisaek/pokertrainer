@@ -8,10 +8,10 @@
     handCounts,
     loadSettings,
     pageGroup,
-    rangeStreaks,
     resetSettings,
     saveSettings,
     settings,
+    streaks,
     tableGroup,
     type MistakeMode,
     type SettingKey,
@@ -63,6 +63,46 @@
 </script>
 
 <svelte:window onclick={windowClick} onkeydown={windowKeydown} />
+
+<!-- How many right answers in a row clear a hand or a chart, and whether
+     that is asked of every one or only of those gotten wrong. -->
+{#snippet streakChoice(
+  noun: string,
+  key: "handStreak" | "rangeStreak",
+  missedKey: "handStreakMissed" | "rangeStreakMissed",
+  missedLabel: string
+)}
+  {@const label = `Right in a row to clear a ${noun}`}
+  <div class="flex flex-col gap-1.5">
+    <span class="text-sm">{label}</span>
+    <div class="flex gap-1.5" role="radiogroup" aria-label={label}>
+      {#each streaks as streak}
+        <button
+          class="chip {settings[key] === streak ? 'chip-active' : ''}"
+          role="radio"
+          aria-checked={settings[key] === streak}
+          onclick={() => set(key, streak)}
+        >
+          {streak}
+        </button>
+      {/each}
+    </div>
+    <label
+      class="flex items-center gap-2 text-sm whitespace-nowrap {settings[key] > 1
+        ? 'cursor-pointer'
+        : 'cursor-default opacity-40'}"
+    >
+      <input
+        type="checkbox"
+        class="accent-accent-500"
+        checked={settings[missedKey]}
+        disabled={settings[key] === 1}
+        onchange={(e) => set(missedKey, e.currentTarget.checked)}
+      />
+      {missedLabel}
+    </label>
+  </div>
+{/snippet}
 
 <div class="flex shrink-0 items-start gap-2">
   <!-- A shortcut for the Page group's picker toggle, which stays in the menu too. -->
@@ -118,6 +158,7 @@
             />
             Wrong hands come back at the end
           </label>
+          {@render streakChoice("hand", "handStreak", "handStreakMissed", "Only for hands answered wrong")}
           <div class="flex flex-col gap-1.5">
             <span class="text-sm">Hands per round</span>
             <div class="flex gap-1.5" role="radiogroup" aria-label="Hands per round">
@@ -156,21 +197,7 @@
             />
             Wrong charts come back at the end
           </label>
-          <div class="flex flex-col gap-1.5">
-            <span class="text-sm">Correct in a row to finish a chart</span>
-            <div class="flex gap-1.5" role="radiogroup" aria-label="Correct in a row to finish a chart">
-              {#each rangeStreaks as streak}
-                <button
-                  class="chip {settings.rangeStreak === streak ? 'chip-active' : ''}"
-                  role="radio"
-                  aria-checked={settings.rangeStreak === streak}
-                  onclick={() => set("rangeStreak", streak)}
-                >
-                  {streak}
-                </button>
-              {/each}
-            </div>
-          </div>
+          {@render streakChoice("chart", "rangeStreak", "rangeStreakMissed", "Only for charts rebuilt wrong")}
           <label class="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap">
             <input
               type="checkbox"
