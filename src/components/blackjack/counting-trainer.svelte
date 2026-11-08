@@ -385,12 +385,15 @@
   </section>
 
 
-  <!-- The drill, with the chart beside it on a wide screen and above it on
-       a narrow one. On a wide screen the felt takes the height that is left. -->
+  <!-- The drill, with the chart right beside it on a wide screen (the pair
+       is centered together, like the board and chart in the hand trainer)
+       and above it on a narrow one. On a wide screen the felt takes the
+       height that is left. -->
   <div
-    class="grid min-h-0 flex-1 items-start gap-6 lg:grid-rows-[minmax(0,1fr)] {options.showChart
-      ? 'lg:grid-cols-[minmax(0,1fr)_18rem]'
-      : ''}"
+    class="grid min-h-0 flex-1 items-start gap-6 lg:grid-rows-[minmax(0,1fr)] lg:justify-center {options.showChart
+      ? 'lg:grid-cols-[minmax(0,var(--drill-width))_18rem]'
+      : 'lg:grid-cols-[minmax(0,var(--drill-width))]'}"
+    style:--drill-width={options.drill === "running" ? "40rem" : "34rem"}
   >
     {#if options.drill === "values"}
       <div class="mx-auto flex w-full max-w-[34rem] flex-col gap-4 lg:h-full lg:min-h-0">
