@@ -1,0 +1,11 @@
+---
+import BlackjackTrainer from "../../components/blackjack/blackjack-trainer.svelte";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Blackjack trainer"
+  description="Learn blackjack basic strategy: play hands against the dealer's upcard and see the chart for every mistake."
+>
+  <BlackjackTrainer client:load />
+</Layout>

@@ -428,4 +428,86 @@
   .compare-fold {
     box-shadow: inset 0 0 0 3px var(--color-action-fold);
   }
+
+  /* The green felt of a blackjack table. */
+  .bj-felt {
+    background: radial-gradient(ellipse at 50% 35%, #1f6b45, #0f3d27 75%);
+  }
+  /* A card on the felt. On a wide training screen the felt takes the height
+     that is left, and the cards are as tall as fits it: --bj-card-fit is set
+     by the page from the felt's height (cqh), less what else is on it. */
+  .bj-card {
+    width: 5rem;
+  }
+  @variant sm {
+    .bj-card {
+      width: 6rem;
+    }
+  }
+  @variant lg {
+    /* The felt takes the room that is left. A felt with cards to size
+       (.bj-felt-fit) is sized by that room alone; any other felt is at least
+       as tall as what is on it. */
+    .page-fill .bj-felt {
+      flex: 1 1 auto;
+    }
+    .page-fill .bj-felt-fit {
+      container-type: size;
+      min-height: 0;
+      flex-basis: 0;
+    }
+    .page-fill .bj-card {
+      width: auto;
+      height: max(4rem, min(var(--bj-card-max, 10rem), var(--bj-card-fit, 100cqh)));
+    }
+  }
+  /* The basic strategy chart. Its cells are square and as big as both the
+     width and the height of its column allow (--rows: the chart's rows plus
+     the header row). */
+  .bj-chart {
+    grid-template-columns: 2.6rem repeat(10, minmax(0, 1fr));
+  }
+  .bj-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    min-width: 0;
+  }
+  @variant lg {
+    .page-fill .bj-chart-frame {
+      container-type: size;
+      min-height: 0;
+    }
+    .page-fill .bj-chart {
+      --cell: min(
+        (100cqw - 2.6rem - 2.5rem - 2px - 20px) / 10,
+        (100cqh - 9rem - var(--rows) * 2px) / var(--rows)
+      );
+      grid-template-columns: 2.6rem repeat(10, var(--cell));
+      justify-content: center;
+    }
+  }
+  /* Blackjack plays: chart cells, buttons and dots share these colors. */
+  .bj-hit {
+    background-color: var(--color-action-raise);
+    color: #fff;
+  }
+  .bj-stand {
+    background-color: var(--color-action-fold);
+    color: #eef5fc;
+  }
+  .bj-double {
+    background-color: var(--color-action-call);
+    color: #06170b;
+  }
+  .bj-split {
+    background-color: #8a6ac4;
+    color: #fff;
+  }
+  .bj-surrender {
+    background-color: var(--color-ink-600);
+    color: var(--color-ink-100);
+  }
 }
