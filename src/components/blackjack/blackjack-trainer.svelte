@@ -139,7 +139,7 @@
 
 <svelte:window onkeydown={keyDown} />
 
-<div class="page">
+<div class="page page-fill">
   <BlackjackHeader
     current="strategy"
     lead="Play each hand by basic strategy. A hand you miss comes back a few hands later with other cards."
@@ -183,22 +183,25 @@
     </div>
   </section>
 
-  <div class="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)]">
-    <div class="flex flex-col gap-4">
+  <div class="mx-auto grid min-h-0 w-full max-w-6xl flex-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,23rem)] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch">
+    <div class="flex flex-col gap-4 lg:min-h-0">
       <!-- The table: the dealer's upcard and hole card, then the player's hand. -->
-      <section class="bj-felt flex flex-col items-center gap-6 rounded-2xl border border-ink-700 px-4 py-6 sm:py-8">
+      <section
+        class="bj-felt bj-felt-fit flex flex-col items-center justify-center gap-6 rounded-2xl border border-ink-700 px-4 py-6 sm:py-8 lg:gap-4 lg:py-4"
+        style="--bj-card-fit: calc((100cqh - 6.5rem) / 2); --bj-card-max: 11rem"
+      >
         {#if hand}
           <div class="flex flex-col items-center gap-2">
             <span class="label text-emerald-100/70">Dealer</span>
             <div class="flex gap-2" data-bj-dealer>
-              <Card rank={hand.dealer[0]} suit={hand.dealer[1]} />
-              <Card rank="2" suit="B" />
+              <Card class="bj-card" rank={hand.dealer[0]} suit={hand.dealer[1]} />
+              <Card class="bj-card" rank="2" suit="B" />
             </div>
           </div>
           <div class="flex flex-col items-center gap-2">
             <div class="flex gap-2" data-bj-player>
-              <Card rank={hand.player[0][0]} suit={hand.player[0][1]} />
-              <Card rank={hand.player[1][0]} suit={hand.player[1][1]} />
+              <Card class="bj-card" rank={hand.player[0][0]} suit={hand.player[0][1]} />
+              <Card class="bj-card" rank={hand.player[1][0]} suit={hand.player[1][1]} />
             </div>
             <span class="rounded-full bg-black/35 px-3 py-1 text-sm font-semibold text-emerald-50" data-bj-total>
               {handTotal(hand)}
@@ -209,7 +212,7 @@
         {/if}
       </section>
 
-      <section class="card flex flex-col gap-3">
+      <section class="card flex shrink-0 flex-col gap-3">
         <div class="flex min-h-7 flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           {#if last}
             <span class="badge {last.right ? 'badge-good' : 'badge-mistake'}" data-bj-feedback>
@@ -242,7 +245,7 @@
         </div>
       </section>
 
-      <section class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm muted" data-bj-stats>
+      <section class="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-2 text-sm muted" data-bj-stats>
         <span><span class="font-semibold text-ink-100 tabular-nums">{stats.hands}</span> hands</span>
         <span>
           <span class="font-semibold text-ink-100 tabular-nums">
@@ -260,6 +263,7 @@
     <!-- The strategy chart for the hand's kind, with its cell marked. -->
     {#if chart}
       {@const rows = CHARTS[chart.hand.kind]}
+      <div class="bj-chart-frame">
       <section class="card flex flex-col gap-3" data-bj-chart>
         <div class="flex items-baseline justify-between gap-2">
           <h2 class="section-title">{KIND_NAMES[chart.hand.kind]}</h2>
@@ -267,7 +271,7 @@
         </div>
         <div
           class="bj-chart grid gap-[2px] text-center text-xs font-semibold tabular-nums"
-          style="grid-template-columns: 2.6rem repeat(10, minmax(0, 1fr));"
+          style:--rows={rows.length + 1}
         >
           <span></span>
           {#each UPCARDS as up}
@@ -292,24 +296,17 @@
           {/each}
         </p>
       </section>
+      </div>
     {/if}
   </div>
 
-  <p class="text-xs muted">
+  <p class="shrink-0 text-xs muted">
     Basic strategy for 4 to 8 decks, doubling on any two cards and after a split, dealer peeks for blackjack.
     Keys: H hit, S stand, D double, P split, R surrender.
   </p>
 </div>
 
 <style>
-  .bj-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1;
-    border-radius: 4px;
-    min-width: 0;
-  }
   .bj-cell-marked {
     box-shadow:
       inset 0 0 0 2px var(--color-ink-950),
