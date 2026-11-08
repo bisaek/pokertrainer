@@ -17,6 +17,8 @@
     decks: 6,
     // Also ask the true count: the running count per deck left.
     askTrue: false,
+    // The Hi-Lo chart above the drill, with the card on the table marked.
+    showChart: false,
   });
 
   const SPEEDS = [
@@ -176,6 +178,24 @@
   let runningInput: HTMLInputElement | undefined = $state();
 
   const current = $derived(round[round.length - 1]);
+
+  // The Hi-Lo values as a chart: each group of ranks and what it counts.
+  const CHART = [
+    { value: 1, ranks: ["2", "3", "4", "5", "6"], name: "Low cards" },
+    { value: 0, ranks: ["7", "8", "9"], name: "Neutral" },
+    { value: -1, ranks: ["10", "J", "Q", "K", "A"], name: "High cards" },
+  ];
+  // The card on the table in the drill being played, to mark on the chart.
+  const tableCard = $derived(
+    options.drill === "values"
+      ? valueCard
+      : options.drill === "each"
+        ? eachCard
+        : (phase as Phase) === "dealing"
+          ? current
+          : undefined
+  );
+  const tableRank = $derived(tableCard ? (tableCard[0] === "T" ? "10" : tableCard[0]) : undefined);
 
   function newShoe() {
     shoe = new Shoe(options.decks);
@@ -357,7 +377,47 @@
         >
       </div>
     {/if}
+    <button
+      class="chip {options.showChart ? 'chip-active' : ''} sm:ml-auto"
+      aria-pressed={options.showChart}
+      onclick={() => (options.showChart = !options.showChart)}>Show chart</button
+    >
   </section>
+
+  {#if options.showChart}
+    <section class="card mx-auto flex w-full max-w-[40rem] flex-col gap-3" data-count-chart>
+      <h2 class="section-title">Hi-Lo values</h2>
+      <div class="grid grid-cols-3 gap-2">
+        {#each CHART as group}
+          <div class="flex flex-col gap-2 rounded-xl border border-ink-700 bg-ink-850 p-2.5">
+            <div class="flex items-baseline justify-between gap-1">
+              <span
+                class="text-2xl font-bold tabular-nums {group.value > 0
+                  ? 'text-emerald-300'
+                  : group.value < 0
+                    ? 'text-red-300'
+                    : 'text-ink-300'}">{sign(group.value)}</span
+              >
+              <span class="hidden text-xs muted sm:inline">{group.name}</span>
+            </div>
+            <div class="flex flex-wrap gap-1">
+              {#each group.ranks as rank}
+                <span
+                  class="grid h-8 min-w-7 place-items-center rounded-md px-1 text-sm font-semibold {tableRank === rank
+                    ? 'bg-ink-100 text-ink-950'
+                    : 'bg-ink-800 text-ink-100'}">{rank}</span
+                >
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+      <p class="text-xs muted">
+        True count = running count ÷ decks left. A higher true count means more tens and aces are left, which is
+        good for the player.
+      </p>
+    </section>
+  {/if}
 
   {#if options.drill === "values"}
     <div class="mx-auto flex w-full max-w-[34rem] flex-col gap-4">
