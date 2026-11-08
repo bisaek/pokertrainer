@@ -1,5 +1,5 @@
 ---
-// Groups are separated by a divider: learning, training, and tools.
+// Groups are separated by a divider: learning, training, tools, and blackjack.
 const groups = [
   [
     { name: "Courses", link: "/courses" },
@@ -13,6 +13,7 @@ const groups = [
     { name: "Review", link: "/review" },
     { name: "Range builder", link: "/range-builder" },
   ],
+  [{ name: "Blackjack", link: "/blackjack" }],
 ];
 
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
