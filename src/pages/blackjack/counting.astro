@@ -1,0 +1,11 @@
+---
+import CountingTrainer from "../../components/blackjack/counting-trainer.svelte";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Card counting"
+  description="Learn Hi-Lo card counting: drill each card's value, then keep the running and true count as cards come out of a shoe."
+>
+  <CountingTrainer client:load />
+</Layout>

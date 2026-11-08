@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Card from "@components/practice/card.svelte";
+  import BlackjackHeader from "./blackjack-header.svelte";
   import {
     ACTION_CLASS,
     ACTION_LETTER,
@@ -139,15 +140,10 @@
 <svelte:window onkeydown={keyDown} />
 
 <div class="page">
-  <header class="flex flex-col gap-1">
-    <span class="eyebrow">Blackjack</span>
-    <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-      <h1 class="page-title">Blackjack trainer</h1>
-      <p class="page-lead">
-        Play each hand by basic strategy. A hand you miss comes back a few hands later with other cards.
-      </p>
-    </div>
-  </header>
+  <BlackjackHeader
+    current="strategy"
+    lead="Play each hand by basic strategy. A hand you miss comes back a few hands later with other cards."
+  />
 
   <section class="card flex flex-wrap items-center gap-x-6 gap-y-3 py-3 sm:py-3" data-bj-options>
     <div class="flex flex-wrap items-center gap-2">
@@ -306,9 +302,6 @@
 </div>
 
 <style>
-  .bj-felt {
-    background: radial-gradient(ellipse at 50% 35%, #1f6b45, #0f3d27 75%);
-  }
   .bj-cell {
     display: flex;
     align-items: center;
@@ -322,25 +315,5 @@
       inset 0 0 0 2px var(--color-ink-950),
       inset 0 0 0 4px #fff;
     filter: brightness(1.2);
-  }
-  :global(.bj-hit) {
-    background-color: var(--color-action-raise);
-    color: #fff;
-  }
-  :global(.bj-stand) {
-    background-color: var(--color-action-fold);
-    color: #eef5fc;
-  }
-  :global(.bj-double) {
-    background-color: var(--color-action-call);
-    color: #06170b;
-  }
-  :global(.bj-split) {
-    background-color: #8a6ac4;
-    color: #fff;
-  }
-  :global(.bj-surrender) {
-    background-color: var(--color-ink-600);
-    color: var(--color-ink-100);
   }
 </style>
