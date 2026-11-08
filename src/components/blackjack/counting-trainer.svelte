@@ -4,7 +4,7 @@
   import BlackjackHeader from "./blackjack-header.svelte";
   import { hiLo, randomCard, Shoe, trueCount, trueCountAnswers } from "@utils/card-counting";
 
-  type Drill = "values" | "running";
+  type Drill = "values" | "each" | "running";
 
   // The drill and how it runs, kept in this browser.
   const STORAGE_KEY = "pokertrainer.counting";
@@ -43,6 +43,7 @@
     newShoe();
     valueCard = randomCard();
     valueShown = performance.now();
+    eachNewShoe();
   });
 
   $effect(() => {
@@ -86,6 +87,72 @@
     valueCard = next;
     valueShown = performance.now();
   }
+
+  // ---- Count each card: type the running count after every card. ----
+
+  let eachShoe = new Shoe(6);
+  let eachCard = $state("");
+  // The running count with the card on the table counted.
+  let eachCount = $state(0);
+  // Bumped for every card dealt, so the same card twice still flashes.
+  let eachDealt = $state(0);
+  let eachGuess = $state("");
+  // Wrong answers on the card on the table.
+  let eachTries = $state(0);
+  let eachLast: { right: boolean } | undefined = $state();
+  let eachDecksLeft = $state(6);
+  let eachShuffled = $state(false);
+  let eachShown = 0;
+  const eachStats = $state({ cards: 0, right: 0, time: 0 });
+  let eachInput: HTMLInputElement | undefined = $state();
+
+  function eachNewShoe() {
+    eachShoe = new Shoe(options.decks);
+    eachCount = 0;
+    eachDraw();
+  }
+
+  function eachDraw() {
+    eachShuffled = eachShoe.dealt === 0 && eachStats.cards > 0;
+    eachCard = eachShoe.draw();
+    eachDealt++;
+    eachCount += hiLo(eachCard);
+    eachDecksLeft = eachShoe.decksLeft;
+    eachTries = 0;
+    eachGuess = "";
+    eachShown = performance.now();
+  }
+
+  // A wrong count keeps the card up until it is right; after two misses the
+  // count is shown, so the drill can go on from it.
+  function eachSubmit(event: SubmitEvent) {
+    event.preventDefault();
+    if (!eachCard || eachGuess.trim() === "" || Number.isNaN(parse(eachGuess))) return;
+    const right = parse(eachGuess) === eachCount;
+    eachLast = { right };
+    if (!eachTries) {
+      eachStats.cards++;
+      if (right) {
+        eachStats.right++;
+        eachStats.time += performance.now() - eachShown;
+      }
+    }
+    if (!right) {
+      eachTries++;
+      eachInput?.select();
+      return;
+    }
+    if (eachShoe.finished) {
+      eachShoe = new Shoe(options.decks);
+      eachCount = 0;
+    }
+    eachDraw();
+  }
+
+  $effect(() => {
+    if (options.drill !== "each") return;
+    tick().then(() => eachInput?.focus());
+  });
 
   // ---- Running count: cards come out of a shoe, then the count is asked. ----
 
@@ -200,6 +267,7 @@
   function setDecks(decks: number) {
     options.decks = decks;
     newShoe();
+    eachNewShoe();
   }
 
   function resetStats() {
@@ -207,7 +275,10 @@
     Object.assign(runStats, { checks: 0, right: 0 });
     valueLast = undefined;
     valueTried = [];
+    Object.assign(eachStats, { cards: 0, right: 0, time: 0 });
+    eachLast = undefined;
     newShoe();
+    eachNewShoe();
   }
 </script>
 
@@ -228,12 +299,28 @@
         onclick={() => (options.drill = "values")}>Card values</button
       >
       <button
+        class="chip {options.drill === 'each' ? 'chip-active' : ''}"
+        aria-pressed={options.drill === "each"}
+        onclick={() => (options.drill = "each")}>Count each card</button
+      >
+      <button
         class="chip {options.drill === 'running' ? 'chip-active' : ''}"
         aria-pressed={options.drill === "running"}
         onclick={() => (options.drill = "running")}>Running count</button
       >
     </div>
-    {#if options.drill === "running"}
+    {#if options.drill === "each"}
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="label">Decks</span>
+        {#each DECKS as decks}
+          <button
+            class="chip {options.decks === decks ? 'chip-active' : ''}"
+            aria-pressed={options.decks === decks}
+            onclick={() => setDecks(decks)}>{decks}</button
+          >
+        {/each}
+      </div>
+    {:else if options.drill === "running"}
       <div class="flex flex-wrap items-center gap-2">
         <span class="label">Speed</span>
         {#each SPEEDS as speed}
@@ -330,6 +417,70 @@
         {/if}
       </section>
       <p class="text-xs muted">Keys: 1 or + for +1, 2 or 0 for 0, 3 or − for −1.</p>
+    </div>
+  {:else if options.drill === "each"}
+    <div class="mx-auto flex w-full max-w-[34rem] flex-col gap-4">
+      <section class="bj-felt relative flex flex-col items-center gap-3 rounded-2xl border border-ink-700 px-4 py-8">
+        <span class="absolute top-3 right-4 text-xs font-semibold text-emerald-100/70" data-count-decks>
+          {eachDecksLeft} {eachDecksLeft === 1 ? "deck" : "decks"} left
+        </span>
+        {#if eachCard}
+          {#key eachDealt}
+            <div class="count-flash" data-count-card>
+              <Card rank={eachCard[0]} suit={eachCard[1]} />
+            </div>
+          {/key}
+        {/if}
+      </section>
+      <section class="card flex flex-col gap-3">
+        <div class="flex min-h-7 flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          {#if eachShuffled && !eachTries}
+            <span class="text-accent-300">New shoe: the count starts at 0.</span>
+          {:else if eachLast && !eachLast.right}
+            <span class="badge badge-mistake" data-count-feedback>Not quite</span>
+            <span class="text-ink-300">
+              {#if eachTries >= 2}
+                The count is <span class="font-semibold text-ink-100">{sign(eachCount)}</span>. Type it to go on.
+              {:else}
+                Try again.
+              {/if}
+            </span>
+          {:else if eachLast}
+            <span class="badge badge-good" data-count-feedback>Right</span>
+          {:else}
+            <span class="muted">Type the running count with this card counted.</span>
+          {/if}
+        </div>
+        <form class="flex gap-2" onsubmit={eachSubmit} data-count-each>
+          <input
+            bind:this={eachInput}
+            bind:value={eachGuess}
+            class="input text-lg tabular-nums"
+            inputmode="numeric"
+            autocomplete="off"
+            aria-label="Running count"
+            placeholder="Running count, e.g. +3 or -2"
+          />
+          <button class="btn btn-primary btn-lg">Check <span class="kbd" aria-hidden="true">Enter</span></button>
+        </form>
+      </section>
+      <section class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm muted" data-count-stats>
+        <span><span class="font-semibold text-ink-100 tabular-nums">{eachStats.cards}</span> cards</span>
+        <span>
+          <span class="font-semibold text-ink-100 tabular-nums">
+            {eachStats.cards ? Math.round((eachStats.right / eachStats.cards) * 100) : 0}%
+          </span> right
+        </span>
+        <span>
+          <span class="font-semibold text-ink-100 tabular-nums">
+            {eachStats.right ? (eachStats.time / eachStats.right / 1000).toFixed(2) : "–"}s
+          </span> a card
+        </span>
+        {#if eachStats.cards}
+          <button class="btn btn-ghost ml-auto px-2 py-1" onclick={resetStats}>Reset</button>
+        {/if}
+      </section>
+      <p class="text-xs muted">The count carries on card after card until the cut card comes out of the shoe.</p>
     </div>
   {:else}
     <div class="mx-auto flex w-full max-w-[40rem] flex-col gap-4">
