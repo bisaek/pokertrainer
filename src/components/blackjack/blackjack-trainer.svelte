@@ -232,14 +232,14 @@
           {/if}
         </div>
         <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
-          {#each actions as action}
+          {#each actions as action, index}
             <button
               class="btn btn-lg justify-between px-3 font-semibold hover:brightness-110 {ACTION_CLASS[action]}"
               disabled={!available(action)}
               onclick={() => play(action)}
             >
               {action}
-              <span class="kbd" aria-hidden="true">{ACTION_LETTER[action]}</span>
+              <span class="kbd" aria-hidden="true">{index + 1}</span>
             </button>
           {/each}
         </div>
@@ -302,7 +302,7 @@
 
   <p class="shrink-0 text-xs muted">
     Basic strategy for 4 to 8 decks, doubling on any two cards and after a split, dealer peeks for blackjack.
-    Keys: H hit, S stand, D double, P split, R surrender.
+    Keys 1 to 5 pick the buttons in order.
   </p>
 </div>
 
