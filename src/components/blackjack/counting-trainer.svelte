@@ -56,18 +56,30 @@
 
   let valueCard = $state("");
   let valueShown = 0;
-  let valueLast: { card: string; picked: number; right: boolean } | undefined = $state();
+  // The last answer. A wrong one keeps the card up until it is answered
+  // right, the way the hand trainer asks a missed hand again.
+  let valueLast: { card: string; right: boolean } | undefined = $state();
+  // The values already tried on this card.
+  let valueTried: number[] = $state([]);
   const valueStats = $state({ cards: 0, right: 0, time: 0 });
 
   function answerValue(value: number) {
-    if (!valueCard) return;
+    if (!valueCard || valueTried.includes(value)) return;
     const right = hiLo(valueCard) === value;
-    valueLast = { card: valueCard, picked: value, right };
-    valueStats.cards++;
-    if (right) {
-      valueStats.right++;
-      valueStats.time += performance.now() - valueShown;
+    valueLast = { card: valueCard, right };
+    // A card counts once, and only a first answer counts as right.
+    if (!valueTried.length) {
+      valueStats.cards++;
+      if (right) {
+        valueStats.right++;
+        valueStats.time += performance.now() - valueShown;
+      }
     }
+    if (!right) {
+      valueTried = [...valueTried, value];
+      return;
+    }
+    valueTried = [];
     let next = randomCard();
     // A new card each time, so a right answer always moves on visibly.
     while (next === valueCard) next = randomCard();
@@ -194,6 +206,7 @@
     Object.assign(valueStats, { cards: 0, right: 0, time: 0 });
     Object.assign(runStats, { checks: 0, right: 0 });
     valueLast = undefined;
+    valueTried = [];
     newShoe();
   }
 </script>
@@ -277,10 +290,7 @@
               {valueLast.right ? "Right" : "Not quite"}
             </span>
             {#if !valueLast.right}
-              <span class="text-ink-300">
-                {valueLast.card[0] === "T" ? "10" : valueLast.card[0]} counts
-                <span class="font-semibold text-ink-100">{sign(hiLo(valueLast.card))}</span>, not {sign(valueLast.picked)}.
-              </span>
+              <span class="text-ink-300">Try again.</span>
             {/if}
           {:else}
             <span class="muted">What does this card count?</span>
@@ -289,7 +299,12 @@
         <div class="grid grid-cols-3 gap-2">
           {#each VALUES as value}
             <button
-              class="btn btn-lg btn-secondary justify-between text-xl font-bold tabular-nums"
+              class="btn btn-lg btn-secondary justify-between text-xl font-bold tabular-nums {valueTried.includes(
+                value.value
+              )
+                ? 'border-red-400/60 text-red-300'
+                : ''}"
+              disabled={valueTried.includes(value.value)}
               onclick={() => answerValue(value.value)}
             >
               {value.name}
