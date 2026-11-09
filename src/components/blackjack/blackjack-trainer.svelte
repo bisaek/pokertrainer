@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Card from "@components/practice/card.svelte";
   import BlackjackHeader from "./blackjack-header.svelte";
+  import StrategyChart from "./strategy-chart.svelte";
   import {
     ACTION_CLASS,
     ACTION_LETTER,
@@ -58,6 +59,28 @@
         ? { hand: last.hand, missed: true }
         : undefined
   );
+
+  // The chart drawer: every chart under the current rules, to look up any
+  // hand. It opens on the current hand's chart.
+  let drawer: HTMLDialogElement | undefined = $state();
+  let drawerOpen = $state(false);
+  let drawerKind: HandKind = $state("hard");
+
+  function openDrawer() {
+    if (!drawer || drawerOpen) return;
+    drawerKind = hand?.kind ?? "hard";
+    drawer.showModal();
+    drawerOpen = true;
+  }
+
+  function closeDrawer() {
+    drawer?.close();
+  }
+
+  // A click on the backdrop lands on the dialog itself, outside its panel.
+  function drawerClick(event: MouseEvent) {
+    if (event.target === drawer) closeDrawer();
+  }
 
   onMount(() => {
     try {
@@ -127,6 +150,12 @@
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
     const target = event.target as HTMLElement | null;
     if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+    if (drawerOpen) return;
+    if (event.key.toLowerCase() === "c") {
+      event.preventDefault();
+      openDrawer();
+      return;
+    }
     const action = KEYS[event.key.toLowerCase()] ?? actions[Number(event.key) - 1];
     if (!action) return;
     event.preventDefault();
@@ -180,6 +209,9 @@
         aria-pressed={options.showChart}
         onclick={() => (options.showChart = !options.showChart)}>Show chart</button
       >
+      <button class="chip gap-2" aria-haspopup="dialog" onclick={openDrawer} data-bj-drawer-open>
+        All charts <span class="kbd" aria-hidden="true">C</span>
+      </button>
     </div>
   </section>
 
@@ -262,34 +294,13 @@
 
     <!-- The strategy chart for the hand's kind, with its cell marked. -->
     {#if chart}
-      {@const rows = CHARTS[chart.hand.kind]}
       <div class="bj-chart-frame">
       <section class="card flex flex-col gap-3" data-bj-chart>
         <div class="flex items-baseline justify-between gap-2">
           <h2 class="section-title">{KIND_NAMES[chart.hand.kind]}</h2>
           {#if chart.missed}<span class="text-sm text-red-300">The hand you missed</span>{/if}
         </div>
-        <div
-          class="bj-chart grid gap-[2px] text-center text-xs font-semibold tabular-nums"
-          style:--rows={rows.length + 1}
-        >
-          <span></span>
-          {#each UPCARDS as up}
-            <span class="py-1 text-ink-400">{up === "T" ? "10" : up}</span>
-          {/each}
-          {#each rows as row, r}
-            <span class="flex items-center justify-end pr-1.5 text-ink-400">{row.label}</span>
-            {#each UPCARDS as _, u}
-              {@const action = chartAction(chart.hand.kind, r, u, options)}
-              <span
-                class="bj-cell {ACTION_CLASS[action]} {r === chart.hand.row && u === chart.hand.upcard
-                  ? 'bj-cell-marked'
-                  : ''}"
-                title={action}>{ACTION_LETTER[action]}</span
-              >
-            {/each}
-          {/each}
-        </div>
+        <StrategyChart kind={chart.hand.kind} rules={options} marked={chart.hand} />
         <p class="flex flex-wrap gap-x-3 gap-y-1 text-xs muted">
           {#each actions as action}
             <span><span class="action-dot {ACTION_CLASS[action]}"></span>{ACTION_LETTER[action]} {action}</span>
@@ -302,15 +313,90 @@
 
   <p class="shrink-0 text-xs muted">
     Basic strategy for 4 to 8 decks, doubling on any two cards and after a split, dealer peeks for blackjack.
-    Keys 1 to 5 pick the buttons in order.
+    Keys 1 to 5 pick the buttons in order, C opens all the charts.
   </p>
 </div>
 
+<!-- The chart drawer: slides in from the right over the trainer. -->
+<dialog
+  bind:this={drawer}
+  class="bj-drawer"
+  aria-label="Basic strategy charts"
+  onclose={() => (drawerOpen = false)}
+  onclick={drawerClick}
+  data-bj-drawer
+>
+  <div class="flex h-full flex-col gap-4 overflow-y-auto p-5">
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="section-title">Basic strategy</h2>
+      <button class="btn btn-ghost px-2 py-1" onclick={closeDrawer} aria-label="Close the charts">
+        Close <span class="kbd" aria-hidden="true">Esc</span>
+      </button>
+    </div>
+    <p class="text-sm muted">
+      Dealer {options.hitSoft17 ? "hits" : "stands on"} soft 17, surrender {options.surrender
+        ? "offered"
+        : "not offered"}.
+    </p>
+    <div class="flex flex-wrap gap-2" role="tablist" aria-label="Chart">
+      {#each ["hard", "soft", "pair"] as HandKind[] as kind}
+        <button
+          class="chip {drawerKind === kind ? 'chip-active' : ''}"
+          role="tab"
+          aria-selected={drawerKind === kind}
+          onclick={() => (drawerKind = kind)}>{KIND_NAMES[kind]}</button
+        >
+      {/each}
+    </div>
+    <StrategyChart
+      kind={drawerKind}
+      rules={options}
+      marked={hand && hand.kind === drawerKind ? hand : undefined}
+    />
+    {#if hand && hand.kind === drawerKind}
+      <p class="text-xs muted">The outlined cell is the hand on the table.</p>
+    {/if}
+    <p class="flex flex-wrap gap-x-3 gap-y-1 text-xs muted">
+      {#each actions as action}
+        <span><span class="action-dot {ACTION_CLASS[action]}"></span>{ACTION_LETTER[action]} {action}</span>
+      {/each}
+    </p>
+  </div>
+</dialog>
+
 <style>
-  .bj-cell-marked {
-    box-shadow:
-      inset 0 0 0 2px var(--color-ink-950),
-      inset 0 0 0 4px #fff;
-    filter: brightness(1.2);
+  .bj-drawer {
+    margin: 0 0 0 auto;
+    width: min(100%, 28rem);
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid var(--color-ink-700);
+    background: var(--color-ink-900);
+    color: var(--color-ink-100);
+    box-shadow: -1.5rem 0 3rem rgb(0 0 0 / 0.4);
+    translate: 100% 0;
+    transition:
+      translate 0.2s ease,
+      overlay 0.2s allow-discrete,
+      display 0.2s allow-discrete;
+  }
+  .bj-drawer[open] {
+    translate: 0 0;
+  }
+  @starting-style {
+    .bj-drawer[open] {
+      translate: 100% 0;
+    }
+  }
+  .bj-drawer::backdrop {
+    background: rgb(0 0 0 / 0.5);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bj-drawer {
+      transition: none;
+    }
   }
 </style>
