@@ -1,0 +1,11 @@
+---
+import ChartTrainer from "../../components/blackjack/chart-trainer.svelte";
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout
+  title="Blackjack chart trainer"
+  description="Rebuild the blackjack basic strategy charts from memory and check them against the answer."
+>
+  <ChartTrainer client:load />
+</Layout>

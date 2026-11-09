@@ -1,9 +1,10 @@
 <script lang="ts">
   // The title and the switch between the blackjack trainers.
-  const { current, lead }: { current: "strategy" | "counting"; lead: string } = $props();
+  const { current, lead }: { current: "strategy" | "chart" | "counting"; lead: string } = $props();
 
   const tabs = [
     { key: "strategy", name: "Basic strategy", href: "/blackjack" },
+    { key: "chart", name: "Chart trainer", href: "/blackjack/chart" },
     { key: "counting", name: "Card counting", href: "/blackjack/counting" },
   ];
 </script>
