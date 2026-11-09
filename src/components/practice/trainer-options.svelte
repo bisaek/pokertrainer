@@ -3,6 +3,7 @@
   import {
     aroundChartGroup,
     aroundHandGroup,
+    blackjackChartGroup,
     chartGroup,
     drillLocks,
     handCounts,
@@ -22,8 +23,9 @@
     trainer,
   }: {
     // Which trainer the menu is for: it decides which choices are offered.
-    // A drill sets its own rules, so it only gets the display choices.
-    trainer: "hand" | "range" | "drill";
+    // A drill sets its own rules, so it only gets the display choices. The
+    // blackjack chart trainer has the range trainer's rules, without a table.
+    trainer: "hand" | "range" | "drill" | "blackjack";
   } = $props();
 
   let open = $state(false);
@@ -42,6 +44,7 @@
 
   const groups = $derived.by((): ToggleGroup[] => {
     if (trainer === "range") return [pageGroup, tableGroup, aroundChartGroup];
+    if (trainer === "blackjack") return [pageGroup, blackjackChartGroup];
     if (trainer === "hand") return [pageGroup, tableGroup, aroundHandGroup, chartGroup];
     return [tableGroup, aroundHandGroup, chartGroup];
   });
@@ -135,9 +138,9 @@
             <span class="text-xs muted">A shorter round favors hands at the edge of a region.</span>
           </div>
         </div>
-      {:else if trainer === "range"}
+      {:else if trainer === "range" || trainer === "blackjack"}
         <div class="flex flex-col gap-3">
-          <span class="label">Range trainer</span>
+          <span class="label">{trainer === "blackjack" ? "Chart trainer" : "Range trainer"}</span>
           <label class="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap">
             <input
               type="checkbox"
