@@ -150,7 +150,7 @@
   }
 
   function pointerDown(event: PointerEvent) {
-    if (checked || event.button !== 0) return;
+    if (event.button !== 0) return;
     const at = cellAt(event);
     if (!at) return;
     event.preventDefault();
@@ -211,9 +211,9 @@
   function cellClass(r: number, u: number): string {
     if (preview.has(`${r},${u}`)) return `${ACTION_CLASS[selectedAction]} bj-cell-preview`;
     const painted = ACTION_CLASS[cells[r]?.[u] ?? BLANK];
-    // After a wrong check every cell is outlined with the chart's play, like
+    // After a check every cell is outlined with the chart's play, like
     // the poker range trainer; a right cell's outline blends into its fill.
-    if (isCorrect === false && settings.rangeAnswer) return `${painted} ${COMPARE_CLASS[answer[r][u]]}`;
+    if (checked && settings.rangeAnswer) return `${painted} ${COMPARE_CLASS[answer[r][u]]}`;
     return painted;
   }
 </script>
@@ -301,9 +301,9 @@
           {#each rows as row, r}
             <span class="flex items-center justify-end pr-1.5 text-ink-400">{row.label}</span>
             {#each UPCARDS as up, u}
-              <span class="bj-cell {cellClass(r, u)}" data-cell="{r},{u}" title="{row.label} vs {up === 'T' ? '10' : up}">
+              <button type="button" class="bj-cell {cellClass(r, u)}" data-cell="{r},{u}" title="{row.label} vs {up === 'T' ? '10' : up}">
                 {ACTION_LETTER[cells[r]?.[u] ?? BLANK]}
-              </span>
+              </button>
             {/each}
           {/each}
         </div>
@@ -373,7 +373,6 @@
   .bj-paint-grid {
     grid-template-columns: 2.6rem repeat(10, minmax(0, 1fr));
     touch-action: none;
-    cursor: crosshair;
   }
   .bj-paint {
     outline: 3px solid transparent;
