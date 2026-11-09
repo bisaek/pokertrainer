@@ -2,6 +2,7 @@
   import { onMount, tick, untrack } from "svelte";
   import Card from "@components/practice/card.svelte";
   import BlackjackHeader from "./blackjack-header.svelte";
+  import { preloadCards } from "@utils/preload-cards";
   import { hiLo, randomCard, Shoe, trueCount, trueCountAnswers } from "@utils/card-counting";
 
   type Drill = "values" | "each" | "running";
@@ -38,6 +39,7 @@
   const sign = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "0");
 
   onMount(() => {
+    preloadCards();
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
       if (saved) Object.assign(options, saved);

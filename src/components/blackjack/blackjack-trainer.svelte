@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Card from "@components/practice/card.svelte";
   import BlackjackHeader from "./blackjack-header.svelte";
+  import { preloadCards } from "@utils/preload-cards";
   import {
     ACTION_CLASS,
     ACTION_LETTER,
@@ -60,6 +61,7 @@
   );
 
   onMount(() => {
+    preloadCards();
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
       if (saved) Object.assign(options, saved);
