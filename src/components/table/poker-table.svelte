@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { preloadCards } from "@utils/preload-cards";
   import { seatsFor, type Spot } from "@utils/spot";
   import { settings } from "@utils/settings.svelte";
 
@@ -48,6 +50,9 @@
       .filter(Boolean)
       .join(" · ")
   );
+
+  // Load every card up front, so the next hand's cards show at once.
+  onMount(preloadCards);
 </script>
 
 <!-- Sizes are in em, and the em scales with the frame's width: container units
