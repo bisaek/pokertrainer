@@ -98,6 +98,14 @@ export const aroundChartGroup: ToggleGroup = {
     { key: "keyHints", label: "Key hints" },
   ],
 };
+// The blackjack chart trainer: no table, and the chart's name is never hidden.
+export const blackjackChartGroup: ToggleGroup = {
+  label: "Around the chart",
+  toggles: [
+    { key: "progress", label: "Charts left" },
+    { key: "keyHints", label: "Key hints" },
+  ],
+};
 export const chartGroup: ToggleGroup = {
   label: "Chart",
   toggles: [

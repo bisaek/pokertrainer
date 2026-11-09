@@ -1,9 +1,21 @@
 <script lang="ts">
   // The title and the switch between the blackjack trainers.
-  const { current, lead }: { current: "strategy" | "counting"; lead: string } = $props();
+  import type { Snippet } from "svelte";
+
+  const {
+    current,
+    lead,
+    actions = undefined,
+  }: {
+    current: "strategy" | "chart" | "counting";
+    lead: string;
+    // Buttons beside the trainer switch, like the Options menu.
+    actions?: Snippet;
+  } = $props();
 
   const tabs = [
     { key: "strategy", name: "Basic strategy", href: "/blackjack" },
+    { key: "chart", name: "Chart trainer", href: "/blackjack/chart" },
     { key: "counting", name: "Card counting", href: "/blackjack/counting" },
   ];
 </script>
@@ -16,6 +28,7 @@
       <p class="page-lead">{lead}</p>
     </div>
   </div>
+  <div class="flex flex-wrap items-center gap-2">
   <nav class="flex gap-1 rounded-full border border-ink-700 bg-ink-900 p-1" aria-label="Blackjack trainers">
     {#each tabs as tab}
       <a
@@ -27,4 +40,6 @@
       >
     {/each}
   </nav>
+  {@render actions?.()}
+  </div>
 </header>
