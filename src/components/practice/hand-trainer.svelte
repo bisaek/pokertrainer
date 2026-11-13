@@ -69,5 +69,7 @@
     count={settings.handCount || undefined}
     mistakes={settings.handMistakes}
     repeatMistakes={settings.handRepeat}
+    streak={settings.handStreak}
+    streakMissed={settings.handStreakMissed}
   />
 </div>
